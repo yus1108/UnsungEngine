@@ -63,34 +63,33 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		return 10;
 	}
 
-	LPWSTR command = GetCommandLine();
-	size_t origsize = wcslen(command) + 1;
-	size_t convertedChars = 0;
-	char *nstring = new char[origsize];
+#pragma region arguement_handling
+	//LPWSTR command = GetCommandLine();
+	//size_t origsize = wcslen(command) + 1;
+	//size_t convertedChars = 0;
+	//char *nstring = new char[origsize];
+	//// Put a copy of the converted string into nstring  
+	//wcstombs_s(&convertedChars, nstring, origsize, command, _TRUNCATE);
+	//UVector<std::string> arguments;
+	//char * pch;
+	//pch = strtok(nstring, " ");
+	//while (pch != NULL)
+	//{
+	//	arguments.push_back(pch);
+	//	size_t newsize = strlen(pch) + 1;
+	//	wchar_t * wcstring = new wchar_t[newsize];
 
-	// Put a copy of the converted string into nstring  
-	wcstombs_s(&convertedChars, nstring, origsize, command, _TRUNCATE);
-
-	UVector<std::string> arguments;
-	char * pch;
-	pch = strtok(nstring, " ");
-	while (pch != NULL)
-	{
-		arguments.push_back(pch);
-		size_t newsize = strlen(pch) + 1;
-		wchar_t * wcstring = new wchar_t[newsize];
-
-		// Convert char* string to a wchar_t* string.  
-		size_t convertedChars = 0;
-		mbstowcs_s(&convertedChars, wcstring, newsize, pch, _TRUNCATE);
-		// Display the result and indicate the type of string that it is.  
-		MessageBox(NULL, wcstring, L"Arglist contents", MB_OK);
-		delete[] wcstring;
-		pch = strtok(NULL, " ");
-	}
-	delete[] nstring;
+	//	// Convert char* string to a wchar_t* string.  
+	//	size_t convertedChars = 0;
+	//	mbstowcs_s(&convertedChars, wcstring, newsize, pch, _TRUNCATE);
+	//	// Display the result and indicate the type of string that it is.  
+	//	MessageBox(NULL, wcstring, L"Arglist contents", MB_OK);
+	//	delete[] wcstring;
+	//	pch = strtok(NULL, " ");
+	//}
+	//delete[] nstring;
+#pragma endregion
 	
-
 	renderer.Init();
     // Main message loop:
 	while (true)

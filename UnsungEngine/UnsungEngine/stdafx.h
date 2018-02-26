@@ -26,7 +26,6 @@
 #include <thread>
 #include <mutex>
 #include <iostream>
-#include <ctime>
 #include <d3d11.h>
 #include <DirectXMath.h>
 #include <DirectXCollision.h>
@@ -34,7 +33,11 @@
 #include <DirectXPackedVector.h>
 
 // reference additional headers your program requires here
+#include <array>
+#include <ctime>
 #include <vector>
+#include <fstream>
+#include <bitset>
 
 // utility headers
 #include "WICTextureLoader.h"
@@ -45,8 +48,11 @@
 // headers for Engine Architecture
 #include "GameState.h"
 #include "Renderer.h"
+#include "RenderComponent.h"
 
 // include shader headers
 #include "Default_VS.csh"
 #include "Default_PS.csh"
 #include "Default_GS.csh"
+#include "Static_VS.csh"
+#include "Static_PS.csh"

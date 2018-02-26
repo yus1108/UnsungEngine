@@ -19,6 +19,9 @@
     <Filter Include="Shaders\Default_Shaders">
       <UniqueIdentifier>{b05f539a-93ca-434f-aea0-58303973c9b8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\Static_Shaders">
+      <UniqueIdentifier>{c2dc28bb-3897-4004-80e4-a902cd7c7a1c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -54,6 +57,9 @@
     <ClInclude Include="UTime.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="RenderComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -72,6 +78,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="UTime.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -97,6 +106,12 @@
     </FxCompile>
     <FxCompile Include="Shaders\Default_GS.hlsl">
       <Filter>Shaders\Default_Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Static_PS.hlsl">
+      <Filter>Shaders\Static_Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Static_VS.hlsl">
+      <Filter>Shaders\Static_Shaders</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>
