@@ -112,7 +112,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			// TODO: Engine Update (main thread)
 			utime.Signal();
 			utime.Throttle(THROTTLE);
-			std::cout << "frame: " << utime.FramePerSecond() << std::endl;
 			renderer.Update();
 		}
 	}

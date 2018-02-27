@@ -17,6 +17,10 @@ Render_World::~Render_World()
 	delete animationComponent;
 }
 
+void Render_World::Init(ID3D11Device * m_pDevice, const WCHAR * textString, UINT32 textLength, const WCHAR * msc_fontName, const FLOAT msc_fontSize, UEngine::TextFormat textFormat)
+{
+}
+
 void Render_World::Init(ID3D11DeviceContext * deviceContext, pipeline_state_t * pipeline, D3D11_VIEWPORT viewport)
 {
 	m_pDeviceContext = deviceContext;
@@ -42,6 +46,11 @@ void Render_World::DrawObj(Renderer * render)
 		//AnimateModel(obj, 1);
 
 		// world matrix
+		if (utime.DeltaTime() < 1)
+		{
+			worldMat.r[3].m128_f32[0] += (float)utime.DeltaTime();
+		}
+		
 		worldMat = DirectX::XMMatrixTranspose(worldMat);
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
 		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));

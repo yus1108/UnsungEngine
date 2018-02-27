@@ -9,6 +9,17 @@ namespace UEngine {
 		UI,
 		COUNT
 	};
+
+	struct TextFormat
+	{
+		UINT width = 512;
+		UINT height = 512; 
+		UINT textColor = D2D1::ColorF::Black;
+		UINT backgroundColor = D2D1::ColorF::White;
+		FLOAT dpiX = 96;
+		FLOAT dpiY = 96;
+		bool hasBackgroundColor = false;
+	};
 }
 
 
@@ -118,6 +129,12 @@ namespace graphics
 		std::bitset<64> pipeline_id;
 	};
 }
+
+struct DefaultVertex
+{
+	DirectX::XMFLOAT3 pos;
+	DirectX::XMFLOAT2 tex;
+};
 
 struct SIMPLE_VERTEX {
 	DirectX::XMFLOAT3 pos;

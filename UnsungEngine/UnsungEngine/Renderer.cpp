@@ -27,6 +27,7 @@ Renderer::~Renderer()
 		constBufferRTTSize->Release();
 
 	delete model;
+	delete textModel;
 }
 
 void Renderer::Init()
@@ -187,15 +188,40 @@ void Renderer::Init()
 	model = new Render_World();
 	model->ReadBin("Assets/germantank.bin", m_pDevice.Get(), m_pDeviceContext.Get());
 	model->Init(m_pWorldDeferredContext[UEngine::WORLD].Get(), &m_pPipelines[UEngine::WORLD], m_pViewports[UEngine::WORLD]);
+
+	textModel = new Render_UI();
+	Render_UI * ptr = (Render_UI*)textModel;
+	const WCHAR sc_helloWorld[] = L"Hello, World!";
+	UEngine::TextFormat textFormat;
+	textFormat.textColor = D2D1::ColorF::White;
+	textFormat.dpiX = 150;
+	textFormat.dpiY = 200;
+	textModel->Init(m_pWorldDeferredContext[UEngine::UI].Get(), &m_pPipelines[UEngine::UI], m_pViewports[UEngine::UI]);
+	ptr->Init(m_pDevice.Get(), sc_helloWorld, ARRAYSIZE(sc_helloWorld) - 1, L"Verdana", 50, textFormat);
 #pragma endregion
 
 	loadingDone = true;
 }
 
+
 void Renderer::Update()
 {
 	if (!loadingDone)
 		return;
+
+	std::stringstream ss;
+	ss << "Frame: " << utime.FramePerSecond() << std::endl;
+
+	char pch[20];
+	ss.getline(pch, 20);
+	size_t newsize = strlen(pch) + 1;
+	wchar_t * wcstring = new wchar_t[newsize];
+
+	// Convert char* string to a wchar_t* string.  
+	size_t convertedChars = 0;
+	mbstowcs_s(&convertedChars, wcstring, newsize, pch, _TRUNCATE);
+	((Render_UI*)textModel)->ChangeText(m_pDevice.Get(), m_pDeviceContext.Get(), wcstring, newsize);
+	delete[] wcstring;
 
 	std::vector<std::thread> threads;
 	threads.push_back(std::thread([&]() {
@@ -208,38 +234,9 @@ void Renderer::Update()
 		}
 	}));
 	threads.push_back(std::thread([&]() {
-		RenderSet(m_pWorldDeferredContext[1].Get(), m_pPipelines[1], m_pViewports[1], D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
-		UINT stride = sizeof(DefaultVertex);
-		UINT offset = 0;
-
-		m_pWorldDeferredContext[1]->VSSetConstantBuffers(0, 1, &constBufferRTTPos);
-		DirectX::XMFLOAT4 RTPos = DirectX::XMFLOAT4(0.5f, 0, 0, 1);
-		D3D11_MAPPED_SUBRESOURCE mappedResource;
-		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
-		m_pWorldDeferredContext[1]->Map(constBufferRTTPos, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
-		memcpy(mappedResource.pData, &RTPos, sizeof(DirectX::XMFLOAT4));
-		m_pWorldDeferredContext[1]->Unmap(constBufferRTTPos, 0);
-
-		m_pWorldDeferredContext[1]->GSSetConstantBuffers(1, 1, &constBufferRTTSize);
-		DirectX::XMFLOAT4 RTSize = DirectX::XMFLOAT4(0.5f, 0.5f, 0, 0);
-		mappedResource;
-		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
-		m_pWorldDeferredContext[1]->Map(constBufferRTTSize, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
-		memcpy(mappedResource.pData, &RTSize, sizeof(DirectX::XMFLOAT4));
-		m_pWorldDeferredContext[1]->Unmap(constBufferRTTSize, 0);
-
-		// set vertex info
-		m_pWorldDeferredContext[1]->IASetVertexBuffers(0, 1, &default_vertexBuffer, &stride, &offset);
-		// set texture info
-		ID3D11ShaderResourceView *baseTexture[]{
-			(ID3D11ShaderResourceView*)
-			default_srv.Get()
-		};
-		m_pWorldDeferredContext[1]->PSSetShaderResources(0, 1, baseTexture);
-		m_pDeviceContext->IASetVertexBuffers(0, 1, default_vertexBuffer.GetAddressOf(), &stride, &offset);
-		m_pWorldDeferredContext[1]->Draw(1, 0);
+		textModel->DrawObj(this);
 		// Create command lists and record commands into them.
-		m_pWorldDeferredContext[1]->FinishCommandList(false, m_pWorldCommandList[1].GetAddressOf());
+		m_pWorldDeferredContext[UEngine::UI]->FinishCommandList(false, m_pWorldCommandList[UEngine::UI].GetAddressOf());
 	}));
 
 	for (auto& thread : threads)
@@ -264,14 +261,14 @@ void Renderer::Update()
 		m_pDeviceContext->Unmap(constBufferRTTPos, 0);
 
 		m_pDeviceContext->GSSetConstantBuffers(1, 1, &constBufferRTTSize);
-		DirectX::XMFLOAT4 RTSize = DirectX::XMFLOAT4(1, 1, 0, 0);
+		DirectX::XMFLOAT4 RTSize = DirectX::XMFLOAT4(-1, -1, 1, 1);
 		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
 		m_pDeviceContext->Map(constBufferRTTSize, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
 		memcpy(mappedResource.pData, &RTSize, sizeof(DirectX::XMFLOAT4));
 		m_pDeviceContext->Unmap(constBufferRTTSize, 0);
 
 		// set vertex info
-		//m_pDeviceContext->ClearDepthStencilView(default_pipeline.depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+		m_pDeviceContext->ClearDepthStencilView(default_pipeline.depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 		m_pDeviceContext->IASetVertexBuffers(0, 1, default_vertexBuffer.GetAddressOf(), &stride, &offset);
 
 		// convert msaa srv to single sampling srv
@@ -291,6 +288,8 @@ void Renderer::Update()
 	m_pSwapCahin->Present(0, 0);
 }
 
+
+
 void Renderer::RenderSet(ID3D11DeviceContext * m_pDeviceContext, pipeline_state_t & pipeline, 
 	D3D11_VIEWPORT & viewport, D3D11_PRIMITIVE_TOPOLOGY topology) {
 	// clearing backbuffer
@@ -299,7 +298,7 @@ void Renderer::RenderSet(ID3D11DeviceContext * m_pDeviceContext, pipeline_state_
 	m_pDeviceContext->OMSetBlendState(pipeline.blendingState.Get(), NULL, 0xffffffff);
 	m_pDeviceContext->RSSetViewports(1, &viewport);
 	// clearing depth buffer and render target
-	m_pDeviceContext->ClearRenderTargetView(default_pipeline.render_target.Get(), DirectX::Colors::Gray);
+	m_pDeviceContext->ClearRenderTargetView(pipeline.render_target.Get(), DirectX::Colors::Transparent);
 	m_pDeviceContext->ClearDepthStencilView(pipeline.depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	// Bind depth stencil state
 	m_pDeviceContext->RSSetState(pipeline.rasterState.Get());
@@ -374,8 +373,6 @@ void Renderer::InitRenderTargetView(pipeline_state_t & pipeline) {
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> pSwapChainBuffer;
 	m_pSwapCahin->GetBuffer(0, __uuidof(pSwapChainBuffer), (void **)&pSwapChainBuffer);
 	m_pDevice->CreateRenderTargetView(pSwapChainBuffer.Get(), nullptr, &pipeline.render_target);
-	pDebugger.ReleaseAndGetAddressOf();
-	pSwapChainBuffer.ReleaseAndGetAddressOf();
 }
 void Renderer::InitDepthStencil(pipeline_state_t & pipeline, RECT clientSize, 
 	D3D11_TEXTURE2D_DESC depthBuffer, D3D11_DEPTH_STENCIL_DESC depthState,
@@ -402,7 +399,7 @@ void Renderer::InitConstBuffer(UINT byteWidth, ID3D11Buffer ** constBuffer)
 void Renderer::InitInputLayout(pipeline_state_t & pipeline, const void * pVShaderByteCode, SIZE_T VShaderLength, 
 	const void * pPShaderByteCode, SIZE_T PShaderLength,
 	const void * pGShaderByteCode, SIZE_T GShaderLength,
-	const D3D11_INPUT_ELEMENT_DESC * vLayout, SIZE_T layoutLength) {
+	const D3D11_INPUT_ELEMENT_DESC * vLayout, UINT layoutLength) {
 	// vertex shader
 	if (pVShaderByteCode)
 		m_pDevice->CreateVertexShader(pVShaderByteCode, VShaderLength, nullptr, pipeline.vertex_shader.GetAddressOf());

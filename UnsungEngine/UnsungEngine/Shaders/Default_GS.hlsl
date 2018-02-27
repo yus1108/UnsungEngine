@@ -34,16 +34,16 @@ void main(point INPUT_VERTEX input[1] : SV_POSITION, inout TriangleStream< GSOut
 	};
 
 	verts[0].posH = input[0].projectedCoordinate;
-	verts[0].posH += float4(-size.x, -size.y, 0, 0);
+	verts[0].posH += float4(size.x, size.y, 0, 0);
 
 	verts[1].posH = input[0].projectedCoordinate;
-	verts[1].posH += float4(-size.x, size.y, 0, 0);
+	verts[1].posH += float4(size.x, size.w, 0, 0);
 
 	verts[2].posH = input[0].projectedCoordinate;
-	verts[2].posH += float4(size.x, -size.y, 0, 0);
+	verts[2].posH += float4(size.z, size.y, 0, 0);
 
 	verts[3].posH = input[0].projectedCoordinate;
-	verts[3].posH += float4(size.x, size.y, 0, 0);
+	verts[3].posH += float4(size.z, size.w, 0, 0);
 
 	// prep triangle for rasterization
 	for (uint i = 0; i < MAXVERTS; ++i)

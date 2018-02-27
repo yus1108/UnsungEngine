@@ -3,6 +3,7 @@
 class Renderer
 {
 	friend class Render_World;
+	friend class Render_UI;
 private:
 	
 	pipeline_state_t default_pipeline;
@@ -19,11 +20,6 @@ private:
 	UVector<pipeline_state_t>	m_pPipelines;
 	UVector<RenderToTexture>	m_pRTT;
 
-	struct DefaultVertex
-	{
-		DirectX::XMFLOAT3 pos;
-		DirectX::XMFLOAT2 tex;
-	};
 	Microsoft::WRL::ComPtr<ID3D11Buffer> default_vertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> default_texture;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> default_srv;
@@ -40,6 +36,7 @@ private:
 	bool loadingDone;
 
 	RenderComponent * model;
+	RenderComponent * textModel;
 public:
 	Renderer();
 	~Renderer();
@@ -58,9 +55,8 @@ public:
 		D3D11_DEPTH_STENCIL_VIEW_DESC descDSV);
 	void InitConstBuffer(UINT byteWidth, ID3D11Buffer ** constBuffer);
 	void InitInputLayout(pipeline_state_t & pipeline, const void * pVShaderByteCode, SIZE_T VShaderLength, 
-		const void * pPShaderByteCode, SIZE_T PShaderLength, 
-		const void * pGShaderByteCode, SIZE_T GShaderLength, 
-		const D3D11_INPUT_ELEMENT_DESC * vLayout, SIZE_T layoutLength);
+		const void * pPShaderByteCode, SIZE_T PShaderLength, const void * pGShaderByteCode, 
+		SIZE_T GShaderLength, const D3D11_INPUT_ELEMENT_DESC * vLayout, UINT layoutLength);
 
 	void CreateNewDeferredContext(UVector<Microsoft::WRL::ComPtr<ID3D11DeviceContext>> & m_pDeferredContexts);
 	void CreateRenderToTexture(RenderToTexture & rtt, UINT width, UINT height);

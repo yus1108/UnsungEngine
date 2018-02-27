@@ -26,17 +26,28 @@
 #include <thread>
 #include <mutex>
 #include <iostream>
+
+// D3D11
 #include <d3d11.h>
 #include <DirectXMath.h>
 #include <DirectXCollision.h>
 #include <DirectXColors.h>
 #include <DirectXPackedVector.h>
 
+// D2D1
+#include <d2d1.h>
+#include <d2d1helper.h>
+#include <dwrite.h>
+#include <wincodec.h>
+#include <wchar.h>
+#include <math.h>
+
 // reference additional headers your program requires here
 #include <array>
 #include <ctime>
 #include <vector>
 #include <fstream>
+#include <sstream>
 #include <bitset>
 
 // utility headers
@@ -51,6 +62,7 @@
 #include "Renderer.h"
 #include "RenderComponent.h"
 #include "Render_World.h"
+#include "Render_UI.h"
 
 // include shader headers
 #include "Default_VS.csh"
