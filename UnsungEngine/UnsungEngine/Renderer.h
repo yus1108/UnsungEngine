@@ -61,5 +61,6 @@ public:
 	void CreateNewDeferredContext(UVector<Microsoft::WRL::ComPtr<ID3D11DeviceContext>> & m_pDeferredContexts);
 	void CreateRenderToTexture(RenderToTexture & rtt, UINT width, UINT height);
 	void AddNewLayer(RECT clientSize);
+	void RequestNewRTT(RenderToTexture & rtt, UINT width, UINT height, ID3D11DeviceContext ** m_pWorldDeferredContext);
 };
 

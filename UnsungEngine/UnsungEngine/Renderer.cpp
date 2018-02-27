@@ -288,8 +288,6 @@ void Renderer::Update()
 	m_pSwapCahin->Present(0, 0);
 }
 
-
-
 void Renderer::RenderSet(ID3D11DeviceContext * m_pDeviceContext, pipeline_state_t & pipeline, 
 	D3D11_VIEWPORT & viewport, D3D11_PRIMITIVE_TOPOLOGY topology) {
 	// clearing backbuffer
@@ -437,8 +435,8 @@ void Renderer::CreateRenderToTexture(RenderToTexture & rtt, UINT width, UINT hei
 	depthBuffer.MipLevels = 1;
 	depthBuffer.ArraySize = 1;
 	depthBuffer.Format = DXGI_FORMAT_D32_FLOAT;
-	depthBuffer.SampleDesc.Count = 4;
-	depthBuffer.SampleDesc.Quality = 0;
+	depthBuffer.SampleDesc.Count = m_pSwapchainDesc.SampleDesc.Count;
+	depthBuffer.SampleDesc.Quality = m_pSwapchainDesc.SampleDesc.Quality;
 	depthBuffer.Usage = D3D11_USAGE_DEFAULT;
 	depthBuffer.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 	depthBuffer.CPUAccessFlags = NULL;
@@ -491,8 +489,8 @@ void Renderer::CreateRenderToTexture(RenderToTexture & rtt, UINT width, UINT hei
 	desc.MipLevels = 1;
 	desc.ArraySize = 1;
 	desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	desc.SampleDesc.Count = 4;
-	desc.SampleDesc.Quality = 0;
+	desc.SampleDesc.Count = m_pSwapchainDesc.SampleDesc.Count;
+	desc.SampleDesc.Quality = m_pSwapchainDesc.SampleDesc.Quality;
 	desc.Usage = D3D11_USAGE_DEFAULT;
 	desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 	desc.CPUAccessFlags = 0;
@@ -532,7 +530,19 @@ void Renderer::AddNewLayer(RECT clientSize) {
 	m_pRTT.push_back(RenderToTexture());
 	CreateRenderToTexture(m_pRTT[UEngine::WORLD], (UINT)(clientSize.right - clientSize.left), (UINT)(clientSize.bottom - clientSize.top));
 	pipeline_state_t pipeline;
-	pipeline.rasterState = default_pipeline.rasterState;
+	D3D11_RASTERIZER_DESC rasterizerState;
+	rasterizerState.FillMode = D3D11_FILL_SOLID;
+	rasterizerState.CullMode = D3D11_CULL_FRONT;
+	rasterizerState.FrontCounterClockwise = false;
+	rasterizerState.DepthBias = false;
+	rasterizerState.DepthBiasClamp = 0;
+	rasterizerState.SlopeScaledDepthBias = 0;
+	rasterizerState.DepthClipEnable = true;
+	rasterizerState.ScissorEnable = false;
+	rasterizerState.MultisampleEnable = true;
+	rasterizerState.AntialiasedLineEnable = true;
+	m_pDevice->CreateRasterizerState(&rasterizerState, pipeline.rasterState.GetAddressOf());
+
 	pipeline.samplerState = default_pipeline.samplerState;
 	pipeline.blendingState = default_pipeline.blendingState;
 
@@ -582,4 +592,10 @@ void Renderer::AddNewLayer(RECT clientSize) {
 	InitViewport(rttViewPort, clientSize);
 	m_pViewports.push_back(rttViewPort);
 #pragma endregion
+}
+
+void Renderer::RequestNewRTT(RenderToTexture & rtt, UINT width, UINT height, ID3D11DeviceContext ** m_pWorldDeferredContext)
+{
+	CreateRenderToTexture(rtt, width, height);
+	m_pDevice->CreateDeferredContext(NULL, m_pWorldDeferredContext);
 }

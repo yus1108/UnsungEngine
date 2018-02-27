@@ -46,10 +46,11 @@ void Render_World::DrawObj(Renderer * render)
 		//AnimateModel(obj, 1);
 
 		// world matrix
-		if (utime.DeltaTime() < 1)
-		{
-			worldMat.r[3].m128_f32[0] += (float)utime.DeltaTime();
-		}
+		worldMat = DirectX::XMMatrixMultiply(worldMat, DirectX::XMMatrixRotationY((float)utime.DeltaTime() / 10.0f));
+		//if (utime.DeltaTime() < 1)
+		//{
+		//	worldMat.r[3].m128_f32[0] += (float)utime.DeltaTime();
+		//}
 		
 		worldMat = DirectX::XMMatrixTranspose(worldMat);
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -70,8 +71,8 @@ void Render_World::DrawObj(Renderer * render)
 		sceneToShader.perspectivMat = DirectX::XMMatrixTranspose(sceneToShader.perspectivMat);
 		DLIGHT dLight;
 		dLight.lightColor = DirectX::XMFLOAT4(1, 1, 1, 1);
-		dLight.lightDirection = DirectX::XMFLOAT3(0, -1, -1);
-		dLight.ambient = 0.5f;
+		dLight.lightDirection = DirectX::XMFLOAT3(0, 0, -1);
+		dLight.ambient = 0;
 		PLIGHT pLight;
 		ZeroMemory(&pLight, sizeof(pLight));
 		SLIGHT sLight;
@@ -238,6 +239,7 @@ void Render_World::ReadBin(const char * filename, ID3D11Device * m_pDevice, ID3D
 				mVertices[i].tex = DirectX::XMFLOAT2(vertices[i].u, 1 - vertices[i].v);
 
 				// normal mapping manipulator
+				using namespace DirectX;
 				DirectX::XMVECTOR normal = XMLoadFloat3(&mVertices[i].normals);
 				DirectX::XMVECTOR tangent = DirectX::XMVector3Cross(DirectX::XMVectorSet(0, 1, 0, 0), normal);
 				DirectX::XMVECTOR binormal = DirectX::XMVector3Cross(normal, tangent);
