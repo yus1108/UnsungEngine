@@ -3,20 +3,21 @@
 class Renderer;
 class RenderComponent
 {
-private:
-	Geometry * geometryComponent;
-	Material * materialComponent;
-	Animation * animationComponent;
+protected:
+	ID3D11DeviceContext * m_pDeviceContext;
+	pipeline_state_t * m_pPipeline;
+	D3D11_VIEWPORT m_viewport;
+
 	DirectX::XMMATRIX worldMat;
 	bool loadingDone;
 public:
 	RenderComponent();
-	~RenderComponent();
+	virtual ~RenderComponent();
 
-	void DrawObj(ID3D11DeviceContext * m_pDeviceContext, D3D11_VIEWPORT m_viewport, Renderer * render);
-
-	void ReadBin(const char * filename, ID3D11Device * m_pDevice,
-		ID3D11DeviceContext * m_pDeviceContext, DirectX::XMFLOAT4 color = DirectX::XMFLOAT4(1, 1, 1, 1));
+	virtual void Init(ID3D11DeviceContext * deviceContext, pipeline_state_t * pipeline, D3D11_VIEWPORT viewport) = 0;
+	virtual void DrawObj(Renderer * render) = 0;
+	virtual void ReadBin(const char * filename, ID3D11Device * m_pDevice,
+		ID3D11DeviceContext * m_pDeviceContext, DirectX::XMFLOAT4 color = DirectX::XMFLOAT4(1, 1, 1, 1)) = 0;
 
 
 };

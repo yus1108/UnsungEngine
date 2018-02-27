@@ -10,11 +10,16 @@ struct OUTPUT_VERTEX
 	float2 tex					: TEXCOORD0;
 };
 
+cbuffer SCREEN : register(b0)
+{
+	float4 screenPos;
+}
+
 OUTPUT_VERTEX main(INPUT_VERTEX fromVertexBuffer)
 {
 	OUTPUT_VERTEX sendToRasterizer = (OUTPUT_VERTEX)0;
 
-	sendToRasterizer.projectedCoordinate = float4(fromVertexBuffer.coordinate, 1);
+	sendToRasterizer.projectedCoordinate = screenPos;
 	sendToRasterizer.tex = fromVertexBuffer.tex;
 
 	return sendToRasterizer;

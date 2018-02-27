@@ -15,6 +15,11 @@ struct GSOutput
 	float2 texOut				: TEXCOORD0;
 };
 
+cbuffer SIZE : register(b1)
+{
+	float4 size;
+}
+
 // convert each incoming world-space line segment into a projected triangle. 
 [maxvertexcount(MAXVERTS)] // max vertex data to be output (limit 1024 total scalars)
 void main(point INPUT_VERTEX input[1] : SV_POSITION, inout TriangleStream< GSOutput > output)
@@ -27,6 +32,18 @@ void main(point INPUT_VERTEX input[1] : SV_POSITION, inout TriangleStream< GSOut
 		float4(1,-1,0,1), float2(1,1),
 		float4(1,1,0,1), float2(1,0)
 	};
+
+	verts[0].posH = input[0].projectedCoordinate;
+	verts[0].posH += float4(-size.x, -size.y, 0, 0);
+
+	verts[1].posH = input[0].projectedCoordinate;
+	verts[1].posH += float4(-size.x, size.y, 0, 0);
+
+	verts[2].posH = input[0].projectedCoordinate;
+	verts[2].posH += float4(size.x, -size.y, 0, 0);
+
+	verts[3].posH = input[0].projectedCoordinate;
+	verts[3].posH += float4(size.x, size.y, 0, 0);
 
 	// prep triangle for rasterization
 	for (uint i = 0; i < MAXVERTS; ++i)

@@ -21,15 +21,21 @@ Renderer::~Renderer()
 		constBufferSLight->Release();
 	if (constBufferLightInfo)
 		constBufferLightInfo->Release();
+	if (constBufferRTTPos)
+		constBufferRTTPos->Release();
+	if (constBufferRTTSize)
+		constBufferRTTSize->Release();
+
+	delete model;
 }
 
 void Renderer::Init()
 {
-#pragma region INITIALIZE
 	RECT clientSize;
 	GetClientRect(hWnd, &clientSize);
 	InitViewport(default_viewport, clientSize);
 	InitDeviceContextSwapchain(clientSize);
+#pragma region INITIALIZE
 	std::vector<std::thread> threads;
 	threads.push_back(std::thread([&]() {
 		InitRenderTargetView(default_pipeline);
@@ -147,69 +153,19 @@ void Renderer::Init()
 		InitConstBuffer(sizeof(SLIGHT), &constBufferSLight);
 		InitConstBuffer(sizeof(PLIGHT), &constBufferPLight);
 		InitConstBuffer(sizeof(LIGHTINFO), &constBufferLightInfo);
+		InitConstBuffer(sizeof(DirectX::XMFLOAT4), &constBufferRTTPos);
+		InitConstBuffer(sizeof(DirectX::XMFLOAT4), &constBufferRTTSize);
 	}));	// TODO: add constant buffers
 	threads.push_back(std::thread([&]() {
-		CreateNewDeferredContext(m_pWorldDeferredContext);
-		m_pRTT.push_back(RenderToTexture());
-		CreateRenderToTexture(m_pRTT[0], (UINT)(clientSize.right - clientSize.left), (UINT)(clientSize.bottom - clientSize.top));
-		pipeline_state_t pipeline;
-		pipeline.rasterState = default_pipeline.rasterState;
-		pipeline.samplerState = default_pipeline.samplerState;
-		pipeline.blendingState = default_pipeline.blendingState;
-
-		pipeline.depthStencilBuffer = m_pRTT[0].depthStencilBuffer;
-		pipeline.depthStencilState = m_pRTT[0].depthStencilState;
-		pipeline.depthStencilView = m_pRTT[0].depthStencilView;
-		pipeline.render_target = m_pRTT[0].renderTargetViewMap;
-
-		// Create view layout
-		D3D11_INPUT_ELEMENT_DESC vLayout[] =
-		{
-			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "BINORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "BLENDWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-		};
-		InitInputLayout(pipeline, Static_VS, ARRAYSIZE(Static_VS), Static_PS, ARRAYSIZE(Static_PS), nullptr, 0, vLayout, ARRAYSIZE(vLayout));
-		
-		m_pPipelines.push_back(pipeline);
-		D3D11_VIEWPORT rttViewPort;
-		InitViewport(rttViewPort, clientSize);
-		m_pViewports.push_back(rttViewPort);
-	})); // 3D NoAnimation Rendering
-
+		AddNewLayer(clientSize);
+	})); // Adding Render To Texture
 	for (auto& thread : threads) {
 		thread.join();
 	}
 	threads.clear();
 
-	CreateNewDeferredContext(m_pWorldDeferredContext);
-	m_pRTT.push_back(RenderToTexture());
-	CreateRenderToTexture(m_pRTT[1], (UINT)(clientSize.right - clientSize.left), (UINT)(clientSize.bottom - clientSize.top));
-	pipeline_state_t pipeline;
-	pipeline.rasterState = default_pipeline.rasterState;
-	pipeline.samplerState = default_pipeline.samplerState;
-	pipeline.blendingState = default_pipeline.blendingState;
-
-	pipeline.depthStencilBuffer = m_pRTT[1].depthStencilBuffer;
-	pipeline.depthStencilState = m_pRTT[1].depthStencilState;
-	pipeline.depthStencilView = m_pRTT[1].depthStencilView;
-	pipeline.render_target = m_pRTT[1].renderTargetViewMap;
-
-	// Create view layout
-	pipeline.vertex_shader = default_pipeline.vertex_shader;
-	pipeline.pixel_shader = default_pipeline.pixel_shader;
-	pipeline.geometry_shader = default_pipeline.geometry_shader;
-	pipeline.input_layout = default_pipeline.input_layout;
-	m_pPipelines.push_back(pipeline);
-	D3D11_VIEWPORT rttViewPort;
-	InitViewport(rttViewPort, clientSize);
-	m_pViewports.push_back(rttViewPort);
-
+#pragma region MODEL_LOADING
+	// Basic Model Loading
 	DefaultVertex cpu_vertex;
 	cpu_vertex.pos = DirectX::XMFLOAT3();
 	cpu_vertex.tex = DirectX::XMFLOAT2();
@@ -228,8 +184,11 @@ void Renderer::Init()
 	// load texture
 	CreateWICTextureFromFile(m_pDevice.Get(), m_pDeviceContext.Get(), L"Assets/TempLogo.png",
 		(ID3D11Resource**)default_texture.GetAddressOf(), default_srv.GetAddressOf());
-	
-	model.ReadBin("Assets/germantank.bin", m_pDevice.Get(), m_pDeviceContext.Get());
+	model = new Render_World();
+	model->ReadBin("Assets/germantank.bin", m_pDevice.Get(), m_pDeviceContext.Get());
+	model->Init(m_pWorldDeferredContext[UEngine::WORLD].Get(), &m_pPipelines[UEngine::WORLD], m_pViewports[UEngine::WORLD]);
+#pragma endregion
+
 	loadingDone = true;
 }
 
@@ -240,19 +199,34 @@ void Renderer::Update()
 
 	std::vector<std::thread> threads;
 	threads.push_back(std::thread([&]() {
+		// Set the index buffer.
+		model->DrawObj(this);
 		for (unsigned int i = 0; i < 1; i++)
 		{
-			// Set the index buffer.
-			RenderSet(m_pWorldDeferredContext[i].Get(), m_pPipelines[i], m_pViewports[i], D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			model.DrawObj(m_pWorldDeferredContext[i].Get(), m_pViewports[i], this);
-
 			// Create command lists and record commands into them.
 			m_pWorldDeferredContext[i]->FinishCommandList(false, m_pWorldCommandList[i].GetAddressOf());
 		}
 	}));
 	threads.push_back(std::thread([&]() {
+		RenderSet(m_pWorldDeferredContext[1].Get(), m_pPipelines[1], m_pViewports[1], D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
 		UINT stride = sizeof(DefaultVertex);
 		UINT offset = 0;
+
+		m_pWorldDeferredContext[1]->VSSetConstantBuffers(0, 1, &constBufferRTTPos);
+		DirectX::XMFLOAT4 RTPos = DirectX::XMFLOAT4(0.5f, 0, 0, 1);
+		D3D11_MAPPED_SUBRESOURCE mappedResource;
+		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
+		m_pWorldDeferredContext[1]->Map(constBufferRTTPos, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
+		memcpy(mappedResource.pData, &RTPos, sizeof(DirectX::XMFLOAT4));
+		m_pWorldDeferredContext[1]->Unmap(constBufferRTTPos, 0);
+
+		m_pWorldDeferredContext[1]->GSSetConstantBuffers(1, 1, &constBufferRTTSize);
+		DirectX::XMFLOAT4 RTSize = DirectX::XMFLOAT4(0.5f, 0.5f, 0, 0);
+		mappedResource;
+		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
+		m_pWorldDeferredContext[1]->Map(constBufferRTTSize, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
+		memcpy(mappedResource.pData, &RTSize, sizeof(DirectX::XMFLOAT4));
+		m_pWorldDeferredContext[1]->Unmap(constBufferRTTSize, 0);
 
 		// set vertex info
 		m_pWorldDeferredContext[1]->IASetVertexBuffers(0, 1, &default_vertexBuffer, &stride, &offset);
@@ -262,7 +236,6 @@ void Renderer::Update()
 			default_srv.Get()
 		};
 		m_pWorldDeferredContext[1]->PSSetShaderResources(0, 1, baseTexture);
-		RenderSet(m_pWorldDeferredContext[1].Get(), m_pPipelines[1], m_pViewports[1], D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
 		m_pDeviceContext->IASetVertexBuffers(0, 1, default_vertexBuffer.GetAddressOf(), &stride, &offset);
 		m_pWorldDeferredContext[1]->Draw(1, 0);
 		// Create command lists and record commands into them.
@@ -282,13 +255,32 @@ void Renderer::Update()
 	RenderSet(m_pDeviceContext.Get(), default_pipeline, default_viewport, D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
 	for (unsigned int i = 0; i < m_pRTT.size(); i++)
 	{
+		m_pDeviceContext->VSSetConstantBuffers(0, 1, &constBufferRTTPos);
+		DirectX::XMFLOAT4 RTPos = DirectX::XMFLOAT4(0, 0, 0, 1);
+		D3D11_MAPPED_SUBRESOURCE mappedResource;
+		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
+		m_pDeviceContext->Map(constBufferRTTPos, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
+		memcpy(mappedResource.pData, &RTPos, sizeof(DirectX::XMFLOAT4));
+		m_pDeviceContext->Unmap(constBufferRTTPos, 0);
+
+		m_pDeviceContext->GSSetConstantBuffers(1, 1, &constBufferRTTSize);
+		DirectX::XMFLOAT4 RTSize = DirectX::XMFLOAT4(1, 1, 0, 0);
+		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
+		m_pDeviceContext->Map(constBufferRTTSize, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
+		memcpy(mappedResource.pData, &RTSize, sizeof(DirectX::XMFLOAT4));
+		m_pDeviceContext->Unmap(constBufferRTTSize, 0);
+
 		// set vertex info
-		m_pDeviceContext->ClearDepthStencilView(default_pipeline.depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+		//m_pDeviceContext->ClearDepthStencilView(default_pipeline.depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 		m_pDeviceContext->IASetVertexBuffers(0, 1, default_vertexBuffer.GetAddressOf(), &stride, &offset);
-		// set texture info
+
+		// convert msaa srv to single sampling srv
+		
+		m_pDeviceContext->ResolveSubresource((ID3D11Resource*)m_pRTT[i].outTexture.Get(), D3D11CalcSubresource(0, 0, 1),
+			(ID3D11Resource*)m_pRTT[i].renderTargetTextureMap.Get(), D3D11CalcSubresource(0, 0, 1), DXGI_FORMAT_R32G32B32A32_FLOAT);
 		ID3D11ShaderResourceView *baseTexture[]{
 			(ID3D11ShaderResourceView*)
-			m_pRTT[i].shaderResourceViewMap.Get()
+			m_pRTT[i].outSRV.Get()
 		};
 		m_pDeviceContext->PSSetShaderResources(0, 1, baseTexture);
 
@@ -448,7 +440,7 @@ void Renderer::CreateRenderToTexture(RenderToTexture & rtt, UINT width, UINT hei
 	depthBuffer.MipLevels = 1;
 	depthBuffer.ArraySize = 1;
 	depthBuffer.Format = DXGI_FORMAT_D32_FLOAT;
-	depthBuffer.SampleDesc.Count = 1;
+	depthBuffer.SampleDesc.Count = 4;
 	depthBuffer.SampleDesc.Quality = 0;
 	depthBuffer.Usage = D3D11_USAGE_DEFAULT;
 	depthBuffer.BindFlags = D3D11_BIND_DEPTH_STENCIL;
@@ -502,7 +494,7 @@ void Renderer::CreateRenderToTexture(RenderToTexture & rtt, UINT width, UINT hei
 	desc.MipLevels = 1;
 	desc.ArraySize = 1;
 	desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	desc.SampleDesc.Count = 1;
+	desc.SampleDesc.Count = 4;
 	desc.SampleDesc.Quality = 0;
 	desc.Usage = D3D11_USAGE_DEFAULT;
 	desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
@@ -515,22 +507,82 @@ void Renderer::CreateRenderToTexture(RenderToTexture & rtt, UINT width, UINT hei
 	// Setup the description of the render target view.
 	D3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
 	renderTargetViewDesc.Format = desc.Format;
-	renderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+	renderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMS;
 	renderTargetViewDesc.Texture2D.MipSlice = 0;
 
 	HRESULT h_ok = m_pDevice->CreateRenderTargetView(rtt.renderTargetTextureMap.Get(), &renderTargetViewDesc, &rtt.renderTargetViewMap);
 
-	/////////////////////// Map's Shader Resource View
-	// Setup the description of the shader resource view.
-	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
-	shaderResourceViewDesc.Format = desc.Format;
-	shaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
-	shaderResourceViewDesc.Texture2D.MipLevels = 1;
-
-	// Create the shader resource view.
-	h_ok = m_pDevice->CreateShaderResourceView(rtt.renderTargetTextureMap.Get(), &shaderResourceViewDesc, &rtt.shaderResourceViewMap);
-
 	rtt.width = width;
 	rtt.height = height;
+	
+	desc.SampleDesc.Count = 1;
+	desc.SampleDesc.Quality = 0;
+	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+
+	// Setup the description of the shader resource view.
+	D3D11_SHADER_RESOURCE_VIEW_DESC singleSRVDesc;
+	singleSRVDesc.Format = desc.Format;
+	singleSRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	singleSRVDesc.Texture2D.MostDetailedMip = 0;
+	singleSRVDesc.Texture2D.MipLevels = 1;
+
+	m_pDevice->CreateTexture2D(&desc, nullptr, &rtt.outTexture);
+	m_pDevice->CreateShaderResourceView(rtt.outTexture.Get(), &singleSRVDesc, &rtt.outSRV);
+}
+void Renderer::AddNewLayer(RECT clientSize) {
+#pragma region WORLD_RTT
+	CreateNewDeferredContext(m_pWorldDeferredContext);
+	m_pRTT.push_back(RenderToTexture());
+	CreateRenderToTexture(m_pRTT[UEngine::WORLD], (UINT)(clientSize.right - clientSize.left), (UINT)(clientSize.bottom - clientSize.top));
+	pipeline_state_t pipeline;
+	pipeline.rasterState = default_pipeline.rasterState;
+	pipeline.samplerState = default_pipeline.samplerState;
+	pipeline.blendingState = default_pipeline.blendingState;
+
+	pipeline.depthStencilBuffer = m_pRTT[UEngine::WORLD].depthStencilBuffer;
+	pipeline.depthStencilState = m_pRTT[UEngine::WORLD].depthStencilState;
+	pipeline.depthStencilView = m_pRTT[UEngine::WORLD].depthStencilView;
+	pipeline.render_target = m_pRTT[UEngine::WORLD].renderTargetViewMap;
+
+	// Create view layout
+	D3D11_INPUT_ELEMENT_DESC vLayout[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "BINORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "BLENDWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+	};
+	InitInputLayout(pipeline, Static_VS, ARRAYSIZE(Static_VS), Static_PS, ARRAYSIZE(Static_PS), nullptr, 0, vLayout, ARRAYSIZE(vLayout));
+
+	m_pPipelines.push_back(pipeline);
+	D3D11_VIEWPORT rttViewPort;
+	InitViewport(rttViewPort, clientSize);
+	m_pViewports.push_back(rttViewPort);
+#pragma endregion
+#pragma region UI_RTT
+	CreateNewDeferredContext(m_pWorldDeferredContext);
+	m_pRTT.push_back(RenderToTexture());
+	CreateRenderToTexture(m_pRTT[UEngine::UI], (UINT)(clientSize.right - clientSize.left), (UINT)(clientSize.bottom - clientSize.top));
+	pipeline.rasterState = default_pipeline.rasterState;
+	pipeline.samplerState = default_pipeline.samplerState;
+	pipeline.blendingState = default_pipeline.blendingState;
+
+	pipeline.depthStencilBuffer = m_pRTT[UEngine::UI].depthStencilBuffer;
+	pipeline.depthStencilState = m_pRTT[UEngine::UI].depthStencilState;
+	pipeline.depthStencilView = m_pRTT[UEngine::UI].depthStencilView;
+	pipeline.render_target = m_pRTT[UEngine::UI].renderTargetViewMap;
+
+	// Create view layout
+	pipeline.vertex_shader = default_pipeline.vertex_shader;
+	pipeline.pixel_shader = default_pipeline.pixel_shader;
+	pipeline.geometry_shader = default_pipeline.geometry_shader;
+	pipeline.input_layout = default_pipeline.input_layout;
+	m_pPipelines.push_back(pipeline);
+	InitViewport(rttViewPort, clientSize);
+	m_pViewports.push_back(rttViewPort);
+#pragma endregion
 }

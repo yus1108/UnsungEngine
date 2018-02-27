@@ -146,8 +146,10 @@
     <ClInclude Include="GameState.h" />
     <ClInclude Include="RenderComponent.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="Render_World.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="SystemDefinition.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="UnsungEngine.h" />
     <ClInclude Include="UTime.h" />
@@ -158,6 +160,7 @@
     <ClCompile Include="GameState.cpp" />
     <ClCompile Include="RenderComponent.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="Render_World.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

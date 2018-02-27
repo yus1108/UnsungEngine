@@ -43,12 +43,14 @@
 #include "WICTextureLoader.h"
 #include "UVector.h"
 #include "UTime.h"
+#include "SystemDefinition.h"
 #include "Definition.h"
 
 // headers for Engine Architecture
 #include "GameState.h"
 #include "Renderer.h"
 #include "RenderComponent.h"
+#include "Render_World.h"
 
 // include shader headers
 #include "Default_VS.csh"

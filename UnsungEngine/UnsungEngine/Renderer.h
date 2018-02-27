@@ -2,22 +2,10 @@
 #include "RenderComponent.h"
 class Renderer
 {
-	friend class RenderComponent;
+	friend class Render_World;
 private:
-	struct pipeline_state_t
-	{
-		Microsoft::WRL::ComPtr<ID3D11InputLayout>		input_layout;
-		Microsoft::WRL::ComPtr<ID3D11VertexShader>		vertex_shader;
-		Microsoft::WRL::ComPtr<ID3D11PixelShader>		pixel_shader;
-		Microsoft::WRL::ComPtr<ID3D11GeometryShader>	geometry_shader;
-		Microsoft::WRL::ComPtr<ID3D11RenderTargetView>	render_target;
-		Microsoft::WRL::ComPtr<ID3D11Texture2D>			depthStencilBuffer;
-		Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depthStencilState;
-		Microsoft::WRL::ComPtr<ID3D11DepthStencilView>	depthStencilView;
-		Microsoft::WRL::ComPtr<ID3D11RasterizerState>	rasterState;
-		Microsoft::WRL::ComPtr<ID3D11SamplerState>		samplerState;
-		Microsoft::WRL::ComPtr<ID3D11BlendState>		blendingState;
-	} default_pipeline;
+	
+	pipeline_state_t default_pipeline;
 	D3D11_VIEWPORT default_viewport;
 
 	DXGI_SWAP_CHAIN_DESC									m_pSwapchainDesc;
@@ -46,10 +34,12 @@ private:
 	ID3D11Buffer * constBufferPLight;
 	ID3D11Buffer * constBufferSLight;
 	ID3D11Buffer * constBufferLightInfo;
+	ID3D11Buffer * constBufferRTTPos;
+	ID3D11Buffer * constBufferRTTSize;
 
 	bool loadingDone;
 
-	RenderComponent model;
+	RenderComponent * model;
 public:
 	Renderer();
 	~Renderer();
@@ -74,5 +64,6 @@ public:
 
 	void CreateNewDeferredContext(UVector<Microsoft::WRL::ComPtr<ID3D11DeviceContext>> & m_pDeferredContexts);
 	void CreateRenderToTexture(RenderToTexture & rtt, UINT width, UINT height);
+	void AddNewLayer(RECT clientSize);
 };
 
