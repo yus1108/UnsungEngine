@@ -343,8 +343,8 @@ void Renderer::InitDeviceContextSwapchain(RECT clientSize) {
 	m_pSwapchainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	m_pSwapchainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 	m_pSwapchainDesc.OutputWindow = hWnd;
-	m_pSwapchainDesc.SampleDesc.Count = 4;
-	m_pSwapchainDesc.SampleDesc.Quality = 0;
+	m_pSwapchainDesc.SampleDesc.Count = 8;
+	m_pSwapchainDesc.SampleDesc.Quality = 0.99f;
 	m_pSwapchainDesc.Windowed = TRUE;
 
 #ifdef _DEBUG

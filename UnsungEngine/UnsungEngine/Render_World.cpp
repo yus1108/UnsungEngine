@@ -71,7 +71,7 @@ void Render_World::DrawObj(Renderer * render)
 		sceneToShader.perspectivMat = DirectX::XMMatrixTranspose(sceneToShader.perspectivMat);
 		DLIGHT dLight;
 		dLight.lightColor = DirectX::XMFLOAT4(1, 1, 1, 1);
-		dLight.lightDirection = DirectX::XMFLOAT3(0, 0, -1);
+		dLight.lightDirection = DirectX::XMFLOAT3(0, 0, 1);
 		dLight.ambient = 0;
 		PLIGHT pLight;
 		ZeroMemory(&pLight, sizeof(pLight));

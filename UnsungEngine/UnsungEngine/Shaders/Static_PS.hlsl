@@ -49,13 +49,13 @@ float4 main(INPUT_PIXEL input) : SV_TARGET
 	float4 bumpMap = normalTexture.Sample(filters, input.tex);
 	bumpMap = (bumpMap * 2.0f) - 1.0f;
 	float3 bumpNormal = bumpMap.x * input.tangent + bumpMap.y * input.binormal + input.normal;
-	bumpNormal = normalize(bumpNormal);
+	input.normal = normalize(bumpNormal);
 
 	float dRatio = saturate(dot(-lightDirection, bumpNormal));
 	dRatio = saturate(dRatio + dAmbient);
 
 	float3 pLightDir = normalize(pLightPos - input.worldPosition);
-	float pRatio = saturate(dot(pLightDir, bumpNormal));
+	float pRatio = saturate(dot(pLightDir, input.normal));
 	float attenuation = 1 - saturate(length(pLightPos - input.worldPosition) / lightRadius);
 	attenuation *= attenuation;
 	pRatio = saturate(pRatio * attenuation);
@@ -63,7 +63,7 @@ float4 main(INPUT_PIXEL input) : SV_TARGET
 	float3 sLightDir = normalize(sLightPos - input.worldPosition);
 	float surfaceRatio = saturate(dot(-sLightDir, normalize(sConeDir)));
 	float spotFactor = (surfaceRatio > coneRatioOut) ? 1 : 0;
-	float sRatio = saturate(dot(sLightDir, bumpNormal));
+	float sRatio = saturate(dot(sLightDir, input.normal));
 	float sAtt = 1 - saturate((coneRatioIn - surfaceRatio) / (coneRatioIn - coneRatioOut));
 	sAtt *= sAtt;
 	sRatio = saturate(sRatio * sAtt);
