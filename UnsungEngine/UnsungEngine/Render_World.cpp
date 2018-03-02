@@ -140,6 +140,10 @@ void Render_World::DrawObj(Renderer * render)
 					(ID3D11ShaderResourceView*)
 					materialComponent->material_info[i][graphics::components::NORMAL].input.texture_resource
 				};
+				if (!normalView[0])
+				{
+					normalView[0] = (ID3D11ShaderResourceView*)materialComponent->material_info[i][graphics::components::BUMP].input.texture_resource;
+				}
 				m_pDeviceContext->PSSetShaderResources(3, 1, normalView);
 			}
 
