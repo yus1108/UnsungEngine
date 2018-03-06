@@ -61,7 +61,7 @@ void Render_World::DrawObj(Renderer * render)
 		worldMat = DirectX::XMMatrixTranspose(worldMat);
 
 		DirectX::XMMATRIX originalView = DirectX::XMMatrixIdentity();
-		originalView.r[3] = DirectX::XMVectorSet(0, 0, -10, 1);
+		originalView.r[3] = DirectX::XMVectorSet(0, 5, -20, 1);
 		DirectX::XMVECTOR determinant = DirectX::XMMatrixDeterminant(originalView);
 		float aspectRatio = (m_viewport.Width / m_viewport.Height);
 		SCENE sceneToShader;
@@ -244,8 +244,18 @@ void Render_World::ReadBin(const char * filename, ID3D11Device * m_pDevice, ID3D
 
 				// normal mapping manipulator
 				using namespace DirectX;
-				DirectX::XMVECTOR normal = XMLoadFloat3(&mVertices[i].normals);
-				DirectX::XMVECTOR tangent = DirectX::XMVector3Cross(DirectX::XMVectorSet(0, 1, 0, 0), normal);
+				DirectX::XMVECTOR normal = XMVector3Normalize(XMLoadFloat3(&mVertices[i].normals));
+				XMVECTOR tangent1 = XMVector3Cross(XMVectorSet(0, 1, 0, 0), normal);
+				XMVECTOR tangent2 = XMVector3Cross(XMVectorSet(0, 0, 1, 0), normal);
+				XMVECTOR tangent = XMVECTOR();
+				if (XMVector3Length(tangent1).m128_f32[0] >= XMVector3Length(tangent2).m128_f32[0])
+				{
+					tangent = tangent1;
+				}
+				else
+				{
+					tangent = tangent2;
+				}
 				DirectX::XMVECTOR binormal = DirectX::XMVector3Cross(normal, tangent);
 				DirectX::XMStoreFloat3(&mVertices[i].tangents, tangent);
 				DirectX::XMStoreFloat3(&mVertices[i].binomals, binormal);

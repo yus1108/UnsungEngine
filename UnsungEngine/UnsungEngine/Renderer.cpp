@@ -186,7 +186,7 @@ void Renderer::Init()
 	CreateWICTextureFromFile(m_pDevice.Get(), m_pDeviceContext.Get(), L"Assets/TempLogo.png",
 		(ID3D11Resource**)default_texture.GetAddressOf(), default_srv.GetAddressOf());
 	model = new Render_World();
-	model->ReadBin("Assets/germantank.bin", m_pDevice.Get(), m_pDeviceContext.Get());
+	model->ReadBin("Assets/WOS_CommandCenter.bin", m_pDevice.Get(), m_pDeviceContext.Get());
 	model->Init(m_pWorldDeferredContext[UEngine::WORLD].Get(), &m_pPipelines[UEngine::WORLD], m_pViewports[UEngine::WORLD]);
 
 	textModel = new Render_UI();

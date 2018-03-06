@@ -48,11 +48,11 @@ float4 main(INPUT_PIXEL input) : SV_TARGET
 	// calculate normal mapping
 	float4 bumpMap = normalTexture.Sample(filters, input.tex);
 	bumpMap = (bumpMap * 2.0f) - 1.0f;
-	float3 bumpNormal = bumpMap.x * input.tangent + bumpMap.y * input.binormal + input.normal;
+	float3 bumpNormal = bumpMap.x * input.tangent + -bumpMap.y * input.binormal + input.normal;
 	input.normal = normalize(bumpNormal);
 
 	float dRatio = saturate(dot(-lightDirection, bumpNormal));
-	dRatio = saturate(dRatio + dAmbient);
+	dRatio = max(dRatio, dAmbient);
 
 	float3 pLightDir = normalize(pLightPos - input.worldPosition);
 	float pRatio = saturate(dot(pLightDir, input.normal));
@@ -74,7 +74,7 @@ float4 main(INPUT_PIXEL input) : SV_TARGET
 		+ spotFactor * sRatio * sLightColor.xyz)
 		* input.color.xyz;
 	lightColor.w = input.color.w;
-	lightColor *= float4(diffuse.xyz, 1) * diffuse.w;
+	lightColor *= float4(diffuse.xyz * diffuse.w, 1);
 
 	float4 diffuseColor = baseTexture.Sample(filters, input.tex) * lightColor; // get base color
 
@@ -86,23 +86,23 @@ float4 main(INPUT_PIXEL input) : SV_TARGET
 		float specularPower = specConstant.w;
 		float specScale = specular.w *
 			pow(saturate(dot(reflectionDirection, directionToCamera)), specularPower);
-		float4 dSpecLight = specScale * float4(specular.xyz, 1);
+		float4 dSpecLight = float4(specScale * specular.xyz, 1);
 
 		reflectionDirection = reflect(-sLightDir, input.normal);
 		specScale = specular.w *
 			pow(saturate(dot(reflectionDirection, directionToCamera)), specularPower);
-		float4 sSpecLight = saturate(specScale * sAtt) * float4(specular.xyz, 1);
+		float4 sSpecLight = float4(saturate(specScale * sAtt) * specular.xyz * sLightColor.xyz, 1);
 
 		reflectionDirection = reflect(-pLightDir, input.normal);
 		specScale = specular.w *
 			pow(saturate(dot(reflectionDirection, directionToCamera)), specularPower);
-		float4 pSpecLight = saturate(specScale * attenuation) * float4(specular.xyz, 1);
+		float4 pSpecLight = float4(saturate(specScale * attenuation) * specular.xyz * pLightColor.xyz, 1);
 		finalSpecColor *= saturate(dSpecLight + sSpecLight + pSpecLight);
 	}
 
 	float4 emissiveColor = emissiveTexture.Sample(filters, input.tex);
 	if (all(emissiveColor))
-		emissiveColor *= float4(emissive.xyz, 1) * emissive.w;
+		emissiveColor *= float4(emissive.xyz * emissive.w, 1);
 
 	return saturate(diffuseColor + finalSpecColor + emissiveColor); // return a transition based on the detail alpha
 }
