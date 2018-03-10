@@ -147,7 +147,7 @@ void Render_UI::Init(ID3D11Device * m_pDevice, const WCHAR * textString, UINT32 
 	this->textFormat = textFormat;
 	loadingDone = true;
 }
-void Render_UI::Init(ID3D11DeviceContext * deviceContext, pipeline_state_t * pipeline, D3D11_VIEWPORT viewport)
+void Render_UI::Init(ID3D11DeviceContext * deviceContext, UEngine::pipeline_state_t * pipeline, D3D11_VIEWPORT viewport)
 {
 	m_pDeviceContext = deviceContext;
 	m_pPipeline = pipeline;

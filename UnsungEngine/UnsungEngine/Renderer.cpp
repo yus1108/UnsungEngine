@@ -6,7 +6,6 @@ Renderer::Renderer()
 {
 	loadingDone = false;
 }
-
 Renderer::~Renderer()
 {
 	if (constBufferWorld)
@@ -26,7 +25,6 @@ Renderer::~Renderer()
 	if (constBufferRTTSize)
 		constBufferRTTSize->Release();
 
-	delete model;
 	delete textModel;
 }
 
@@ -182,13 +180,9 @@ void Renderer::Init()
 	initData.pSysMem = &cpu_vertex;
 	m_pDevice->CreateBuffer(&bufferDesc, &initData, default_vertexBuffer.GetAddressOf());
 
-	// load texture
-	CreateWICTextureFromFile(m_pDevice.Get(), m_pDeviceContext.Get(), L"Assets/TempLogo.png",
-		(ID3D11Resource**)default_texture.GetAddressOf(), default_srv.GetAddressOf());
-	model = new Render_World();
-	model->ReadBin("Assets/WOS_CommandCenter.bin", m_pDevice.Get(), m_pDeviceContext.Get());
-	model->Init(m_pWorldDeferredContext[UEngine::WORLD].Get(), &m_pPipelines[UEngine::WORLD], m_pViewports[UEngine::WORLD]);
+	
 
+	// load texture
 	textModel = new Render_UI();
 	Render_UI * ptr = (Render_UI*)textModel;
 	const WCHAR sc_helloWorld[] = L"Hello, World!";
@@ -202,8 +196,6 @@ void Renderer::Init()
 
 	loadingDone = true;
 }
-
-
 void Renderer::Update()
 {
 	if (!loadingDone)
@@ -226,7 +218,7 @@ void Renderer::Update()
 	std::vector<std::thread> threads;
 	threads.push_back(std::thread([&]() {
 		// Set the index buffer.
-		model->DrawObj(this);
+		//gameObject.GetRenderComponent()->DrawObj(this);
 		for (unsigned int i = 0; i < 1; i++)
 		{
 			// Create command lists and record commands into them.
@@ -288,7 +280,14 @@ void Renderer::Update()
 	m_pSwapCahin->Present(0, 0);
 }
 
-void Renderer::RenderSet(ID3D11DeviceContext * m_pDeviceContext, pipeline_state_t & pipeline, 
+void Renderer::LoadObject(const char * name, GameObject * gameObject) {
+	RenderComponent * model = new Render_World();
+	model->ReadBin(name, m_pDevice.Get(), m_pDeviceContext.Get());
+	model->Init(m_pWorldDeferredContext[UEngine::WORLD].Get(), &m_pPipelines[UEngine::WORLD], m_pViewports[UEngine::WORLD]);
+	gameObject->SetRenderComponent(model);
+}
+
+void Renderer::RenderSet(ID3D11DeviceContext * m_pDeviceContext, UEngine::pipeline_state_t & pipeline,
 	D3D11_VIEWPORT & viewport, D3D11_PRIMITIVE_TOPOLOGY topology) {
 	// clearing backbuffer
 	m_pDeviceContext->OMSetDepthStencilState(pipeline.depthStencilState.Get(), 1);
@@ -344,7 +343,7 @@ void Renderer::InitDeviceContextSwapchain(RECT clientSize) {
 	m_pSwapchainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 	m_pSwapchainDesc.OutputWindow = hWnd;
 	m_pSwapchainDesc.SampleDesc.Count = 8;
-	m_pSwapchainDesc.SampleDesc.Quality = 0.99f;
+	m_pSwapchainDesc.SampleDesc.Quality = 0;
 	m_pSwapchainDesc.Windowed = TRUE;
 
 #ifdef _DEBUG
@@ -365,14 +364,14 @@ void Renderer::InitDeviceContextSwapchain(RECT clientSize) {
 		&FeatureLevel,
 		&m_pDeviceContext);
 }
-void Renderer::InitRenderTargetView(pipeline_state_t & pipeline) {
+void Renderer::InitRenderTargetView(UEngine::pipeline_state_t & pipeline) {
 	Microsoft::WRL::ComPtr<ID3D11Debug> pDebugger;
 	m_pDevice->QueryInterface(__uuidof(ID3D11Debug), (void **)&pDebugger);
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> pSwapChainBuffer;
 	m_pSwapCahin->GetBuffer(0, __uuidof(pSwapChainBuffer), (void **)&pSwapChainBuffer);
 	m_pDevice->CreateRenderTargetView(pSwapChainBuffer.Get(), nullptr, &pipeline.render_target);
 }
-void Renderer::InitDepthStencil(pipeline_state_t & pipeline, RECT clientSize, 
+void Renderer::InitDepthStencil(UEngine::pipeline_state_t & pipeline, RECT clientSize,
 	D3D11_TEXTURE2D_DESC depthBuffer, D3D11_DEPTH_STENCIL_DESC depthState,
 	D3D11_DEPTH_STENCIL_VIEW_DESC descDSV) {
 	m_pDevice->CreateTexture2D(&depthBuffer, nullptr, pipeline.depthStencilBuffer.GetAddressOf());
@@ -394,7 +393,7 @@ void Renderer::InitConstBuffer(UINT byteWidth, ID3D11Buffer ** constBuffer)
 	constBufferDesc.ByteWidth = byteWidth;
 	m_pDevice->CreateBuffer(&constBufferDesc, nullptr, constBuffer);
 }
-void Renderer::InitInputLayout(pipeline_state_t & pipeline, const void * pVShaderByteCode, SIZE_T VShaderLength, 
+void Renderer::InitInputLayout(UEngine::pipeline_state_t & pipeline, const void * pVShaderByteCode, SIZE_T VShaderLength,
 	const void * pPShaderByteCode, SIZE_T PShaderLength,
 	const void * pGShaderByteCode, SIZE_T GShaderLength,
 	const D3D11_INPUT_ELEMENT_DESC * vLayout, UINT layoutLength) {
@@ -427,7 +426,7 @@ void Renderer::CreateNewDeferredContext(UVector<Microsoft::WRL::ComPtr<ID3D11Dev
 	m_pWorldCommandList.push_back(nullptr);
 	m_pDevice->CreateDeferredContext(NULL, m_pDeferredContexts[m_pDeferredContexts.size() - 1].GetAddressOf());
 }
-void Renderer::CreateRenderToTexture(RenderToTexture & rtt, UINT width, UINT height) {
+void Renderer::CreateRenderToTexture(UEngine::RenderToTexture & rtt, UINT width, UINT height) {
 #pragma region descDepth_buffer
 	D3D11_TEXTURE2D_DESC depthBuffer;
 	depthBuffer.Width = width;
@@ -527,9 +526,9 @@ void Renderer::CreateRenderToTexture(RenderToTexture & rtt, UINT width, UINT hei
 void Renderer::AddNewLayer(RECT clientSize) {
 #pragma region WORLD_RTT
 	CreateNewDeferredContext(m_pWorldDeferredContext);
-	m_pRTT.push_back(RenderToTexture());
+	m_pRTT.push_back(UEngine::RenderToTexture());
 	CreateRenderToTexture(m_pRTT[UEngine::WORLD], (UINT)(clientSize.right - clientSize.left), (UINT)(clientSize.bottom - clientSize.top));
-	pipeline_state_t pipeline;
+	UEngine::pipeline_state_t pipeline;
 	D3D11_RASTERIZER_DESC rasterizerState;
 	rasterizerState.FillMode = D3D11_FILL_SOLID;
 	rasterizerState.CullMode = D3D11_CULL_FRONT;
@@ -572,7 +571,7 @@ void Renderer::AddNewLayer(RECT clientSize) {
 #pragma endregion
 #pragma region UI_RTT
 	CreateNewDeferredContext(m_pWorldDeferredContext);
-	m_pRTT.push_back(RenderToTexture());
+	m_pRTT.push_back(UEngine::RenderToTexture());
 	CreateRenderToTexture(m_pRTT[UEngine::UI], (UINT)(clientSize.right - clientSize.left), (UINT)(clientSize.bottom - clientSize.top));
 	pipeline.rasterState = default_pipeline.rasterState;
 	pipeline.samplerState = default_pipeline.samplerState;
@@ -594,7 +593,7 @@ void Renderer::AddNewLayer(RECT clientSize) {
 #pragma endregion
 }
 
-void Renderer::RequestNewRTT(RenderToTexture & rtt, UINT width, UINT height, ID3D11DeviceContext ** m_pWorldDeferredContext)
+void Renderer::RequestNewRTT(UEngine::RenderToTexture & rtt, UINT width, UINT height, ID3D11DeviceContext ** m_pWorldDeferredContext)
 {
 	CreateRenderToTexture(rtt, width, height);
 	m_pDevice->CreateDeferredContext(NULL, m_pWorldDeferredContext);

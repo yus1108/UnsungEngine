@@ -22,14 +22,23 @@
     <Filter Include="Shaders\Static_Shaders">
       <UniqueIdentifier>{c2dc28bb-3897-4004-80e4-a902cd7c7a1c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Render">
+      <UniqueIdentifier>{eb2255ca-4d8b-4693-b0a0-bfd8cd0c7d40}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game">
+      <UniqueIdentifier>{6b5a07be-34ec-4488-b2d9-1a0e6ec192c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utility">
+      <UniqueIdentifier>{2fb9b301-a841-43ae-8228-40e400a467e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Definitions">
+      <UniqueIdentifier>{4cb0e733-1cb8-4de7-b750-373726fe3a78}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="stdafx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -39,35 +48,41 @@
     <ClInclude Include="UnsungEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Definition.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GameState.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="UVector.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="WICTextureLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="UTime.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SystemDefinition.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Render_UI.h">
+      <Filter>Render</Filter>
     </ClInclude>
     <ClInclude Include="Render_World.h">
-      <Filter>Header Files</Filter>
+      <Filter>Render</Filter>
     </ClInclude>
-    <ClInclude Include="Render_UI.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="RenderComponent.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="GameState.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="UVector.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="UTime.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemDefinition.h">
+      <Filter>Definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="Definition.h">
+      <Filter>Definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Definitions</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -77,26 +92,29 @@
     <ClCompile Include="UnsungEngine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GameState.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Renderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="WICTextureLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="UTime.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderComponent.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Render_UI.cpp">
+      <Filter>Render</Filter>
     </ClCompile>
     <ClCompile Include="Render_World.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Render</Filter>
     </ClCompile>
-    <ClCompile Include="Render_UI.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="RenderComponent.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="GameState.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="UTime.cpp">
+      <Filter>Utility</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

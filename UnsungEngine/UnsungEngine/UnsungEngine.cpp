@@ -12,7 +12,6 @@ WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
 HWND hWnd;
 UTime utime;
-Renderer renderer;
 GameState gameState;
 
 // Forward declarations of functions included in this code module:
@@ -90,7 +89,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	//delete[] nstring;
 #pragma endregion
 	
-	renderer.Init();
+	gameState.Init();
     // Main message loop:
 	while (true)
 	{
@@ -112,7 +111,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			// TODO: Engine Update (main thread)
 			utime.Signal();
 			utime.Throttle(THROTTLE);
-			renderer.Update();
+			gameState.Update();
 		}
 	}
 

@@ -63,6 +63,7 @@
 #include "RenderComponent.h"
 #include "Render_World.h"
 #include "Render_UI.h"
+#include "GameObject.h"
 
 // include shader headers
 #include "Default_VS.csh"

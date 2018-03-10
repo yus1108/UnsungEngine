@@ -20,6 +20,35 @@ namespace UEngine {
 		FLOAT dpiY = 96;
 		bool hasBackgroundColor = false;
 	};
+
+	struct pipeline_state_t
+	{
+		Microsoft::WRL::ComPtr<ID3D11InputLayout>		input_layout;
+		Microsoft::WRL::ComPtr<ID3D11VertexShader>		vertex_shader;
+		Microsoft::WRL::ComPtr<ID3D11PixelShader>		pixel_shader;
+		Microsoft::WRL::ComPtr<ID3D11GeometryShader>	geometry_shader;
+		Microsoft::WRL::ComPtr<ID3D11RenderTargetView>	render_target;
+		Microsoft::WRL::ComPtr<ID3D11Texture2D>			depthStencilBuffer;
+		Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depthStencilState;
+		Microsoft::WRL::ComPtr<ID3D11DepthStencilView>	depthStencilView;
+		Microsoft::WRL::ComPtr<ID3D11RasterizerState>	rasterState;
+		Microsoft::WRL::ComPtr<ID3D11SamplerState>		samplerState;
+		Microsoft::WRL::ComPtr<ID3D11BlendState>		blendingState;
+	};
+
+	struct RenderToTexture
+	{
+		Microsoft::WRL::ComPtr<ID3D11Texture2D> depthStencilBuffer;
+		Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depthStencilState;
+		Microsoft::WRL::ComPtr<ID3D11DepthStencilView>	depthStencilView;
+		Microsoft::WRL::ComPtr<ID3D11Texture2D> renderTargetTextureMap;
+		Microsoft::WRL::ComPtr<ID3D11RenderTargetView>	renderTargetViewMap;
+		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderResourceViewMap;
+		Microsoft::WRL::ComPtr<ID3D11Texture2D> outTexture;
+		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> outSRV;
+		UINT width;
+		UINT height;
+	};
 }
 
 
@@ -27,34 +56,7 @@ namespace UEngine {
 struct alignas(16) float4 : std::array<float, 4> { using std::array<float, 4>::array;  };
 struct alignas(64) float4x4 : std::array<float4, 4> { using std::array<float4, 4>::array;  };
 
-struct pipeline_state_t
-{
-	Microsoft::WRL::ComPtr<ID3D11InputLayout>		input_layout;
-	Microsoft::WRL::ComPtr<ID3D11VertexShader>		vertex_shader;
-	Microsoft::WRL::ComPtr<ID3D11PixelShader>		pixel_shader;
-	Microsoft::WRL::ComPtr<ID3D11GeometryShader>	geometry_shader;
-	Microsoft::WRL::ComPtr<ID3D11RenderTargetView>	render_target;
-	Microsoft::WRL::ComPtr<ID3D11Texture2D>			depthStencilBuffer;
-	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depthStencilState;
-	Microsoft::WRL::ComPtr<ID3D11DepthStencilView>	depthStencilView;
-	Microsoft::WRL::ComPtr<ID3D11RasterizerState>	rasterState;
-	Microsoft::WRL::ComPtr<ID3D11SamplerState>		samplerState;
-	Microsoft::WRL::ComPtr<ID3D11BlendState>		blendingState;
-};
 
-struct RenderToTexture
-{
-	Microsoft::WRL::ComPtr<ID3D11Texture2D> depthStencilBuffer;
-	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depthStencilState;
-	Microsoft::WRL::ComPtr<ID3D11DepthStencilView>	depthStencilView;
-	Microsoft::WRL::ComPtr<ID3D11Texture2D> renderTargetTextureMap;
-	Microsoft::WRL::ComPtr<ID3D11RenderTargetView>	renderTargetViewMap;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderResourceViewMap;
-	Microsoft::WRL::ComPtr<ID3D11Texture2D> outTexture;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> outSRV;
-	UINT width;
-	UINT height;
-};
 
 namespace end
 {
