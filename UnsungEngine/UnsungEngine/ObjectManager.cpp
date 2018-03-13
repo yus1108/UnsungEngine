@@ -41,7 +41,7 @@ void ObjectManager::Render(UVector<UEngine::RenderToTexture> & m_pRTT,
 		}
 		for (unsigned i = 0; i < (unsigned)UEngine::DrawType_COUNT; i++)
 		{
-			m_pWorldDeferredContext[i]->FinishCommandList(false, m_pWorldCommandList[i].GetAddressOf());
+			m_pWorldDeferredContext[i]->FinishCommandList(true, m_pWorldCommandList[i].GetAddressOf());
 		}
 	}));
 	for (auto& thread : threads)
