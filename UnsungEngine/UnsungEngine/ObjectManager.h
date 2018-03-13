@@ -5,16 +5,18 @@
 class ObjectManager
 {
 	unsigned obj_reference_num;
-	std::unordered_map<unsigned, GameObject*> objs;
+	std::unordered_map<unsigned, GameObject*> gameObjects;
 public:
 	ObjectManager();
 	~ObjectManager();
+
 	void Init();
 	void Update();
 	void Render(UVector<UEngine::RenderToTexture>& m_pRTT, UVector<Microsoft::WRL::ComPtr<ID3D11DeviceContext>>& m_pWorldDeferredContext, UVector<Microsoft::WRL::ComPtr<ID3D11CommandList>>& m_pWorldCommandList, Renderer * render);
 	void Clear();
 
-	void AddObj(GameObject * _obj);
-	void RemoveObj(GameObject * _obj);
+	GameObject * GetGameObject(unsigned i);
+	void AddGameObject(GameObject * _obj);
+	void RemoveGameObject(GameObject * _obj);
 };
 

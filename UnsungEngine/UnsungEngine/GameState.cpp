@@ -20,19 +20,19 @@ void GameState::Init()
 
 	// load model
 	renderer.LoadObject("Assets/WOS_CommandCenter.bin", gameObject);
-	objManager.AddObj(gameObject);
+	objManager.AddGameObject(gameObject);
 
 	// load dump
 	renderer.LoadObject("Assets/WOS_CommandCenter.bin", nullObject);
-	objManager.AddObj(nullObject);
+	objManager.AddGameObject(nullObject);
 
 	// load text
 	const WCHAR hello[] = L"Hello World!";
 	unsigned textLength = ARRAYSIZE(hello) - 1;
 	renderer.LoadGUI(hello, textLength, text);
-	objManager.AddObj(text);
+	objManager.AddGameObject(text);
 
-	objManager.RemoveObj(nullObject);
+	objManager.RemoveGameObject(nullObject);
 }
 
 void GameState::Update()

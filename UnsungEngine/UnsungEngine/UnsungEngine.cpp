@@ -92,6 +92,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 #pragma endregion
 	
 	isTerminate = false;
+	bool succeedTerminating = false;
 	std::thread mainThreads[1];
 	gameState.Init();
 	mainThreads[0] = std::thread([&]() {
@@ -100,7 +101,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			utime.Signal();
 			utime.Throttle(THROTTLE);
 			gameState.Update();
+			std::unique_lock<std::mutex> mainLock(mainMutex);
 		}
+		std::unique_lock<std::mutex> mainLock(mainMutex);
+		succeedTerminating = true;
 	});
 	for (auto& thread : mainThreads)
 		thread.detach();
@@ -126,6 +130,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		}
 	}
 
+	while (!succeedTerminating)
+	{
+		std::unique_lock<std::mutex> mainLock(mainMutex);
+	}
     return (int) msg.wParam;
 }
 

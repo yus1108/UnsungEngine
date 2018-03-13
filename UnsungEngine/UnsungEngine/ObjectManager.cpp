@@ -17,7 +17,7 @@ void ObjectManager::Init() {
 }
 
 void ObjectManager::Update() {
-	for each (std::pair<int, GameObject*> obj in objs)
+	for each (std::pair<int, GameObject*> obj in gameObjects)
 	{
 		if (obj.second)
 		{
@@ -31,7 +31,7 @@ void ObjectManager::Render(UVector<UEngine::RenderToTexture> & m_pRTT,
 	UVector<Microsoft::WRL::ComPtr<ID3D11CommandList>> & m_pWorldCommandList, Renderer * render) {
 	std::vector<std::thread> threads;
 	threads.push_back(std::thread([&]() {
-		for each (std::pair<int, GameObject*> obj in objs)
+		for each (std::pair<int, GameObject*> obj in gameObjects)
 		{
 			if (obj.second)
 			{
@@ -50,37 +50,60 @@ void ObjectManager::Render(UVector<UEngine::RenderToTexture> & m_pRTT,
 
 void ObjectManager::Clear()
 {
-	for each (std::pair<int, GameObject*> obj in objs)
+	for each (std::pair<int, GameObject*> obj in gameObjects)
 	{
 		if (obj.second)
 			delete obj.second;
 	}
-	objs.clear();
+	gameObjects.clear();
 }
 
-void ObjectManager::AddObj(GameObject * _obj)
+GameObject * ObjectManager::GetGameObject(unsigned i)
+{
+	if (gameObjects[i])
+		return gameObjects[i];
+
+	gameObjects.erase(i);
+	return nullptr;
+}
+
+void ObjectManager::AddGameObject(GameObject * _obj)
 {
 	if (_obj)
 	{
-		while (objs[obj_reference_num])
+		unsigned counter = 0;
+		while (gameObjects[obj_reference_num])
+		{
 			obj_reference_num++;
+			counter++;
+			if (counter == UINT_MAX)
+			{
+				std::cout << "Cannot create more than the space provided in the container!" << std::endl;
+				return;
+			}
+		}
 
-		std::cout << obj_reference_num << std::endl;
+		std::cout << "object number " << obj_reference_num << " created." << std::endl;
 		_obj->SetReferenceNum(obj_reference_num);
-		objs[obj_reference_num] = _obj;
+		gameObjects[obj_reference_num] = _obj;
 	}
 	else {
 		std::cout << "Object trying to add doesn't exist" << std::endl;
 	}
 }
 
-void ObjectManager::RemoveObj(GameObject * _obj)
+void ObjectManager::RemoveGameObject(GameObject * _obj)
 {
 	unsigned refNum = _obj->GetReferenceNum();
-	if (objs[refNum])
+	if (gameObjects[refNum])
 	{
-		objs[refNum] = nullptr;
+		std::cout << "object number " << refNum << " deleted." << std::endl;
+		gameObjects[refNum] = nullptr;
 		delete _obj;
 	}
-	objs.erase(refNum);
+	else
+	{
+		std::cout << "object number " << refNum << " doesn't exist." << std::endl;
+	}
+	gameObjects.erase(refNum);
 }
