@@ -15,6 +15,8 @@ public:
 	Render_UI();
 	virtual ~Render_UI();
 
+	inline UEngine::TextFormat GetTextFormat() { return textFormat; };
+	inline void SetTextFormat(UEngine::TextFormat _textFormat) { textFormat = _textFormat; };
 	inline const ID3D11ShaderResourceView * const GetShaderResourceView() { return m_pOffscreenSRV.Get(); };
 
 	void Init(ID3D11Device * m_pDevice, const WCHAR * textString, UINT32 textLength,

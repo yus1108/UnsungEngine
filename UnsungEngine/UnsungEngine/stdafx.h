@@ -49,6 +49,7 @@
 #include <fstream>
 #include <sstream>
 #include <bitset>
+#include <unordered_map>
 
 // utility headers
 #include "WICTextureLoader.h"
@@ -64,6 +65,7 @@
 #include "Render_World.h"
 #include "Render_UI.h"
 #include "GameObject.h"
+#include "ObjectManager.h"
 
 // include shader headers
 #include "Default_VS.csh"

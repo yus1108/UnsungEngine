@@ -24,8 +24,6 @@ Renderer::~Renderer()
 		constBufferRTTPos->Release();
 	if (constBufferRTTSize)
 		constBufferRTTSize->Release();
-
-	delete textModel;
 }
 
 void Renderer::Init()
@@ -179,60 +177,17 @@ void Renderer::Init()
 	ZeroMemory(&initData, sizeof(initData));
 	initData.pSysMem = &cpu_vertex;
 	m_pDevice->CreateBuffer(&bufferDesc, &initData, default_vertexBuffer.GetAddressOf());
-
-	
-
-	// load texture
-	textModel = new Render_UI();
-	Render_UI * ptr = (Render_UI*)textModel;
-	const WCHAR sc_helloWorld[] = L"Hello, World!";
-	UEngine::TextFormat textFormat;
-	textFormat.textColor = D2D1::ColorF::White;
-	textFormat.dpiX = 150;
-	textFormat.dpiY = 200;
-	textModel->Init(m_pWorldDeferredContext[UEngine::UI].Get(), &m_pPipelines[UEngine::UI], m_pViewports[UEngine::UI]);
-	ptr->Init(m_pDevice.Get(), sc_helloWorld, ARRAYSIZE(sc_helloWorld) - 1, L"Verdana", 50, textFormat);
 #pragma endregion
 
 	loadingDone = true;
 }
-void Renderer::Update()
+void Renderer::Update(ObjectManager * objManager)
 {
 	if (!loadingDone)
 		return;
 
-	std::stringstream ss;
-	ss << "Frame: " << utime.FramePerSecond() << std::endl;
+	objManager->Render(m_pWorldDeferredContext, m_pWorldCommandList, this);
 
-	char pch[20];
-	ss.getline(pch, 20);
-	size_t newsize = strlen(pch) + 1;
-	wchar_t * wcstring = new wchar_t[newsize];
-
-	// Convert char* string to a wchar_t* string.  
-	size_t convertedChars = 0;
-	mbstowcs_s(&convertedChars, wcstring, newsize, pch, _TRUNCATE);
-	((Render_UI*)textModel)->ChangeText(m_pDevice.Get(), m_pDeviceContext.Get(), wcstring, newsize);
-	delete[] wcstring;
-
-	std::vector<std::thread> threads;
-	threads.push_back(std::thread([&]() {
-		// Set the index buffer.
-		//gameObject.GetRenderComponent()->DrawObj(this);
-		for (unsigned int i = 0; i < 1; i++)
-		{
-			// Create command lists and record commands into them.
-			m_pWorldDeferredContext[i]->FinishCommandList(false, m_pWorldCommandList[i].GetAddressOf());
-		}
-	}));
-	threads.push_back(std::thread([&]() {
-		textModel->DrawObj(this);
-		// Create command lists and record commands into them.
-		m_pWorldDeferredContext[UEngine::UI]->FinishCommandList(false, m_pWorldCommandList[UEngine::UI].GetAddressOf());
-	}));
-
-	for (auto& thread : threads)
-		thread.join();
 	for (unsigned int i = 0; i < m_pWorldCommandList.size(); i++)
 	{
 		m_pDeviceContext->ExecuteCommandList(m_pWorldCommandList[i].Get(), false); // Execute pass 1.
@@ -285,8 +240,32 @@ void Renderer::LoadObject(const char * name, GameObject * gameObject) {
 	model->ReadBin(name, m_pDevice.Get(), m_pDeviceContext.Get());
 	model->Init(m_pWorldDeferredContext[UEngine::WORLD].Get(), &m_pPipelines[UEngine::WORLD], m_pViewports[UEngine::WORLD]);
 	gameObject->SetRenderComponent(model);
+	gameObject->SetDrawType(UEngine::WORLD);
 }
-
+void Renderer::LoadGUI(const WCHAR * inputString, unsigned length, GameObject * gameObject) {
+	// load texture
+	RenderComponent * textModel = new Render_UI();
+	Render_UI * ptr = (Render_UI*)textModel;
+	UEngine::TextFormat textFormat;
+	textFormat.textColor = D2D1::ColorF::White;
+	textFormat.dpiX = 150;
+	textFormat.dpiY = 200;
+	textModel->Init(m_pWorldDeferredContext[UEngine::UI].Get(), &m_pPipelines[UEngine::UI], m_pViewports[UEngine::UI]);
+	ptr->Init(m_pDevice.Get(), inputString, length, L"Verdana", 50, textFormat);
+	gameObject->SetRenderComponent(textModel);
+	gameObject->SetDrawType(UEngine::UI);
+}
+void Renderer::ChangeGUI(const char * textStr, GameObject * gameObject, UEngine::TextFormat * textFormat) {
+	size_t newsize = strlen(textStr) + 1;
+	wchar_t * wcstring = new wchar_t[newsize];
+	// Convert char* string to a wchar_t* string.  
+	size_t convertedChars = 0;
+	mbstowcs_s(&convertedChars, wcstring, newsize, textStr, _TRUNCATE);
+	if (textFormat)
+		((Render_UI*)gameObject->GetRenderComponent())->SetTextFormat(*textFormat);
+	((Render_UI*)gameObject->GetRenderComponent())->ChangeText(m_pDevice.Get(), m_pDeviceContext.Get(), wcstring, newsize);
+	delete[] wcstring;
+}
 void Renderer::RenderSet(ID3D11DeviceContext * m_pDeviceContext, UEngine::pipeline_state_t & pipeline,
 	D3D11_VIEWPORT & viewport, D3D11_PRIMITIVE_TOPOLOGY topology) {
 	// clearing backbuffer

@@ -1,6 +1,8 @@
 #pragma once
 #include "RenderComponent.h"
 #include "GameObject.h"
+#include "ObjectManager.h"
+
 class Renderer
 {
 	friend class Render_World;
@@ -32,16 +34,16 @@ private:
 	ID3D11Buffer * constBufferRTTSize;
 
 	bool loadingDone;
-
-	RenderComponent * textModel;
 public:
 	Renderer();
 	~Renderer();
 
 	void Init();
-	void Update();
+	void Update(ObjectManager * objManager);
 
 	void LoadObject(const char * name, GameObject * gameObject);
+	void LoadGUI(const WCHAR * inputString, unsigned length, GameObject * gameObject);
+	void ChangeGUI(const char * textStr, GameObject * gameObject, UEngine::TextFormat * textFormat = nullptr);
 
 private:
 	void RenderSet(ID3D11DeviceContext * m_pDeviceContext, UEngine::pipeline_state_t & pipeline,
