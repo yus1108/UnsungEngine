@@ -14,6 +14,7 @@ public:
 	RenderComponent();
 	virtual ~RenderComponent();
 
+	UEngine::pipeline_state_t * GetPipeline() { return m_pPipeline; }
 	void SetPipeline(UEngine::pipeline_state_t * _pipeline) { m_pPipeline = _pipeline; }
 
 	virtual void Init(ID3D11Device * m_pDevice, const WCHAR * textString, UINT32 textLength,
