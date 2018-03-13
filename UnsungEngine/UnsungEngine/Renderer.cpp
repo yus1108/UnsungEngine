@@ -238,9 +238,9 @@ void Renderer::Update(ObjectManager * objManager)
 void Renderer::LoadObject(const char * name, GameObject * gameObject) {
 	RenderComponent * model = new Render_World();
 	model->ReadBin(name, m_pDevice.Get(), m_pDeviceContext.Get());
-	model->Init(m_pWorldDeferredContext[UEngine::WORLD].Get(), &m_pPipelines[UEngine::WORLD], m_pViewports[UEngine::WORLD]);
+	model->Init(m_pWorldDeferredContext[UEngine::DrawType_WORLD].Get(), &m_pPipelines[UEngine::PipelineType_NO_ANIMATION], m_pViewports[UEngine::DrawType_WORLD]);
 	gameObject->SetRenderComponent(model);
-	gameObject->SetDrawType(UEngine::WORLD);
+	gameObject->SetDrawType(UEngine::DrawType_WORLD);
 }
 void Renderer::LoadGUI(const WCHAR * inputString, unsigned length, GameObject * gameObject) {
 	// load texture
@@ -250,10 +250,10 @@ void Renderer::LoadGUI(const WCHAR * inputString, unsigned length, GameObject * 
 	textFormat.textColor = D2D1::ColorF::White;
 	textFormat.dpiX = 150;
 	textFormat.dpiY = 200;
-	textModel->Init(m_pWorldDeferredContext[UEngine::UI].Get(), &m_pPipelines[UEngine::UI], m_pViewports[UEngine::UI]);
+	textModel->Init(m_pWorldDeferredContext[UEngine::DrawType_UI].Get(), &m_pPipelines[UEngine::PipelineType_UI], m_pViewports[UEngine::DrawType_UI]);
 	ptr->Init(m_pDevice.Get(), inputString, length, L"Verdana", 50, textFormat);
 	gameObject->SetRenderComponent(textModel);
-	gameObject->SetDrawType(UEngine::UI);
+	gameObject->SetDrawType(UEngine::DrawType_UI);
 }
 void Renderer::ChangeGUI(const char * textStr, GameObject * gameObject, UEngine::TextFormat * textFormat) {
 	size_t newsize = strlen(textStr) + 1;
@@ -503,10 +503,10 @@ void Renderer::CreateRenderToTexture(UEngine::RenderToTexture & rtt, UINT width,
 	m_pDevice->CreateShaderResourceView(rtt.outTexture.Get(), &singleSRVDesc, &rtt.outSRV);
 }
 void Renderer::AddNewLayer(RECT clientSize) {
-#pragma region WORLD_RTT
+#pragma region WORLD_STATIC_RTT
 	CreateNewDeferredContext(m_pWorldDeferredContext);
 	m_pRTT.push_back(UEngine::RenderToTexture());
-	CreateRenderToTexture(m_pRTT[UEngine::WORLD], (UINT)(clientSize.right - clientSize.left), (UINT)(clientSize.bottom - clientSize.top));
+	CreateRenderToTexture(m_pRTT[UEngine::DrawType_WORLD], (UINT)(clientSize.right - clientSize.left), (UINT)(clientSize.bottom - clientSize.top));
 	UEngine::pipeline_state_t pipeline;
 	D3D11_RASTERIZER_DESC rasterizerState;
 	rasterizerState.FillMode = D3D11_FILL_SOLID;
@@ -524,10 +524,10 @@ void Renderer::AddNewLayer(RECT clientSize) {
 	pipeline.samplerState = default_pipeline.samplerState;
 	pipeline.blendingState = default_pipeline.blendingState;
 
-	pipeline.depthStencilBuffer = m_pRTT[UEngine::WORLD].depthStencilBuffer;
-	pipeline.depthStencilState = m_pRTT[UEngine::WORLD].depthStencilState;
-	pipeline.depthStencilView = m_pRTT[UEngine::WORLD].depthStencilView;
-	pipeline.render_target = m_pRTT[UEngine::WORLD].renderTargetViewMap;
+	pipeline.depthStencilBuffer = m_pRTT[UEngine::DrawType_WORLD].depthStencilBuffer;
+	pipeline.depthStencilState = m_pRTT[UEngine::DrawType_WORLD].depthStencilState;
+	pipeline.depthStencilView = m_pRTT[UEngine::DrawType_WORLD].depthStencilView;
+	pipeline.render_target = m_pRTT[UEngine::DrawType_WORLD].renderTargetViewMap;
 
 	// Create view layout
 	D3D11_INPUT_ELEMENT_DESC vLayout[] =
@@ -548,18 +548,26 @@ void Renderer::AddNewLayer(RECT clientSize) {
 	InitViewport(rttViewPort, clientSize);
 	m_pViewports.push_back(rttViewPort);
 #pragma endregion
+#pragma region WORLD_ANIM_RTT
+	/*if (pVShaderByteCode)
+		m_pDevice->CreateVertexShader(pVShaderByteCode, VShaderLength, nullptr, pipeline.vertex_shader.GetAddressOf());
+	else
+		pipeline.vertex_shader = nullptr;*/
+	pipeline.vertex_shader = nullptr;
+	m_pPipelines.push_back(pipeline);
+#pragma endregion
 #pragma region UI_RTT
 	CreateNewDeferredContext(m_pWorldDeferredContext);
 	m_pRTT.push_back(UEngine::RenderToTexture());
-	CreateRenderToTexture(m_pRTT[UEngine::UI], (UINT)(clientSize.right - clientSize.left), (UINT)(clientSize.bottom - clientSize.top));
+	CreateRenderToTexture(m_pRTT[UEngine::DrawType_UI], (UINT)(clientSize.right - clientSize.left), (UINT)(clientSize.bottom - clientSize.top));
 	pipeline.rasterState = default_pipeline.rasterState;
 	pipeline.samplerState = default_pipeline.samplerState;
 	pipeline.blendingState = default_pipeline.blendingState;
 
-	pipeline.depthStencilBuffer = m_pRTT[UEngine::UI].depthStencilBuffer;
-	pipeline.depthStencilState = m_pRTT[UEngine::UI].depthStencilState;
-	pipeline.depthStencilView = m_pRTT[UEngine::UI].depthStencilView;
-	pipeline.render_target = m_pRTT[UEngine::UI].renderTargetViewMap;
+	pipeline.depthStencilBuffer = m_pRTT[UEngine::DrawType_UI].depthStencilBuffer;
+	pipeline.depthStencilState = m_pRTT[UEngine::DrawType_UI].depthStencilState;
+	pipeline.depthStencilView = m_pRTT[UEngine::DrawType_UI].depthStencilView;
+	pipeline.render_target = m_pRTT[UEngine::DrawType_UI].renderTargetViewMap;
 
 	// Create view layout
 	pipeline.vertex_shader = default_pipeline.vertex_shader;

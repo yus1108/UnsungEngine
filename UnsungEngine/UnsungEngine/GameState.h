@@ -7,8 +7,9 @@ class GameState
 private:
 	Renderer renderer;
 	ObjectManager objManager;
-	GameObject gameObject;
-	GameObject text;
+	GameObject * gameObject;
+	GameObject * text;
+	GameObject * nullObject;
 public:
 	GameState();
 	~GameState();

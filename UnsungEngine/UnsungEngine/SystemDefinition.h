@@ -5,9 +5,16 @@
 namespace UEngine {
 	enum DrawType
 	{
-		WORLD,
-		UI,
-		COUNT
+		DrawType_WORLD,
+		DrawType_UI,
+		DrawType_COUNT
+	};
+
+	enum PipelineType {
+		PipelineType_NO_ANIMATION,
+		PipelineType_ANIMATION,
+		PipelineType_UI,
+		PipelineType_COUNT
 	};
 
 	struct TextFormat

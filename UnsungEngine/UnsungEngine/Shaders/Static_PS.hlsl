@@ -48,7 +48,7 @@ float4 main(INPUT_PIXEL input) : SV_TARGET
 	// calculate normal mapping
 	float4 bumpMap = normalTexture.Sample(filters, input.tex);
 	bumpMap = (bumpMap * 2.0f) - 1.0f;
-	float3 bumpNormal = bumpMap.x * input.tangent + -bumpMap.y * input.binormal + input.normal;
+	float3 bumpNormal = -bumpMap.x * input.tangent + -bumpMap.y * input.binormal + input.normal;
 	input.normal = normalize(bumpNormal);
 
 	float dRatio = saturate(dot(-lightDirection, bumpNormal));

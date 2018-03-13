@@ -13,6 +13,8 @@ WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
 HWND hWnd;
 UTime utime;
 GameState gameState;
+bool isTerminate;
+std::mutex mainMutex;
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -89,7 +91,20 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	//delete[] nstring;
 #pragma endregion
 	
+	isTerminate = false;
+	std::thread mainThreads[1];
 	gameState.Init();
+	mainThreads[0] = std::thread([&]() {
+		while (!isTerminate)
+		{
+			utime.Signal();
+			utime.Throttle(THROTTLE);
+			gameState.Update();
+		}
+	});
+	for (auto& thread : mainThreads)
+		thread.detach();
+
     // Main message loop:
 	while (true)
 	{
@@ -99,6 +114,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			// translated or dispatched
 			if (msg.message == WM_QUIT)
 			{
+				std::unique_lock<std::mutex> mainLock(mainMutex);
+				isTerminate = true;
 				break;
 			}
 
@@ -106,12 +123,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			//to WndProc
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
-		}
-		else {
-			// TODO: Engine Update (main thread)
-			utime.Signal();
-			utime.Throttle(THROTTLE);
-			gameState.Update();
 		}
 	}
 
