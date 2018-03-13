@@ -154,6 +154,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="SystemDefinition.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="Transform.h" />
     <ClInclude Include="UnsungEngine.h" />
     <ClInclude Include="UTime.h" />
     <ClInclude Include="UVector.h" />
@@ -173,6 +174,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Transform.cpp" />
     <ClCompile Include="UnsungEngine.cpp" />
     <ClCompile Include="UTime.cpp" />
     <ClCompile Include="WICTextureLoader.cpp" />

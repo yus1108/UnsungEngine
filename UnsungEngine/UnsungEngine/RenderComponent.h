@@ -8,6 +8,7 @@ protected:
 	UEngine::pipeline_state_t * m_pPipeline;
 	D3D11_VIEWPORT m_viewport;
 
+	// temporary
 	DirectX::XMMATRIX worldMat;
 	bool loadingDone;
 public:

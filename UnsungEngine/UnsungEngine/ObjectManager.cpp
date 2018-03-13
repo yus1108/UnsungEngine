@@ -66,7 +66,6 @@ GameObject * ObjectManager::GetGameObject(unsigned i)
 	gameObjects.erase(i);
 	return nullptr;
 }
-
 void ObjectManager::AddGameObject(GameObject * _obj)
 {
 	if (_obj)
@@ -91,7 +90,6 @@ void ObjectManager::AddGameObject(GameObject * _obj)
 		std::cout << "Object trying to add doesn't exist" << std::endl;
 	}
 }
-
 void ObjectManager::RemoveGameObject(GameObject * _obj)
 {
 	unsigned refNum = _obj->GetReferenceNum();

@@ -187,7 +187,7 @@ void Renderer::Update(ObjectManager * objManager)
 	if (!loadingDone)
 		return;
 
-	for (size_t i = 0; i < m_pRTT.size(); i++)
+	for (unsigned i = 0; i < (unsigned)m_pRTT.size(); i++)
 	{
 		// clearing backbuffer
 		m_pWorldDeferredContext[i]->OMSetDepthStencilState(m_pRTT[i].depthStencilState.Get(), 1);
