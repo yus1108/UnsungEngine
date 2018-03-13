@@ -206,6 +206,7 @@ void Render_UI::ChangeText(ID3D11Device * m_pDevice, ID3D11DeviceContext * m_pIm
 		// Retrieve the size of the render target.
 		D2D1_SIZE_F renderTargetSize = m_pRenderTarget->GetSize();
 
+		m_pImmediateContext->OMSetRenderTargets(1, m_pOffscreenRenderTarget.GetAddressOf(), nullptr);
 		m_pImmediateContext->ClearRenderTargetView(m_pOffscreenRenderTarget.Get(), DirectX::Colors::Transparent);
 		m_pRenderTarget->BeginDraw();
 

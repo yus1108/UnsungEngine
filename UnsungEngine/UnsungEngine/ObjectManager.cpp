@@ -26,19 +26,22 @@ void ObjectManager::Update() {
 	}
 }
 
-void ObjectManager::Render(UVector<Microsoft::WRL::ComPtr<ID3D11DeviceContext>> & m_pWorldDeferredContext,
+void ObjectManager::Render(UVector<UEngine::RenderToTexture> & m_pRTT,
+	UVector<Microsoft::WRL::ComPtr<ID3D11DeviceContext>> & m_pWorldDeferredContext,
 	UVector<Microsoft::WRL::ComPtr<ID3D11CommandList>> & m_pWorldCommandList, Renderer * render) {
 	std::vector<std::thread> threads;
 	threads.push_back(std::thread([&]() {
-		// Set the index buffer.
 		for each (std::pair<int, GameObject*> obj in objs)
 		{
 			if (obj.second)
 			{
 				obj.second->GetRenderComponent()->DrawObj(render);
 				// Create command lists and record commands into them.
-				m_pWorldDeferredContext[obj.second->GetDrawType()]->FinishCommandList(false, m_pWorldCommandList[obj.second->GetDrawType()].GetAddressOf());
 			}
+		}
+		for (unsigned i = 0; i < (unsigned)UEngine::DrawType_COUNT; i++)
+		{
+			m_pWorldDeferredContext[i]->FinishCommandList(false, m_pWorldCommandList[i].GetAddressOf());
 		}
 	}));
 	for (auto& thread : threads)

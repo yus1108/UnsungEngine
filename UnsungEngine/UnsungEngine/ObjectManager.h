@@ -11,9 +11,7 @@ public:
 	~ObjectManager();
 	void Init();
 	void Update();
-	void Render(UVector<Microsoft::WRL::ComPtr<ID3D11DeviceContext>>& m_pWorldDeferredContext, 
-		UVector<Microsoft::WRL::ComPtr<ID3D11CommandList>>& m_pWorldCommandList, 
-		Renderer * render);
+	void Render(UVector<UEngine::RenderToTexture>& m_pRTT, UVector<Microsoft::WRL::ComPtr<ID3D11DeviceContext>>& m_pWorldDeferredContext, UVector<Microsoft::WRL::ComPtr<ID3D11CommandList>>& m_pWorldCommandList, Renderer * render);
 	void Clear();
 
 	void AddObj(GameObject * _obj);

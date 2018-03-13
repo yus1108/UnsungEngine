@@ -187,7 +187,16 @@ void Renderer::Update(ObjectManager * objManager)
 	if (!loadingDone)
 		return;
 
-	objManager->Render(m_pWorldDeferredContext, m_pWorldCommandList, this);
+	for (size_t i = 0; i < UEngine::PipelineType_COUNT; i++)
+	{
+		// clearing backbuffer
+		m_pDeviceContext->OMSetDepthStencilState(m_pPipelines[i].depthStencilState.Get(), 1);
+		m_pDeviceContext->OMSetRenderTargets(1, m_pPipelines[i].render_target.GetAddressOf(), m_pPipelines[i].depthStencilView.Get());
+
+		m_pDeviceContext->ClearRenderTargetView(m_pPipelines[i].render_target.Get(), DirectX::Colors::Transparent);
+		m_pDeviceContext->ClearDepthStencilView(m_pPipelines[i].depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+	}
+	objManager->Render(m_pRTT, m_pWorldDeferredContext, m_pWorldCommandList, this);
 
 	for (unsigned int i = 0; i < m_pWorldCommandList.size(); i++)
 	{
@@ -197,6 +206,8 @@ void Renderer::Update(ObjectManager * objManager)
 
 	UINT stride = sizeof(DefaultVertex);
 	UINT offset = 0;
+
+	// clearing depth buffer and render target
 	RenderSet(m_pDeviceContext.Get(), default_pipeline, default_viewport, D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
 	for (unsigned int i = 0; i < m_pRTT.size(); i++)
 	{
@@ -274,9 +285,7 @@ void Renderer::RenderSet(ID3D11DeviceContext * m_pDeviceContext, UEngine::pipeli
 	m_pDeviceContext->OMSetRenderTargets(1, pipeline.render_target.GetAddressOf(), pipeline.depthStencilView.Get());
 	m_pDeviceContext->OMSetBlendState(pipeline.blendingState.Get(), NULL, 0xffffffff);
 	m_pDeviceContext->RSSetViewports(1, &viewport);
-	// clearing depth buffer and render target
-	m_pDeviceContext->ClearRenderTargetView(pipeline.render_target.Get(), DirectX::Colors::Transparent);
-	m_pDeviceContext->ClearDepthStencilView(pipeline.depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+	
 	// Bind depth stencil state
 	m_pDeviceContext->RSSetState(pipeline.rasterState.Get());
 	ID3D11SamplerState *sampler[]{ pipeline.samplerState.Get() };
