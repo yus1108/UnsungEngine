@@ -39,6 +39,14 @@ void GameState::Init()
 void GameState::Update()
 {
 	// input
+	if (input.GetKeyPress('U'))
+	{
+		std::cout << "U is pressed" << std::endl;
+	}
+	if (input.GetKey('I'))
+	{
+		std::cout << "I is pressed" << std::endl;
+	}
 	std::stringstream stringBuilder;
 	stringBuilder << "Frame: " << utime.FramePerSecond() << std::endl;
 	char pch[20];

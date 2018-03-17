@@ -7,6 +7,7 @@
 // external variables
 extern HWND hWnd;
 extern UTime utime;
+extern Input input;
 
 // structure definition
 
