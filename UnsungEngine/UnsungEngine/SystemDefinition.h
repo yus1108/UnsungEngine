@@ -3,6 +3,14 @@
 
 // enum definition
 namespace UEngine {
+	enum MouseInputType {
+		MouseInputType_LEFT,
+		MouseInputType_RIGHT,
+		MouseInputType_MIDDLE,
+		MouseInputType_SCROLL,
+		MouseInputType_COUNT
+	};
+
 	enum DrawType
 	{
 		DrawType_WORLD,
@@ -41,6 +49,7 @@ namespace UEngine {
 		Microsoft::WRL::ComPtr<ID3D11RasterizerState>	rasterState;
 		Microsoft::WRL::ComPtr<ID3D11SamplerState>		samplerState;
 		Microsoft::WRL::ComPtr<ID3D11BlendState>		blendingState;
+		UEngine::DrawType								drawType;
 	};
 
 	struct RenderToTexture

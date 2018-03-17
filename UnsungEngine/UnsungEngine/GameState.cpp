@@ -34,6 +34,9 @@ void GameState::Init()
 	DirectX::XMMATRIX worldMat2 = DirectX::XMMatrixScaling(0.1f, 0.1f, 1);
 	text->GetTransform()->SetMatrix(worldMat2);
 	objManager.AddGameObject(text);
+
+	renderer.Resize(true, 1920, 1024);
+	renderer.Resize(false, 1024, 768);
 }
 
 void GameState::Update()
@@ -47,6 +50,13 @@ void GameState::Update()
 	{
 		std::cout << "I is pressed" << std::endl;
 	}
+
+	if (input.GetMousePress(UEngine::MouseInputType_LEFT))
+	{
+		DirectX::XMFLOAT2 ndcPos = input.GetMousePos();
+		std::cout << "mouse pos: " << ndcPos.x << ", " << ndcPos.y << std::endl;
+	}
+
 	std::stringstream stringBuilder;
 	stringBuilder << "Frame: " << utime.FramePerSecond() << std::endl;
 	char pch[20];

@@ -180,8 +180,12 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // Store instance handle in our global variable
 
+   //hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+	  // CW_USEDEFAULT, 0, 800, 600, nullptr, nullptr, hInstance, nullptr);
    hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME ^ WS_MAXIMIZEBOX,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+	   CW_USEDEFAULT, 0, 800, 600, nullptr, nullptr, hInstance, nullptr);
+   //hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME ^ WS_MAXIMIZEBOX,
+	  // CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
 
    if (!hWnd)
    {
@@ -206,7 +210,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	input.SetMousePress(false, 1);
+	input.SetMousePress(false, UEngine::MouseInputType_SCROLL);
 	switch (message)
 	{
 	case WM_KEYDOWN:
@@ -219,26 +223,29 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		PostQuitMessage(0);
 		break;
 	case WM_LBUTTONDOWN:
-		input.SetMousePress(true, 0);
+		input.SetMousePress(true, UEngine::MouseInputType_LEFT);
 		break;
 	case WM_LBUTTONUP:
-		input.SetMousePress(false, 0);
+		input.SetMousePress(false, UEngine::MouseInputType_LEFT);
 		break;
 	case WM_RBUTTONDOWN:
-		input.SetMousePress(true, 2);
+		input.SetMousePress(true, UEngine::MouseInputType_RIGHT);
 		break;
 	case WM_RBUTTONUP:
-		input.SetMousePress(false, 2);
+		input.SetMousePress(false, UEngine::MouseInputType_RIGHT);
 		break;
 	case WM_MOUSEWHEEL:
-		input.SetMousePress(true, 1);
+		input.SetMousePress(true, UEngine::MouseInputType_SCROLL);
 		input.scroll = (int)wParam;
 		break;
 	case WM_MBUTTONDOWN:
-		input.SetMousePress(true, 3);
+		input.SetMousePress(true, UEngine::MouseInputType_MIDDLE);
 		break;
 	case WM_MBUTTONUP:
-		input.SetMousePress(false, 3);
+		input.SetMousePress(false, UEngine::MouseInputType_MIDDLE);
+		break;
+	case WM_SIZE:
+		//gameState.SetClientSize();
 		break;
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);

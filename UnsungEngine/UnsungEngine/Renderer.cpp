@@ -182,6 +182,108 @@ void Renderer::Init()
 
 	loadingDone = true;
 }
+void Renderer::Resize(bool isFullScreen, int width, int height) {
+	m_pSwapCahin->SetFullscreenState(false, nullptr);
+	MoveWindow(hWnd, 0, 0, width, height, true);
+	RECT clientSize;
+	GetClientRect(hWnd, &clientSize);
+	default_pipeline.depthStencilBuffer.ReleaseAndGetAddressOf();
+	default_pipeline.depthStencilState.ReleaseAndGetAddressOf();
+	default_pipeline.depthStencilView.ReleaseAndGetAddressOf();
+	default_pipeline.render_target.ReleaseAndGetAddressOf();
+	m_pDeviceContext->Flush();
+
+	// swapchain specification
+	m_pSwapchainDesc.BufferDesc.Width = (UINT)(clientSize.right - clientSize.left);
+	m_pSwapchainDesc.BufferDesc.Height = (UINT)(clientSize.bottom - clientSize.top);
+	m_pSwapCahin->ResizeBuffers(1, m_pSwapchainDesc.BufferDesc.Width, m_pSwapchainDesc.BufferDesc.Height,
+		m_pSwapchainDesc.BufferDesc.Format, m_pSwapchainDesc.Flags);
+	InitViewport(default_viewport, clientSize);
+
+	std::vector<std::thread> threads;
+	threads.push_back(std::thread([&]() {
+		InitRenderTargetView(default_pipeline);
+	}));	// render target view
+	threads.push_back(std::thread([&]() {
+#pragma region descDepth_buffer
+		D3D11_TEXTURE2D_DESC depthBuffer;
+		depthBuffer.Width = (UINT)(clientSize.right - clientSize.left);
+		depthBuffer.Height = (UINT)(clientSize.bottom - clientSize.top);
+		depthBuffer.MipLevels = 1;
+		depthBuffer.ArraySize = 1;
+		depthBuffer.Format = DXGI_FORMAT_D32_FLOAT;
+		depthBuffer.SampleDesc.Count = m_pSwapchainDesc.SampleDesc.Count;
+		depthBuffer.SampleDesc.Quality = m_pSwapchainDesc.SampleDesc.Quality;
+		depthBuffer.Usage = D3D11_USAGE_DEFAULT;
+		depthBuffer.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+		depthBuffer.CPUAccessFlags = NULL;
+		depthBuffer.MiscFlags = NULL;
+#pragma endregion
+#pragma region depth_stencil_state_desc
+		D3D11_DEPTH_STENCIL_DESC depthState;
+
+		// Depth test parameters
+		depthState.DepthEnable = true;
+		depthState.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+		depthState.DepthFunc = D3D11_COMPARISON_LESS;
+
+		// Stencil test parameters
+		depthState.StencilEnable = true;
+		depthState.StencilReadMask = 0xFF;
+		depthState.StencilWriteMask = 0xFF;
+
+		// Stencil operations if pixel is front-facing
+		depthState.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+		depthState.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+		depthState.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+		depthState.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+		// Stencil operations if pixel is back-facing
+		depthState.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+		depthState.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+		depthState.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+		depthState.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+#pragma endregion
+#pragma region depth_stencil_view_desc
+		D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
+		descDSV.Format = DXGI_FORMAT_D32_FLOAT;
+		descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMS;
+		descDSV.Flags = NULL;
+		descDSV.Texture2D.MipSlice = NULL;
+#pragma endregion
+		InitDepthStencil(default_pipeline, clientSize, depthBuffer, depthState, descDSV);
+	}));	// depth stencil buffer/state/view
+	for (auto& thread : threads) {
+		thread.join();
+	}
+	threads.clear();
+
+	for (size_t i = 0; i < UEngine::DrawType_COUNT; i++)
+	{
+		m_pRTT[i].depthStencilBuffer.ReleaseAndGetAddressOf();
+		m_pRTT[i].depthStencilState.ReleaseAndGetAddressOf();
+		m_pRTT[i].depthStencilView.ReleaseAndGetAddressOf();
+		m_pRTT[i].outSRV.ReleaseAndGetAddressOf();
+		m_pRTT[i].outTexture.ReleaseAndGetAddressOf();
+		m_pRTT[i].renderTargetTextureMap.ReleaseAndGetAddressOf();
+		m_pRTT[i].renderTargetViewMap.ReleaseAndGetAddressOf();
+		m_pRTT[i].shaderResourceViewMap.ReleaseAndGetAddressOf();
+		CreateRenderToTexture(m_pRTT[i], (UINT)(clientSize.right - clientSize.left), (UINT)(clientSize.bottom - clientSize.top));
+		InitViewport(m_pViewports[i], clientSize);
+	}
+	for (size_t i = 0; i < UEngine::PipelineType_COUNT; i++)
+	{
+		m_pPipelines[i].depthStencilBuffer.ReleaseAndGetAddressOf();
+		m_pPipelines[i].depthStencilState.ReleaseAndGetAddressOf();
+		m_pPipelines[i].depthStencilView.ReleaseAndGetAddressOf();
+		m_pPipelines[i].render_target.ReleaseAndGetAddressOf();
+		m_pPipelines[i].depthStencilBuffer = m_pRTT[m_pPipelines[i].drawType].depthStencilBuffer;
+		m_pPipelines[i].depthStencilState = m_pRTT[m_pPipelines[i].drawType].depthStencilState;
+		m_pPipelines[i].depthStencilView = m_pRTT[m_pPipelines[i].drawType].depthStencilView;
+		m_pPipelines[i].render_target = m_pRTT[m_pPipelines[i].drawType].renderTargetViewMap;
+	}
+	m_pSwapCahin->SetFullscreenState(isFullScreen, nullptr);
+}
 void Renderer::Update(ObjectManager * objManager)
 {
 	if (!loadingDone)
@@ -255,7 +357,7 @@ void Renderer::Update(ObjectManager * objManager)
 void Renderer::LoadObject(const char * name, GameObject * gameObject) {
 	RenderComponent * model = new Render_World();
 	model->ReadBin(name, m_pDevice.Get(), m_pDeviceContext.Get());
-	model->Init(m_pWorldDeferredContext[UEngine::DrawType_WORLD].Get(), &m_pPipelines[UEngine::PipelineType_NO_ANIMATION], m_pViewports[UEngine::DrawType_WORLD]);
+	model->Init(m_pWorldDeferredContext[UEngine::DrawType_WORLD].Get(), &m_pPipelines[UEngine::PipelineType_NO_ANIMATION], &m_pViewports[UEngine::DrawType_WORLD]);
 	gameObject->SetRenderComponent(model);
 	gameObject->SetDrawType(UEngine::DrawType_WORLD);
 	gameObject->GetTransform()->SetMatrix(DirectX::XMMatrixIdentity());
@@ -265,8 +367,8 @@ void Renderer::LoadGUI(const char * textureName, GameObject * gameObject) {
 	RenderComponent * textModel = new Render_UI();
 	Render_UI * ptr = (Render_UI*)textModel;
 	ptr->ReadBin(textureName, m_pDevice.Get(), m_pDeviceContext.Get());
-	ptr->Init(m_pWorldDeferredContext[UEngine::DrawType_UI].Get(), &m_pPipelines[UEngine::PipelineType_UI], m_pViewports[UEngine::PipelineType_UI]);
-	textModel->Init(m_pWorldDeferredContext[UEngine::DrawType_UI].Get(), &m_pPipelines[UEngine::PipelineType_UI], m_pViewports[UEngine::DrawType_UI]);
+	ptr->Init(m_pWorldDeferredContext[UEngine::DrawType_UI].Get(), &m_pPipelines[UEngine::PipelineType_UI], &m_pViewports[UEngine::PipelineType_UI]);
+	textModel->Init(m_pWorldDeferredContext[UEngine::DrawType_UI].Get(), &m_pPipelines[UEngine::PipelineType_UI], &m_pViewports[UEngine::DrawType_UI]);
 	gameObject->SetRenderComponent(textModel);
 	gameObject->SetDrawType(UEngine::DrawType_UI);
 	gameObject->GetTransform()->SetMatrix(DirectX::XMMatrixIdentity());
@@ -279,7 +381,7 @@ void Renderer::LoadGUI(const WCHAR * inputString, unsigned length, GameObject * 
 	textFormat.textColor = D2D1::ColorF::White;
 	textFormat.dpiX = 150;
 	textFormat.dpiY = 200;
-	textModel->Init(m_pWorldDeferredContext[UEngine::DrawType_UI].Get(), &m_pPipelines[UEngine::PipelineType_UI], m_pViewports[UEngine::DrawType_UI]);
+	textModel->Init(m_pWorldDeferredContext[UEngine::DrawType_UI].Get(), &m_pPipelines[UEngine::PipelineType_UI], &m_pViewports[UEngine::DrawType_UI]);
 	ptr->Init(m_pDevice.Get(), inputString, length, L"Verdana", 50, textFormat);
 	gameObject->SetRenderComponent(textModel);
 	gameObject->SetDrawType(UEngine::DrawType_UI);
@@ -586,6 +688,7 @@ void Renderer::AddBasicPipelines() {
 	pipeline.depthStencilState = m_pRTT[UEngine::DrawType_WORLD].depthStencilState;
 	pipeline.depthStencilView = m_pRTT[UEngine::DrawType_WORLD].depthStencilView;
 	pipeline.render_target = m_pRTT[UEngine::DrawType_WORLD].renderTargetViewMap;
+	pipeline.drawType = UEngine::DrawType_WORLD;
 	m_pPipelines.push_back(pipeline);
 
 	// PipelineType_ANIMATION
@@ -601,6 +704,7 @@ void Renderer::AddBasicPipelines() {
 	pipeline.depthStencilState = m_pRTT[UEngine::DrawType_UI].depthStencilState;
 	pipeline.depthStencilView = m_pRTT[UEngine::DrawType_UI].depthStencilView;
 	pipeline.render_target = m_pRTT[UEngine::DrawType_UI].renderTargetViewMap;
+	pipeline.drawType = UEngine::DrawType_UI;
 	pipeline.vertex_shader = default_pipeline.vertex_shader;
 	pipeline.pixel_shader = default_pipeline.pixel_shader;
 	pipeline.geometry_shader = default_pipeline.geometry_shader;

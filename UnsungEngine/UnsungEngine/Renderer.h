@@ -39,6 +39,7 @@ public:
 	~Renderer();
 
 	void Init();
+	void Resize(bool isFullScreen, int width, int height);
 	void Update(ObjectManager * objManager);
 
 	void LoadObject(const char * name, GameObject * gameObject);

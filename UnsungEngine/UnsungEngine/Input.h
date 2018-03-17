@@ -21,6 +21,7 @@ public:
 	bool GetKeyPress(int _key); // check the state key pressed for one time while pressed down
 	bool GetMouseInput(int _mouseInput);
 	bool GetMousePress(int _key); // check the state key pressed for one time while pressed down
+	DirectX::XMFLOAT2 GetMousePos();
 
 	void SetKeyPress(bool _keypressed, WPARAM _wParam);
 	void SetMousePress(bool _keypressed, WPARAM _wParam);

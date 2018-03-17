@@ -19,7 +19,7 @@ void Render_World::Init(ID3D11Device * m_pDevice, const WCHAR * textString, UINT
 {
 }
 
-void Render_World::Init(ID3D11DeviceContext * deviceContext, UEngine::pipeline_state_t * pipeline, D3D11_VIEWPORT viewport)
+void Render_World::Init(ID3D11DeviceContext * deviceContext, UEngine::pipeline_state_t * pipeline, D3D11_VIEWPORT * viewport)
 {
 	m_pDeviceContext = deviceContext;
 	m_pPipeline = pipeline;
@@ -29,7 +29,7 @@ void Render_World::Init(ID3D11DeviceContext * deviceContext, UEngine::pipeline_s
 void Render_World::DrawObj(Renderer * render, Transform * transform)
 {
 	if (loadingDone) {
-		render->RenderSet(m_pDeviceContext, *m_pPipeline, m_viewport, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		render->RenderSet(m_pDeviceContext, *m_pPipeline, *m_viewport, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		m_pDeviceContext->VSSetConstantBuffers(0, 1, &render->constBufferWorld);
 		m_pDeviceContext->VSSetConstantBuffers(1, 1, &render->constBufferScene);
@@ -57,7 +57,7 @@ void Render_World::DrawObj(Renderer * render, Transform * transform)
 		DirectX::XMMATRIX originalView = DirectX::XMMatrixIdentity();
 		originalView.r[3] = DirectX::XMVectorSet(0, 5, -20, 1);
 		DirectX::XMVECTOR determinant = DirectX::XMMatrixDeterminant(originalView);
-		float aspectRatio = (m_viewport.Width / m_viewport.Height);
+		float aspectRatio = (m_viewport->Width / m_viewport->Height);
 		SCENE sceneToShader;
 		sceneToShader.viewMat = DirectX::XMMatrixInverse(&determinant, originalView);
 		sceneToShader.viewMat = DirectX::XMMatrixTranspose(sceneToShader.viewMat);

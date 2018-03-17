@@ -56,6 +56,7 @@
 #include "DDSTextureLoader.h"
 #include "UVector.h"
 #include "UTime.h"
+#include "UMath.h"
 #include "Input.h"
 #include "SystemDefinition.h"
 #include "Definition.h"
