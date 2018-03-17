@@ -154,7 +154,7 @@ void Render_UI::Init(ID3D11DeviceContext * deviceContext, UEngine::pipeline_stat
 	m_viewport = viewport;
 }
 
-void Render_UI::DrawObj(Renderer * render)
+void Render_UI::DrawObj(Renderer * render, Transform * transform)
 {
 	if (loadingDone)
 	{
@@ -163,7 +163,7 @@ void Render_UI::DrawObj(Renderer * render)
 		UINT offset = 0;
 
 		m_pDeviceContext->VSSetConstantBuffers(0, 1, &render->constBufferRTTPos);
-		DirectX::XMFLOAT4 RTPos = DirectX::XMFLOAT4(0, 0, 0, 1);
+		DirectX::XMFLOAT4 RTPos = transform->GetPosition4();
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
 		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
 		m_pDeviceContext->Map(render->constBufferRTTPos, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
@@ -171,7 +171,8 @@ void Render_UI::DrawObj(Renderer * render)
 		m_pDeviceContext->Unmap(render->constBufferRTTPos, 0);
 
 		m_pDeviceContext->GSSetConstantBuffers(1, 1, &render->constBufferRTTSize);
-		DirectX::XMFLOAT4 RTSize = DirectX::XMFLOAT4(-0.1f, -0.1f, 0.1f, 0.1f);
+		DirectX::XMFLOAT3 scale = transform->GetScale();
+		DirectX::XMFLOAT4 RTSize = DirectX::XMFLOAT4(-scale.x, -scale.y, scale.x, scale.y);
 		mappedResource;
 		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
 		m_pDeviceContext->Map(render->constBufferRTTSize, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);

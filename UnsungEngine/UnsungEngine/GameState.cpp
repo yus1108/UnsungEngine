@@ -30,6 +30,8 @@ void GameState::Init()
 	const WCHAR hello[] = L"Hello World!";
 	unsigned textLength = ARRAYSIZE(hello) - 1;
 	renderer.LoadGUI(hello, textLength, text);
+	DirectX::XMMATRIX worldMat2 = DirectX::XMMatrixScaling(0.1f, 0.1f, 1);
+	text->GetTransform()->SetMatrix(worldMat2);
 	objManager.AddGameObject(text);
 
 	objManager.RemoveGameObject(nullObject);
@@ -43,6 +45,13 @@ void GameState::Update()
 	char pch[20];
 	stringBuilder.getline(pch, 20);
 	renderer.ChangeGUI(pch, text);
+
+	DirectX::XMMATRIX worldMat = DirectX::XMMatrixMultiply(gameObject->GetTransform()->GetMatrix(), DirectX::XMMatrixRotationY((float)utime.DeltaTime() / 10.0f));
+	gameObject->GetTransform()->SetMatrix(worldMat);
+	//if (utime.DeltaTime() < 1)
+	//{
+	//	worldMat.r[3].m128_f32[0] += (float)utime.DeltaTime();
+	//}
 
 	// collision
 

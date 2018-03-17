@@ -13,3 +13,7 @@ GameObject::~GameObject()
 	if (renderComponent)
 		delete renderComponent;
 }
+
+void GameObject::Update()
+{
+}

@@ -5,8 +5,6 @@
 ObjectManager::ObjectManager()
 {
 }
-
-
 ObjectManager::~ObjectManager()
 {
 	Clear();
@@ -22,6 +20,7 @@ void ObjectManager::Update() {
 		if (obj.second)
 		{
 			// update
+			obj.second->Update();
 		}
 	}
 }
@@ -35,7 +34,7 @@ void ObjectManager::Render(UVector<UEngine::RenderToTexture> & m_pRTT,
 		{
 			if (obj.second)
 			{
-				obj.second->GetRenderComponent()->DrawObj(render);
+				obj.second->GetRenderComponent()->DrawObj(render, obj.second->GetTransform());
 				// Create command lists and record commands into them.
 			}
 		}

@@ -258,6 +258,7 @@ void Renderer::LoadObject(const char * name, GameObject * gameObject) {
 	model->Init(m_pWorldDeferredContext[UEngine::DrawType_WORLD].Get(), &m_pPipelines[UEngine::PipelineType_NO_ANIMATION], m_pViewports[UEngine::DrawType_WORLD]);
 	gameObject->SetRenderComponent(model);
 	gameObject->SetDrawType(UEngine::DrawType_WORLD);
+	gameObject->GetTransform()->SetMatrix(DirectX::XMMatrixIdentity());
 }
 void Renderer::LoadGUI(const WCHAR * inputString, unsigned length, GameObject * gameObject) {
 	// load texture
@@ -271,6 +272,7 @@ void Renderer::LoadGUI(const WCHAR * inputString, unsigned length, GameObject * 
 	ptr->Init(m_pDevice.Get(), inputString, length, L"Verdana", 50, textFormat);
 	gameObject->SetRenderComponent(textModel);
 	gameObject->SetDrawType(UEngine::DrawType_UI);
+	gameObject->GetTransform()->SetMatrix(DirectX::XMMatrixIdentity());
 }
 void Renderer::ChangeGUI(const char * textStr, GameObject * gameObject, UEngine::TextFormat * textFormat) {
 	size_t newsize = strlen(textStr) + 1;

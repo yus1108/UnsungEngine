@@ -28,7 +28,7 @@ void Render_World::Init(ID3D11DeviceContext * deviceContext, UEngine::pipeline_s
 	m_viewport = viewport;
 }
 
-void Render_World::DrawObj(Renderer * render)
+void Render_World::DrawObj(Renderer * render, Transform * transform)
 {
 	if (loadingDone) {
 		render->RenderSet(m_pDeviceContext, *m_pPipeline, m_viewport, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -46,11 +46,7 @@ void Render_World::DrawObj(Renderer * render)
 		//AnimateModel(obj, 1);
 
 		// world matrix
-		worldMat = DirectX::XMMatrixMultiply(worldMat, DirectX::XMMatrixRotationY((float)utime.DeltaTime() / 10.0f));
-		//if (utime.DeltaTime() < 1)
-		//{
-		//	worldMat.r[3].m128_f32[0] += (float)utime.DeltaTime();
-		//}
+		worldMat = transform->GetMatrix();
 		
 		worldMat = DirectX::XMMatrixTranspose(worldMat);
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
