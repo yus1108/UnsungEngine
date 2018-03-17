@@ -13,6 +13,7 @@ WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
 HWND hWnd;
 UTime utime;
 GameState gameState;
+Input input;
 bool isTerminate;
 std::mutex mainMutex;
 
@@ -205,28 +206,39 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	input.SetMousePress(false, 1);
 	switch (message)
 	{
 	case WM_KEYDOWN:
+		input.SetKeyPress(true, wParam);
 		break;
 	case WM_KEYUP:
+		input.SetKeyPress(false, wParam);
 		break;
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
 	case WM_LBUTTONDOWN:
+		input.SetMousePress(true, 0);
 		break;
 	case WM_LBUTTONUP:
+		input.SetMousePress(false, 0);
 		break;
 	case WM_RBUTTONDOWN:
+		input.SetMousePress(true, 2);
 		break;
 	case WM_RBUTTONUP:
+		input.SetMousePress(false, 2);
 		break;
 	case WM_MOUSEWHEEL:
+		input.SetMousePress(true, 1);
+		input.scroll = (int)wParam;
 		break;
 	case WM_MBUTTONDOWN:
+		input.SetMousePress(true, 3);
 		break;
 	case WM_MBUTTONUP:
+		input.SetMousePress(false, 3);
 		break;
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
