@@ -6,7 +6,7 @@ GameState::GameState()
 {
 	gameObject = new GameObject();
 	text = new GameObject();
-	nullObject = new GameObject();
+	logo = new GameObject();
 }
 
 GameState::~GameState()
@@ -23,8 +23,9 @@ void GameState::Init()
 	objManager.AddGameObject(gameObject);
 
 	// load dump
-	renderer.LoadObject("Assets/WOS_CommandCenter.bin", nullObject);
-	objManager.AddGameObject(nullObject);
+	renderer.LoadGUI("Assets/TempLogo.png", logo);
+	objManager.AddGameObject(logo);
+	objManager.RemoveGameObject(logo);
 
 	// load text
 	const WCHAR hello[] = L"Hello World!";
@@ -33,8 +34,6 @@ void GameState::Init()
 	DirectX::XMMATRIX worldMat2 = DirectX::XMMatrixScaling(0.1f, 0.1f, 1);
 	text->GetTransform()->SetMatrix(worldMat2);
 	objManager.AddGameObject(text);
-
-	objManager.RemoveGameObject(nullObject);
 }
 
 void GameState::Update()
@@ -48,10 +47,6 @@ void GameState::Update()
 
 	DirectX::XMMATRIX worldMat = DirectX::XMMatrixMultiply(gameObject->GetTransform()->GetMatrix(), DirectX::XMMatrixRotationY((float)utime.DeltaTime() / 10.0f));
 	gameObject->GetTransform()->SetMatrix(worldMat);
-	//if (utime.DeltaTime() < 1)
-	//{
-	//	worldMat.r[3].m128_f32[0] += (float)utime.DeltaTime();
-	//}
 
 	// collision
 

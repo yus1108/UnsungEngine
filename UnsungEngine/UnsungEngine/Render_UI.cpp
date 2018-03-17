@@ -195,7 +195,30 @@ void Render_UI::DrawObj(Renderer * render, Transform * transform)
 
 void Render_UI::ReadBin(const char * filename, ID3D11Device * m_pDevice, ID3D11DeviceContext * m_pDeviceContext, DirectX::XMFLOAT4 color)
 {
-	
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> tex = nullptr;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv = nullptr;
+
+	size_t newsize = strlen(filename) + 1;
+	wchar_t * tempStr = new wchar_t[newsize];
+	size_t convertedChars = 0;
+	mbstowcs_s(&convertedChars, tempStr, newsize, filename, _TRUNCATE);
+
+	CreateWICTextureFromFile(m_pDevice, m_pDeviceContext, tempStr,
+		(ID3D11Resource**)tex.GetAddressOf(), srv.GetAddressOf());
+	if (srv) {
+		m_pOffscreenSRV = srv;
+		m_pOffscreenTexture = tex;
+	}
+	else {
+		CreateDDSTextureFromFile(m_pDevice, tempStr,
+			(ID3D11Resource**)tex.GetAddressOf(), srv.GetAddressOf());
+		if (srv) {
+			m_pOffscreenSRV = srv;
+			m_pOffscreenTexture = tex;
+		}
+	}
+	delete[] tempStr;
+	loadingDone = true;
 }
 
 void Render_UI::ChangeText(ID3D11Device * m_pDevice, ID3D11DeviceContext * m_pImmediateContext, const WCHAR * textString, UINT32 textLength)

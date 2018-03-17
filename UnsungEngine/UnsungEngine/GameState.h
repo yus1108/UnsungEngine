@@ -9,7 +9,7 @@ private:
 	ObjectManager objManager;
 	GameObject * gameObject;
 	GameObject * text;
-	GameObject * nullObject;
+	GameObject * logo;
 public:
 	GameState();
 	~GameState();

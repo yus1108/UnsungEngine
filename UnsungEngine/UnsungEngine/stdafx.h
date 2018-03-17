@@ -53,6 +53,7 @@
 
 // utility headers
 #include "WICTextureLoader.h"
+#include "DDSTextureLoader.h"
 #include "UVector.h"
 #include "UTime.h"
 #include "SystemDefinition.h"

@@ -260,6 +260,17 @@ void Renderer::LoadObject(const char * name, GameObject * gameObject) {
 	gameObject->SetDrawType(UEngine::DrawType_WORLD);
 	gameObject->GetTransform()->SetMatrix(DirectX::XMMatrixIdentity());
 }
+void Renderer::LoadGUI(const char * textureName, GameObject * gameObject) {
+	// load texture
+	RenderComponent * textModel = new Render_UI();
+	Render_UI * ptr = (Render_UI*)textModel;
+	ptr->ReadBin(textureName, m_pDevice.Get(), m_pDeviceContext.Get());
+	ptr->Init(m_pWorldDeferredContext[UEngine::DrawType_UI].Get(), &m_pPipelines[UEngine::PipelineType_UI], m_pViewports[UEngine::PipelineType_UI]);
+	textModel->Init(m_pWorldDeferredContext[UEngine::DrawType_UI].Get(), &m_pPipelines[UEngine::PipelineType_UI], m_pViewports[UEngine::DrawType_UI]);
+	gameObject->SetRenderComponent(textModel);
+	gameObject->SetDrawType(UEngine::DrawType_UI);
+	gameObject->GetTransform()->SetMatrix(DirectX::XMMatrixIdentity());
+}
 void Renderer::LoadGUI(const WCHAR * inputString, unsigned length, GameObject * gameObject) {
 	// load texture
 	RenderComponent * textModel = new Render_UI();

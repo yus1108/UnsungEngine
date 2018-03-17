@@ -42,6 +42,7 @@ public:
 	void Update(ObjectManager * objManager);
 
 	void LoadObject(const char * name, GameObject * gameObject);
+	void LoadGUI(const char * textureName, GameObject * gameObject);
 	void LoadGUI(const WCHAR * inputString, unsigned length, GameObject * gameObject);
 	void ChangeGUI(const char * textStr, GameObject * gameObject, UEngine::TextFormat * textFormat = nullptr);
 

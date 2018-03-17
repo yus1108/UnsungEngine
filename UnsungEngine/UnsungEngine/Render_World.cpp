@@ -8,8 +8,6 @@ Render_World::Render_World()
 	materialComponent = new Material;
 	animationComponent = new Animation;
 }
-
-
 Render_World::~Render_World()
 {
 	delete geometryComponent;
@@ -403,8 +401,17 @@ void Render_World::ReadBin(const char * filename, ID3D11Device * m_pDevice, ID3D
 						in_material[i][j].input.texture_resource = srv.Get();
 					}
 					else {
-						delete[] in_material[i][j].input.file_path;
-						in_material[i][j].input.texture_resource = nullptr;
+						CreateDDSTextureFromFile(m_pDevice, in_material[i][j].input.file_path,
+							(ID3D11Resource**)tex.GetAddressOf(), srv.GetAddressOf());
+						if (srv) {
+							materialComponent->srv.push_back(srv);
+							delete[] in_material[i][j].input.file_path;
+							in_material[i][j].input.texture_resource = srv.Get();
+						}
+						else {
+							delete[] in_material[i][j].input.file_path;
+							in_material[i][j].input.texture_resource = nullptr;
+						}
 					}
 				}
 			}
