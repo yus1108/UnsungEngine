@@ -8,12 +8,15 @@ private:
 	RenderComponent * renderComponent;
 	UEngine::DrawType drawType;
 	unsigned referenceNum;
+	bool isActive;
 public:
 	GameObject();
 	~GameObject();
 
 	unsigned GetReferenceNum() { return referenceNum; }
 	void SetReferenceNum(unsigned _ref) { referenceNum = _ref; }
+	bool GetActive() { return isActive; }
+	void SetActive(bool _active);
 
 	UEngine::DrawType GetDrawType() { return drawType; }
 	void SetDrawType(UEngine::DrawType _drawType) { drawType = _drawType; }

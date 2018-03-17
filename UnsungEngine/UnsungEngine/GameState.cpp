@@ -22,21 +22,23 @@ void GameState::Init()
 	renderer.LoadObject("Assets/WOS_CommandCenter.bin", gameObject);
 	objManager.AddGameObject(gameObject);
 
-	// load dump
+	// load logo
 	renderer.LoadGUI("Assets/TempLogo.png", logo);
+	DirectX::XMMATRIX worldMat = DirectX::XMMatrixScaling(0.1f, 0.1f, 1);
+	logo->GetTransform()->SetMatrix(worldMat);
 	objManager.AddGameObject(logo);
-	objManager.RemoveGameObject(logo);
+	//objManager.RemoveGameObject(logo);
 
 	// load text
 	const WCHAR hello[] = L"Hello World!";
 	unsigned textLength = ARRAYSIZE(hello) - 1;
 	renderer.LoadGUI(hello, textLength, text);
-	DirectX::XMMATRIX worldMat2 = DirectX::XMMatrixScaling(0.1f, 0.1f, 1);
-	text->GetTransform()->SetMatrix(worldMat2);
+	text->GetTransform()->SetMatrix(worldMat);
+	text->SetActive(false);
 	objManager.AddGameObject(text);
 
-	renderer.Resize(true, 1920, 1024);
-	renderer.Resize(false, 1024, 768);
+	/*renderer.Resize(true, 1920, 1024);
+	renderer.Resize(false, 1024, 768);*/
 }
 
 void GameState::Update()
@@ -57,14 +59,20 @@ void GameState::Update()
 		std::cout << "mouse pos: " << ndcPos.x << ", " << ndcPos.y << std::endl;
 	}
 
-	std::stringstream stringBuilder;
-	stringBuilder << "Frame: " << utime.FramePerSecond() << std::endl;
-	char pch[20];
-	stringBuilder.getline(pch, 20);
-	renderer.ChangeGUI(pch, text);
-
-	DirectX::XMMATRIX worldMat = DirectX::XMMatrixMultiply(gameObject->GetTransform()->GetMatrix(), DirectX::XMMatrixRotationY((float)utime.DeltaTime() / 10.0f));
-	gameObject->GetTransform()->SetMatrix(worldMat);
+	if (text->GetActive())
+	{
+		std::stringstream stringBuilder;
+		stringBuilder << "Frame: " << utime.FramePerSecond() << std::endl;
+		char pch[20];
+		stringBuilder.getline(pch, 20);
+		renderer.ChangeGUI(pch, text);
+	}
+	
+	if (gameObject->GetActive())
+	{
+		DirectX::XMMATRIX worldMat = DirectX::XMMatrixMultiply(gameObject->GetTransform()->GetMatrix(), DirectX::XMMatrixRotationY((float)utime.DeltaTime() / 10.0f));
+		gameObject->GetTransform()->SetMatrix(worldMat);
+	}
 
 	// collision
 

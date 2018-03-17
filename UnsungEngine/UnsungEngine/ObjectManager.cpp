@@ -17,7 +17,7 @@ void ObjectManager::Init() {
 void ObjectManager::Update() {
 	for each (std::pair<int, GameObject*> obj in gameObjects)
 	{
-		if (obj.second)
+		if (obj.second && obj.second->GetActive())
 		{
 			// update
 			obj.second->Update();
@@ -32,7 +32,7 @@ void ObjectManager::Render(UVector<UEngine::RenderToTexture> & m_pRTT,
 	threads.push_back(std::thread([&]() {
 		for each (std::pair<int, GameObject*> obj in gameObjects)
 		{
-			if (obj.second)
+			if (obj.second && obj.second->GetActive())
 			{
 				obj.second->GetRenderComponent()->DrawObj(render, obj.second->GetTransform());
 				// Create command lists and record commands into them.

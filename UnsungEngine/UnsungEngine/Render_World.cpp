@@ -28,7 +28,7 @@ void Render_World::Init(ID3D11DeviceContext * deviceContext, UEngine::pipeline_s
 
 void Render_World::DrawObj(Renderer * render, Transform * transform)
 {
-	if (loadingDone) {
+	if (loadingDone && isActive) {
 		render->RenderSet(m_pDeviceContext, *m_pPipeline, *m_viewport, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		m_pDeviceContext->VSSetConstantBuffers(0, 1, &render->constBufferWorld);

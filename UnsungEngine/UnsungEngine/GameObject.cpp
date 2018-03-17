@@ -5,6 +5,7 @@
 GameObject::GameObject()
 {
 	renderComponent = nullptr;
+	isActive = true;
 }
 
 
@@ -14,6 +15,15 @@ GameObject::~GameObject()
 		delete renderComponent;
 }
 
+void GameObject::SetActive(bool _active)
+{
+	isActive = _active;
+}
+
 void GameObject::Update()
 {
+	if (isActive)
+	{
+
+	}
 }

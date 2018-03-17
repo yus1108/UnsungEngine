@@ -13,9 +13,13 @@ protected:
 	// temporary
 	DirectX::XMMATRIX worldMat;
 	bool loadingDone;
+	bool isActive;
 public:
 	RenderComponent();
 	virtual ~RenderComponent();
+
+	bool GetActive() { return isActive; }
+	void SetActive(bool _active) { isActive = _active; }
 
 	UEngine::pipeline_state_t * GetPipeline() { return m_pPipeline; }
 	void SetPipeline(UEngine::pipeline_state_t * _pipeline) { m_pPipeline = _pipeline; }

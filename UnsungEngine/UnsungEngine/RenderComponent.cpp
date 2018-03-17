@@ -5,6 +5,7 @@
 RenderComponent::RenderComponent()
 {
 	loadingDone = false;
+	isActive = true;
 }
 
 
