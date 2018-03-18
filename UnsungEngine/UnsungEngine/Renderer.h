@@ -8,6 +8,8 @@ class Renderer
 	friend class Render_World;
 	friend class Render_UI;
 private:
+	Microsoft::WRL::ComPtr<ID3D11Buffer> default_vertexBuffer;
+	UEngine::RenderToTexture default_RTT;
 	UEngine::pipeline_state_t default_pipeline;
 	D3D11_VIEWPORT default_viewport;
 
@@ -21,8 +23,6 @@ private:
 	UVector<D3D11_VIEWPORT>		m_pViewports;
 	UVector<UEngine::pipeline_state_t>	m_pPipelines;
 	UVector<UEngine::RenderToTexture>	m_pRTT;
-
-	Microsoft::WRL::ComPtr<ID3D11Buffer> default_vertexBuffer;
 
 	ID3D11Buffer * constBufferWorld;
 	ID3D11Buffer * constBufferScene;
@@ -39,22 +39,22 @@ public:
 	~Renderer();
 
 	void Init();
-	void Resize(bool isFullScreen, int width, int height);
 	void Update(ObjectManager * objManager);
 
+	void Resize(bool isFullScreen, int width, int height);
 	void LoadObject(const char * name, GameObject * gameObject);
 	void LoadGUI(const char * textureName, GameObject * gameObject);
 	void LoadGUI(const WCHAR * inputString, unsigned length, GameObject * gameObject);
 	void ChangeGUI(const char * textStr, GameObject * gameObject, UEngine::TextFormat * textFormat = nullptr);
 private:
-	void RenderSet(ID3D11DeviceContext * m_pDeviceContext, UEngine::pipeline_state_t & pipeline,
+	void RenderSet(ID3D11DeviceContext * m_pDeviceContext, UEngine::pipeline_state_t & pipeline, UEngine::RenderToTexture & rtt,
 		D3D11_VIEWPORT & viewport, D3D11_PRIMITIVE_TOPOLOGY topology);
 	void DebugSet(UEngine::pipeline_state_t * pipeline);
 
 	void InitViewport(D3D11_VIEWPORT & _viewport, RECT clientSize);
 	void InitDeviceContextSwapchain(RECT clientSize);
-	void InitRenderTargetView(UEngine::pipeline_state_t & pipeline);
-	void InitDepthStencil(UEngine::pipeline_state_t & pipeline, RECT clientSize,
+	void InitRenderTargetView(UEngine::RenderToTexture & rtt);
+	void InitDepthStencil(UEngine::RenderToTexture & rtt, RECT clientSize,
 		D3D11_TEXTURE2D_DESC depthBuffer, D3D11_DEPTH_STENCIL_DESC depthState,
 		D3D11_DEPTH_STENCIL_VIEW_DESC descDSV);
 	void InitConstBuffer(UINT byteWidth, ID3D11Buffer ** constBuffer);

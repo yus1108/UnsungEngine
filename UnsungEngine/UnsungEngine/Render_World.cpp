@@ -19,17 +19,15 @@ void Render_World::Init(ID3D11Device * m_pDevice, const WCHAR * textString, UINT
 {
 }
 
-void Render_World::Init(ID3D11DeviceContext * deviceContext, UEngine::pipeline_state_t * pipeline, D3D11_VIEWPORT * viewport)
+void Render_World::Init(ID3D11DeviceContext * deviceContext, UEngine::pipeline_state_t * pipeline, UEngine::RenderToTexture * rtt, D3D11_VIEWPORT * viewport)
 {
-	m_pDeviceContext = deviceContext;
-	m_pPipeline = pipeline;
-	m_viewport = viewport;
+	RenderComponent::Init(deviceContext, pipeline, rtt, viewport);
 }
 
 void Render_World::DrawObj(Renderer * render, Transform * transform)
 {
 	if (loadingDone && isActive) {
-		render->RenderSet(m_pDeviceContext, *m_pPipeline, *m_viewport, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		render->RenderSet(m_pDeviceContext, *m_pPipeline, *m_pRTT, *m_viewport, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		m_pDeviceContext->VSSetConstantBuffers(0, 1, &render->constBufferWorld);
 		m_pDeviceContext->VSSetConstantBuffers(1, 1, &render->constBufferScene);

@@ -35,7 +35,7 @@ void Renderer::Init()
 #pragma region INITIALIZE
 	std::vector<std::thread> threads;
 	threads.push_back(std::thread([&]() {
-		InitRenderTargetView(default_pipeline);
+		InitRenderTargetView(default_RTT);
 	}));	// render target view
 	threads.push_back(std::thread([&]() {
 #pragma region descDepth_buffer
@@ -84,7 +84,7 @@ void Renderer::Init()
 		descDSV.Flags = NULL;
 		descDSV.Texture2D.MipSlice = NULL;
 #pragma endregion
-		InitDepthStencil(default_pipeline, clientSize, depthBuffer, depthState, descDSV);
+		InitDepthStencil(default_RTT, clientSize, depthBuffer, depthState, descDSV);
 	}));	// depth stencil buffer/state/view
 	threads.push_back(std::thread([&]() {
 		D3D11_RASTERIZER_DESC rasterizerState;
@@ -182,15 +182,84 @@ void Renderer::Init()
 
 	loadingDone = true;
 }
+void Renderer::Update(ObjectManager * objManager)
+{
+	if (!loadingDone)
+		return;
+
+	for (unsigned i = 0; i < (unsigned)m_pRTT.size(); i++)
+	{
+		// clearing backbuffer
+		m_pWorldDeferredContext[i]->OMSetDepthStencilState(m_pRTT[i].depthStencilState.Get(), 1);
+		m_pWorldDeferredContext[i]->OMSetRenderTargets(1, m_pRTT[i].renderTargetViewMap.GetAddressOf(), m_pRTT[i].depthStencilView.Get());
+
+		m_pWorldDeferredContext[i]->ClearRenderTargetView(m_pRTT[i].renderTargetViewMap.Get(), DirectX::Colors::Transparent);
+		m_pWorldDeferredContext[i]->ClearDepthStencilView(m_pRTT[i].depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+	}
+	objManager->Render(m_pRTT, m_pWorldDeferredContext, m_pWorldCommandList, this);
+	for (unsigned int i = 0; i < m_pWorldCommandList.size(); i++)
+	{
+		m_pDeviceContext->ExecuteCommandList(m_pWorldCommandList[i].Get(), true); // Execute pass 1.
+		m_pWorldCommandList[i].ReleaseAndGetAddressOf();
+	}
+
+	UINT stride = sizeof(DefaultVertex);
+	UINT offset = 0;
+
+	// clearing depth buffer and render target
+	m_pDeviceContext->OMSetDepthStencilState(default_RTT.depthStencilState.Get(), 1);
+	m_pDeviceContext->OMSetRenderTargets(1, default_RTT.renderTargetViewMap.GetAddressOf(), default_RTT.depthStencilView.Get());
+
+	m_pDeviceContext->ClearRenderTargetView(default_RTT.renderTargetViewMap.Get(), DirectX::Colors::Transparent);
+	m_pDeviceContext->ClearDepthStencilView(default_RTT.depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+	RenderSet(m_pDeviceContext.Get(), default_pipeline, default_RTT, default_viewport, D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+	for (unsigned int i = 0; i < m_pRTT.size(); i++)
+	{
+		m_pDeviceContext->VSSetConstantBuffers(0, 1, &constBufferRTTPos);
+		DirectX::XMFLOAT4 RTPos = DirectX::XMFLOAT4(0, 0, 0, 1);
+		D3D11_MAPPED_SUBRESOURCE mappedResource;
+		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
+		m_pDeviceContext->Map(constBufferRTTPos, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
+		memcpy(mappedResource.pData, &RTPos, sizeof(DirectX::XMFLOAT4));
+		m_pDeviceContext->Unmap(constBufferRTTPos, 0);
+
+		m_pDeviceContext->GSSetConstantBuffers(1, 1, &constBufferRTTSize);
+		DirectX::XMFLOAT4 RTSize = DirectX::XMFLOAT4(-1, -1, 1, 1);
+		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
+		m_pDeviceContext->Map(constBufferRTTSize, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
+		memcpy(mappedResource.pData, &RTSize, sizeof(DirectX::XMFLOAT4));
+		m_pDeviceContext->Unmap(constBufferRTTSize, 0);
+
+		// set vertex info
+		m_pDeviceContext->ClearDepthStencilView(default_RTT.depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+		m_pDeviceContext->IASetVertexBuffers(0, 1, default_vertexBuffer.GetAddressOf(), &stride, &offset);
+
+		// convert msaa srv to single sampling srv
+		
+		m_pDeviceContext->ResolveSubresource((ID3D11Resource*)m_pRTT[i].outTexture.Get(), D3D11CalcSubresource(0, 0, 1),
+			(ID3D11Resource*)m_pRTT[i].renderTargetTextureMap.Get(), D3D11CalcSubresource(0, 0, 1), DXGI_FORMAT_R32G32B32A32_FLOAT);
+		ID3D11ShaderResourceView *baseTexture[]{
+			(ID3D11ShaderResourceView*)
+			m_pRTT[i].outSRV.Get()
+		};
+		m_pDeviceContext->PSSetShaderResources(0, 1, baseTexture);
+
+		// Set the index buffer.
+		m_pDeviceContext->Draw(1, 0);
+	}
+
+	m_pSwapCahin->Present(0, 0);
+}
+
 void Renderer::Resize(bool isFullScreen, int width, int height) {
 	m_pSwapCahin->SetFullscreenState(false, nullptr);
 	MoveWindow(hWnd, 0, 0, width, height, true);
 	RECT clientSize;
 	GetClientRect(hWnd, &clientSize);
-	default_pipeline.depthStencilBuffer.ReleaseAndGetAddressOf();
-	default_pipeline.depthStencilState.ReleaseAndGetAddressOf();
-	default_pipeline.depthStencilView.ReleaseAndGetAddressOf();
-	default_pipeline.render_target.ReleaseAndGetAddressOf();
+	default_RTT.depthStencilBuffer.ReleaseAndGetAddressOf();
+	default_RTT.depthStencilState.ReleaseAndGetAddressOf();
+	default_RTT.depthStencilView.ReleaseAndGetAddressOf();
+	default_RTT.renderTargetViewMap.ReleaseAndGetAddressOf();
 	m_pDeviceContext->Flush();
 
 	// swapchain specification
@@ -202,7 +271,7 @@ void Renderer::Resize(bool isFullScreen, int width, int height) {
 
 	std::vector<std::thread> threads;
 	threads.push_back(std::thread([&]() {
-		InitRenderTargetView(default_pipeline);
+		InitRenderTargetView(default_RTT);
 	}));	// render target view
 	threads.push_back(std::thread([&]() {
 #pragma region descDepth_buffer
@@ -251,7 +320,7 @@ void Renderer::Resize(bool isFullScreen, int width, int height) {
 		descDSV.Flags = NULL;
 		descDSV.Texture2D.MipSlice = NULL;
 #pragma endregion
-		InitDepthStencil(default_pipeline, clientSize, depthBuffer, depthState, descDSV);
+		InitDepthStencil(default_RTT, clientSize, depthBuffer, depthState, descDSV);
 	}));	// depth stencil buffer/state/view
 	for (auto& thread : threads) {
 		thread.join();
@@ -271,93 +340,13 @@ void Renderer::Resize(bool isFullScreen, int width, int height) {
 		CreateRenderToTexture(m_pRTT[i], (UINT)(clientSize.right - clientSize.left), (UINT)(clientSize.bottom - clientSize.top));
 		InitViewport(m_pViewports[i], clientSize);
 	}
-	for (size_t i = 0; i < UEngine::PipelineType_COUNT; i++)
-	{
-		m_pPipelines[i].depthStencilBuffer.ReleaseAndGetAddressOf();
-		m_pPipelines[i].depthStencilState.ReleaseAndGetAddressOf();
-		m_pPipelines[i].depthStencilView.ReleaseAndGetAddressOf();
-		m_pPipelines[i].render_target.ReleaseAndGetAddressOf();
-		m_pPipelines[i].depthStencilBuffer = m_pRTT[m_pPipelines[i].drawType].depthStencilBuffer;
-		m_pPipelines[i].depthStencilState = m_pRTT[m_pPipelines[i].drawType].depthStencilState;
-		m_pPipelines[i].depthStencilView = m_pRTT[m_pPipelines[i].drawType].depthStencilView;
-		m_pPipelines[i].render_target = m_pRTT[m_pPipelines[i].drawType].renderTargetViewMap;
-	}
 	m_pSwapCahin->SetFullscreenState(isFullScreen, nullptr);
 }
-void Renderer::Update(ObjectManager * objManager)
-{
-	if (!loadingDone)
-		return;
-
-	for (unsigned i = 0; i < (unsigned)m_pRTT.size(); i++)
-	{
-		// clearing backbuffer
-		m_pWorldDeferredContext[i]->OMSetDepthStencilState(m_pRTT[i].depthStencilState.Get(), 1);
-		m_pWorldDeferredContext[i]->OMSetRenderTargets(1, m_pRTT[i].renderTargetViewMap.GetAddressOf(), m_pPipelines[i].depthStencilView.Get());
-
-		m_pWorldDeferredContext[i]->ClearRenderTargetView(m_pRTT[i].renderTargetViewMap.Get(), DirectX::Colors::Transparent);
-		m_pWorldDeferredContext[i]->ClearDepthStencilView(m_pRTT[i].depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
-	}
-	objManager->Render(m_pRTT, m_pWorldDeferredContext, m_pWorldCommandList, this);
-
-	for (unsigned int i = 0; i < m_pWorldCommandList.size(); i++)
-	{
-		m_pDeviceContext->ExecuteCommandList(m_pWorldCommandList[i].Get(), true); // Execute pass 1.
-		m_pWorldCommandList[i].ReleaseAndGetAddressOf();
-	}
-
-	UINT stride = sizeof(DefaultVertex);
-	UINT offset = 0;
-
-	// clearing depth buffer and render target
-	m_pDeviceContext->OMSetDepthStencilState(default_pipeline.depthStencilState.Get(), 1);
-	m_pDeviceContext->OMSetRenderTargets(1, default_pipeline.render_target.GetAddressOf(), default_pipeline.depthStencilView.Get());
-
-	m_pDeviceContext->ClearRenderTargetView(default_pipeline.render_target.Get(), DirectX::Colors::Transparent);
-	m_pDeviceContext->ClearDepthStencilView(default_pipeline.depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
-	RenderSet(m_pDeviceContext.Get(), default_pipeline, default_viewport, D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
-	for (unsigned int i = 0; i < m_pRTT.size(); i++)
-	{
-		m_pDeviceContext->VSSetConstantBuffers(0, 1, &constBufferRTTPos);
-		DirectX::XMFLOAT4 RTPos = DirectX::XMFLOAT4(0, 0, 0, 1);
-		D3D11_MAPPED_SUBRESOURCE mappedResource;
-		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
-		m_pDeviceContext->Map(constBufferRTTPos, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
-		memcpy(mappedResource.pData, &RTPos, sizeof(DirectX::XMFLOAT4));
-		m_pDeviceContext->Unmap(constBufferRTTPos, 0);
-
-		m_pDeviceContext->GSSetConstantBuffers(1, 1, &constBufferRTTSize);
-		DirectX::XMFLOAT4 RTSize = DirectX::XMFLOAT4(-1, -1, 1, 1);
-		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
-		m_pDeviceContext->Map(constBufferRTTSize, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
-		memcpy(mappedResource.pData, &RTSize, sizeof(DirectX::XMFLOAT4));
-		m_pDeviceContext->Unmap(constBufferRTTSize, 0);
-
-		// set vertex info
-		m_pDeviceContext->ClearDepthStencilView(default_pipeline.depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
-		m_pDeviceContext->IASetVertexBuffers(0, 1, default_vertexBuffer.GetAddressOf(), &stride, &offset);
-
-		// convert msaa srv to single sampling srv
-		
-		m_pDeviceContext->ResolveSubresource((ID3D11Resource*)m_pRTT[i].outTexture.Get(), D3D11CalcSubresource(0, 0, 1),
-			(ID3D11Resource*)m_pRTT[i].renderTargetTextureMap.Get(), D3D11CalcSubresource(0, 0, 1), DXGI_FORMAT_R32G32B32A32_FLOAT);
-		ID3D11ShaderResourceView *baseTexture[]{
-			(ID3D11ShaderResourceView*)
-			m_pRTT[i].outSRV.Get()
-		};
-		m_pDeviceContext->PSSetShaderResources(0, 1, baseTexture);
-
-		// Set the index buffer.
-		m_pDeviceContext->Draw(1, 0);
-	}
-
-	m_pSwapCahin->Present(0, 0);
-}
-
 void Renderer::LoadObject(const char * name, GameObject * gameObject) {
 	RenderComponent * model = new Render_World();
+	model->Init(m_pWorldDeferredContext[UEngine::DrawType_WORLD].Get(), &m_pPipelines[UEngine::PipelineType_NO_ANIMATION],
+		&m_pRTT[UEngine::DrawType_WORLD], &m_pViewports[UEngine::DrawType_WORLD]);
 	model->ReadBin(name, m_pDevice.Get(), m_pDeviceContext.Get());
-	model->Init(m_pWorldDeferredContext[UEngine::DrawType_WORLD].Get(), &m_pPipelines[UEngine::PipelineType_NO_ANIMATION], &m_pViewports[UEngine::DrawType_WORLD]);
 	gameObject->SetRenderComponent(model);
 	gameObject->SetDrawType(UEngine::DrawType_WORLD);
 	gameObject->GetTransform()->SetMatrix(DirectX::XMMatrixIdentity());
@@ -366,9 +355,9 @@ void Renderer::LoadGUI(const char * textureName, GameObject * gameObject) {
 	// load texture
 	RenderComponent * textModel = new Render_UI();
 	Render_UI * ptr = (Render_UI*)textModel;
+	ptr->Init(m_pWorldDeferredContext[UEngine::DrawType_UI].Get(), &m_pPipelines[UEngine::PipelineType_UI],
+		&m_pRTT[UEngine::DrawType_UI], &m_pViewports[UEngine::PipelineType_UI]);
 	ptr->ReadBin(textureName, m_pDevice.Get(), m_pDeviceContext.Get());
-	ptr->Init(m_pWorldDeferredContext[UEngine::DrawType_UI].Get(), &m_pPipelines[UEngine::PipelineType_UI], &m_pViewports[UEngine::PipelineType_UI]);
-	textModel->Init(m_pWorldDeferredContext[UEngine::DrawType_UI].Get(), &m_pPipelines[UEngine::PipelineType_UI], &m_pViewports[UEngine::DrawType_UI]);
 	gameObject->SetRenderComponent(textModel);
 	gameObject->SetDrawType(UEngine::DrawType_UI);
 	gameObject->GetTransform()->SetMatrix(DirectX::XMMatrixIdentity());
@@ -381,7 +370,8 @@ void Renderer::LoadGUI(const WCHAR * inputString, unsigned length, GameObject * 
 	textFormat.textColor = D2D1::ColorF::White;
 	textFormat.dpiX = 150;
 	textFormat.dpiY = 200;
-	textModel->Init(m_pWorldDeferredContext[UEngine::DrawType_UI].Get(), &m_pPipelines[UEngine::PipelineType_UI], &m_pViewports[UEngine::DrawType_UI]);
+	textModel->Init(m_pWorldDeferredContext[UEngine::DrawType_UI].Get(), &m_pPipelines[UEngine::PipelineType_UI], 
+		&m_pRTT[UEngine::DrawType_UI], &m_pViewports[UEngine::DrawType_UI]);
 	ptr->Init(m_pDevice.Get(), inputString, length, L"Verdana", 50, textFormat);
 	gameObject->SetRenderComponent(textModel);
 	gameObject->SetDrawType(UEngine::DrawType_UI);
@@ -398,11 +388,11 @@ void Renderer::ChangeGUI(const char * textStr, GameObject * gameObject, UEngine:
 	((Render_UI*)gameObject->GetRenderComponent())->ChangeText(m_pDevice.Get(), m_pDeviceContext.Get(), wcstring, (UINT32)newsize);
 	delete[] wcstring;
 }
-void Renderer::RenderSet(ID3D11DeviceContext * m_pDeviceContext, UEngine::pipeline_state_t & pipeline,
+void Renderer::RenderSet(ID3D11DeviceContext * m_pDeviceContext, UEngine::pipeline_state_t & pipeline, UEngine::RenderToTexture & rtt,
 	D3D11_VIEWPORT & viewport, D3D11_PRIMITIVE_TOPOLOGY topology) {
 	// clearing backbuffer
-	m_pDeviceContext->OMSetDepthStencilState(pipeline.depthStencilState.Get(), 1);
-	m_pDeviceContext->OMSetRenderTargets(1, pipeline.render_target.GetAddressOf(), pipeline.depthStencilView.Get());
+	m_pDeviceContext->OMSetDepthStencilState(rtt.depthStencilState.Get(), 1);
+	m_pDeviceContext->OMSetRenderTargets(1, rtt.renderTargetViewMap.GetAddressOf(), rtt.depthStencilView.Get());
 	m_pDeviceContext->OMSetBlendState(pipeline.blendingState.Get(), NULL, 0xffffffff);
 	m_pDeviceContext->RSSetViewports(1, &viewport);
 	
@@ -509,23 +499,23 @@ void Renderer::InitDeviceContextSwapchain(RECT clientSize) {
 		&FeatureLevel,
 		&m_pDeviceContext);
 }
-void Renderer::InitRenderTargetView(UEngine::pipeline_state_t & pipeline) {
+void Renderer::InitRenderTargetView(UEngine::RenderToTexture & rtt) {
 	Microsoft::WRL::ComPtr<ID3D11Debug> pDebugger;
 	m_pDevice->QueryInterface(__uuidof(ID3D11Debug), (void **)&pDebugger);
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> pSwapChainBuffer;
 	m_pSwapCahin->GetBuffer(0, __uuidof(pSwapChainBuffer), (void **)&pSwapChainBuffer);
-	m_pDevice->CreateRenderTargetView(pSwapChainBuffer.Get(), nullptr, &pipeline.render_target);
+	m_pDevice->CreateRenderTargetView(pSwapChainBuffer.Get(), nullptr, &rtt.renderTargetViewMap);
 }
-void Renderer::InitDepthStencil(UEngine::pipeline_state_t & pipeline, RECT clientSize,
+void Renderer::InitDepthStencil(UEngine::RenderToTexture & rtt, RECT clientSize,
 	D3D11_TEXTURE2D_DESC depthBuffer, D3D11_DEPTH_STENCIL_DESC depthState,
 	D3D11_DEPTH_STENCIL_VIEW_DESC descDSV) {
-	m_pDevice->CreateTexture2D(&depthBuffer, nullptr, pipeline.depthStencilBuffer.GetAddressOf());
+	m_pDevice->CreateTexture2D(&depthBuffer, nullptr, rtt.depthStencilBuffer.GetAddressOf());
 	// Create depth stencil state
-	m_pDevice->CreateDepthStencilState(&depthState, pipeline.depthStencilState.GetAddressOf());
+	m_pDevice->CreateDepthStencilState(&depthState, rtt.depthStencilState.GetAddressOf());
 	// Create the depth stencil view
-	m_pDevice->CreateDepthStencilView(pipeline.depthStencilBuffer.Get(), // Depth stencil texture
+	m_pDevice->CreateDepthStencilView(rtt.depthStencilBuffer.Get(), // Depth stencil texture
 		&descDSV, // Depth stencil desc
-		pipeline.depthStencilView.GetAddressOf());  // [out] Depth stencil view
+		rtt.depthStencilView.GetAddressOf());  // [out] Depth stencil view
 }
 void Renderer::InitConstBuffer(UINT byteWidth, ID3D11Buffer ** constBuffer)
 {
@@ -720,10 +710,6 @@ void Renderer::AddBasicPipelines() {
 	m_pDevice->CreateRasterizerState(&rasterizerState, pipeline.rasterState.GetAddressOf());
 	pipeline.samplerState = default_pipeline.samplerState;
 	pipeline.blendingState = default_pipeline.blendingState;
-	pipeline.depthStencilBuffer = m_pRTT[UEngine::DrawType_WORLD].depthStencilBuffer;
-	pipeline.depthStencilState = m_pRTT[UEngine::DrawType_WORLD].depthStencilState;
-	pipeline.depthStencilView = m_pRTT[UEngine::DrawType_WORLD].depthStencilView;
-	pipeline.render_target = m_pRTT[UEngine::DrawType_WORLD].renderTargetViewMap;
 	pipeline.drawType = UEngine::DrawType_WORLD;
 	m_pPipelines.push_back(pipeline);
 
@@ -736,10 +722,6 @@ void Renderer::AddBasicPipelines() {
 	pipeline.rasterState = default_pipeline.rasterState;
 	pipeline.samplerState = default_pipeline.samplerState;
 	pipeline.blendingState = default_pipeline.blendingState;
-	pipeline.depthStencilBuffer = m_pRTT[UEngine::DrawType_UI].depthStencilBuffer;
-	pipeline.depthStencilState = m_pRTT[UEngine::DrawType_UI].depthStencilState;
-	pipeline.depthStencilView = m_pRTT[UEngine::DrawType_UI].depthStencilView;
-	pipeline.render_target = m_pRTT[UEngine::DrawType_UI].renderTargetViewMap;
 	pipeline.drawType = UEngine::DrawType_UI;
 	pipeline.vertex_shader = default_pipeline.vertex_shader;
 	pipeline.pixel_shader = default_pipeline.pixel_shader;

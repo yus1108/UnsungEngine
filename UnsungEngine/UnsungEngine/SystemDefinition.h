@@ -42,10 +42,6 @@ namespace UEngine {
 		Microsoft::WRL::ComPtr<ID3D11VertexShader>		vertex_shader;
 		Microsoft::WRL::ComPtr<ID3D11PixelShader>		pixel_shader;
 		Microsoft::WRL::ComPtr<ID3D11GeometryShader>	geometry_shader;
-		Microsoft::WRL::ComPtr<ID3D11RenderTargetView>	render_target;
-		Microsoft::WRL::ComPtr<ID3D11Texture2D>			depthStencilBuffer;
-		Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depthStencilState;
-		Microsoft::WRL::ComPtr<ID3D11DepthStencilView>	depthStencilView;
 		Microsoft::WRL::ComPtr<ID3D11RasterizerState>	rasterState;
 		Microsoft::WRL::ComPtr<ID3D11SamplerState>		samplerState;
 		Microsoft::WRL::ComPtr<ID3D11BlendState>		blendingState;
