@@ -417,6 +417,42 @@ void Renderer::RenderSet(ID3D11DeviceContext * m_pDeviceContext, UEngine::pipeli
 	m_pDeviceContext->IASetInputLayout(pipeline.input_layout.Get());
 	m_pDeviceContext->IASetPrimitiveTopology(topology);
 }
+void Renderer::DebugSet(UEngine::pipeline_state_t * pipeline) {
+	//ID3D11SamplerState *sampler[]{ pipeline->samplerState.Get() };
+	//m_pDeviceContext->PSSetSamplers(0, 1, sampler);
+
+	//// transparent stuff
+	//DirectX::XMVECTOR determinant = DirectX::XMMatrixDeterminant(myCam.GetOriginalView());
+	//SCENE sceneToShader;
+	//sceneToShader.viewMat = DirectX::XMMatrixInverse(&determinant, myCam.GetOriginalView());
+	//sceneToShader.viewMat = DirectX::XMMatrixTranspose(sceneToShader.viewMat);
+	//myCam.SetAspectRatio(default_viewport.Width / default_viewport.Height);
+	//sceneToShader.perspectivMat = DirectX::XMMatrixPerspectiveFovLH(myCam.GetAngle(),
+	//	myCam.GetAspectRatio(), myCam.nearZ, myCam.farZ);
+	//sceneToShader.perspectivMat = DirectX::XMMatrixTranspose(sceneToShader.perspectivMat);
+	//myCam.SetSceneToShader(sceneToShader);
+
+	//// world matrix
+	//D3D11_MAPPED_SUBRESOURCE mappedResource;
+	//ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
+	//m_pDeviceContext->Map(constBufferWorld, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
+	//memcpy(mappedResource.pData, &DirectX::XMMatrixIdentity(), sizeof(DirectX::XMMATRIX));
+	//m_pDeviceContext->Unmap(constBufferWorld, 0);
+
+	//// view matrix buffer
+	//ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
+	//m_pDeviceContext->Map(constBufferScene, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
+	//memcpy(mappedResource.pData, &myCam.GetSceneToShader(), sizeof(SCENE));
+	//m_pDeviceContext->Unmap(constBufferScene, 0);
+
+	//m_pDeviceContext->VSSetConstantBuffers(0, 1, &constBufferWorld);
+	//m_pDeviceContext->VSSetConstantBuffers(1, 1, &constBufferScene);
+
+	//m_pDeviceContext->VSSetShader(pipeline->vertex_shader[VertexShaderType::EColorVShader].Get(), nullptr, 0);
+	//m_pDeviceContext->PSSetShader(pipeline->pixel_shader[PixelShaderType::EColorPShader].Get(), nullptr, 0);
+	//m_pDeviceContext->IASetInputLayout(pipeline->input_layout.Get());
+	//m_pDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+}
 
 void Renderer::InitViewport(D3D11_VIEWPORT & _viewport, RECT clientSize)
 {

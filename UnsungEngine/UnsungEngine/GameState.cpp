@@ -27,18 +27,18 @@ void GameState::Init()
 	DirectX::XMMATRIX worldMat = DirectX::XMMatrixScaling(0.1f, 0.1f, 1);
 	logo->GetTransform()->SetMatrix(worldMat);
 	objManager.AddGameObject(logo);
-	//objManager.RemoveGameObject(logo);
+	objManager.RemoveGameObject(logo);
 
 	// load text
 	const WCHAR hello[] = L"Hello World!";
 	unsigned textLength = ARRAYSIZE(hello) - 1;
 	renderer.LoadGUI(hello, textLength, text);
 	text->GetTransform()->SetMatrix(worldMat);
-	text->SetActive(false);
+	//text->SetActive(false);
 	objManager.AddGameObject(text);
 
-	/*renderer.Resize(true, 1920, 1024);
-	renderer.Resize(false, 1024, 768);*/
+	//renderer.Resize(true, 1920, 1024);
+	//renderer.Resize(false, 1280, 768);
 }
 
 void GameState::Update()

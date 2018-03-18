@@ -183,7 +183,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    //hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
 	  // CW_USEDEFAULT, 0, 800, 600, nullptr, nullptr, hInstance, nullptr);
    hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME ^ WS_MAXIMIZEBOX,
-	   CW_USEDEFAULT, 0, 800, 600, nullptr, nullptr, hInstance, nullptr);
+	   CW_USEDEFAULT, 0, 1280, 768, nullptr, nullptr, hInstance, nullptr);
    //hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME ^ WS_MAXIMIZEBOX,
 	  // CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
 

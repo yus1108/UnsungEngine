@@ -46,10 +46,10 @@ public:
 	void LoadGUI(const char * textureName, GameObject * gameObject);
 	void LoadGUI(const WCHAR * inputString, unsigned length, GameObject * gameObject);
 	void ChangeGUI(const char * textStr, GameObject * gameObject, UEngine::TextFormat * textFormat = nullptr);
-
 private:
 	void RenderSet(ID3D11DeviceContext * m_pDeviceContext, UEngine::pipeline_state_t & pipeline,
 		D3D11_VIEWPORT & viewport, D3D11_PRIMITIVE_TOPOLOGY topology);
+	void DebugSet(UEngine::pipeline_state_t * pipeline);
 
 	void InitViewport(D3D11_VIEWPORT & _viewport, RECT clientSize);
 	void InitDeviceContextSwapchain(RECT clientSize);
