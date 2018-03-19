@@ -231,9 +231,9 @@ void Renderer::Update(ObjectManager * objManager)
 		if (!m_pCameras[i]->GetActive() && !m_pCameras[i]->GetParent()->GetActive())
 			continue;
 
-		if (m_pCameras[i]->GetCommandList(0))
+		if (*m_pCameras[i]->GetCommandList(0))
 			m_pDeviceContext->ExecuteCommandList(*m_pCameras[i]->GetCommandList(0), true); // Execute pass 1.
-		if (m_pCameras[i]->GetCommandList(1))
+		if (*m_pCameras[i]->GetCommandList(1))
 			m_pDeviceContext->ExecuteCommandList(*m_pCameras[i]->GetCommandList(1), true); // Execute pass 1.
 		m_pCameras[i]->ReleaseCommandList(0);
 		m_pCameras[i]->ReleaseCommandList(1);
@@ -392,10 +392,10 @@ void Renderer::Resize(bool isFullScreen, int width, int height) {
 		m_pCameras[i]->Clear();
 
 		RECT changedSize;
-		changedSize.left = clientSize.right * m_pCameras[i]->GetViewRatio().x;
-		changedSize.top = clientSize.bottom * m_pCameras[i]->GetViewRatio().y;
-		changedSize.right = clientSize.right * m_pCameras[i]->GetViewRatio().z;
-		changedSize.bottom = clientSize.bottom *m_pCameras[i]->GetViewRatio().w;
+		changedSize.left = (LONG)(clientSize.right * m_pCameras[i]->GetViewRatio().x);
+		changedSize.top = (LONG)(clientSize.bottom * m_pCameras[i]->GetViewRatio().y);
+		changedSize.right = (LONG)(clientSize.right * m_pCameras[i]->GetViewRatio().z);
+		changedSize.bottom = (LONG)(clientSize.bottom *m_pCameras[i]->GetViewRatio().w);
 		D3D11_VIEWPORT * rttViewPort = new D3D11_VIEWPORT;
 		InitViewport(*rttViewPort, changedSize);
 		m_pCameras[i]->SetViewport(rttViewPort);

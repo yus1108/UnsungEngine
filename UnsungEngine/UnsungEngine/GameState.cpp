@@ -45,7 +45,7 @@ void GameState::Init()
 	//text->SetActive(false);
 	objManager.AddGameObject(text);
 
-	renderer.Resize(false, 1920, 1024);
+	//renderer.Resize(true, 1920, 1024);
 	//renderer.Resize(false, 1280, 768);
 }
 

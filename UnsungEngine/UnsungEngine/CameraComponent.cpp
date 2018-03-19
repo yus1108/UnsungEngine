@@ -36,10 +36,10 @@ void CameraComponent::Init(Renderer * renderer, DirectX::XMFLOAT4 viewRatio)
 	this->viewRatio = viewRatio;
 	RECT clientSize;
 	GetClientRect(hWnd, &clientSize);
-	clientSize.left = clientSize.right * viewRatio.x;
-	clientSize.top = clientSize.bottom * viewRatio.y;
-	clientSize.right *= viewRatio.z;
-	clientSize.bottom *= viewRatio.w;
+	clientSize.left = (LONG)(clientSize.right * viewRatio.x);
+	clientSize.top = (LONG)(clientSize.bottom * viewRatio.y);
+	clientSize.right = (LONG)(clientSize.right * viewRatio.z);
+	clientSize.bottom = (LONG)(clientSize.bottom * viewRatio.w);
 	renderer->AddCameras(this, clientSize);
 
 	// perspective view
