@@ -26,6 +26,35 @@ Renderer::~Renderer()
 		constBufferRTTSize->Release();
 }
 
+void Renderer::AddCameras(CameraComponent * component)
+{
+	RECT clientSize;
+	GetClientRect(hWnd, &clientSize);
+	D3D11_VIEWPORT * rttViewPort = new D3D11_VIEWPORT;
+	InitViewport(*rttViewPort, clientSize);
+	component->SetViewport(rttViewPort);
+
+#pragma region WORLD_RTT
+	UEngine::RenderToTexture * rtt = new UEngine::RenderToTexture;
+	CreateRenderToTexture(rtt, rttViewPort->Width, rttViewPort->Height);
+	component->SetRTTWorld(rtt);
+#pragma endregion
+#pragma region UI_RTT
+	rtt = new UEngine::RenderToTexture;
+	CreateRenderToTexture(rtt, rttViewPort->Width, rttViewPort->Height);
+	component->SetRTTUI(rtt);
+#pragma endregion
+	component->CreateNewDeferredContext(m_pDevice.Get());
+
+	m_pCameras.push_back(component);
+}
+void Renderer::RemoveCameras(unsigned i)
+{
+	if (m_pCameras[i])
+		delete m_pCameras[i];
+	m_pCameras.erase(i);
+}
+
 void Renderer::Init()
 {
 	RECT clientSize;
@@ -154,7 +183,6 @@ void Renderer::Init()
 		InitConstBuffer(sizeof(DirectX::XMFLOAT4), &constBufferRTTSize);
 	}));	// TODO: add constant buffers
 	threads.push_back(std::thread([&]() {
-		AddNewLayer(clientSize);
 		AddBasicPipelines();
 	})); // Adding Render To Texture and pipelines
 	for (auto& thread : threads) {
@@ -187,22 +215,50 @@ void Renderer::Update(ObjectManager * objManager)
 	if (!loadingDone)
 		return;
 
-	for (unsigned i = 0; i < (unsigned)m_pRTT.size(); i++)
+	// render for each camera
+	for (unsigned i = 0; i < m_pCameras.size(); i++)
 	{
-		// clearing backbuffer
-		m_pWorldDeferredContext[i]->OMSetDepthStencilState(m_pRTT[i].depthStencilState.Get(), 1);
-		m_pWorldDeferredContext[i]->OMSetRenderTargets(1, m_pRTT[i].renderTargetViewMap.GetAddressOf(), m_pRTT[i].depthStencilView.Get());
+		if (!m_pCameras[i]->GetActive())
+			continue;
 
-		m_pWorldDeferredContext[i]->ClearRenderTargetView(m_pRTT[i].renderTargetViewMap.Get(), DirectX::Colors::Transparent);
-		m_pWorldDeferredContext[i]->ClearDepthStencilView(m_pRTT[i].depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+#pragma region CLEAR_BUFFER
+		// clearing world
+		m_pCameras[i]->GetDeferredContext(0)->OMSetDepthStencilState(m_pCameras[i]->GetRTTWorld()->depthStencilState.Get(), 1);
+		m_pCameras[i]->GetDeferredContext(0)->OMSetRenderTargets(1, m_pCameras[i]->GetRTTWorld()->renderTargetViewMap.GetAddressOf(), 
+			m_pCameras[i]->GetRTTWorld()->depthStencilView.Get());
+		m_pCameras[i]->GetDeferredContext(0)->ClearRenderTargetView(m_pCameras[i]->GetRTTWorld()->renderTargetViewMap.Get(), DirectX::Colors::Transparent);
+		m_pCameras[i]->GetDeferredContext(0)->ClearDepthStencilView(m_pCameras[i]->GetRTTWorld()->depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+		// clearing ui
+		m_pCameras[i]->GetDeferredContext(1)->OMSetDepthStencilState(m_pCameras[i]->GetRTTUI()->depthStencilState.Get(), 1);
+		m_pCameras[i]->GetDeferredContext(1)->OMSetRenderTargets(1, m_pCameras[i]->GetRTTUI()->renderTargetViewMap.GetAddressOf(), 
+			m_pCameras[i]->GetRTTWorld()->depthStencilView.Get());
+		m_pCameras[i]->GetDeferredContext(1)->ClearRenderTargetView(m_pCameras[i]->GetRTTUI()->renderTargetViewMap.Get(), DirectX::Colors::Transparent);
+		m_pCameras[i]->GetDeferredContext(1)->ClearDepthStencilView(m_pCameras[i]->GetRTTUI()->depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+#pragma endregion
+		objManager->Render(m_pCameras[i], this);
 	}
-	objManager->Render(m_pRTT, m_pWorldDeferredContext, m_pWorldCommandList, this);
-	for (unsigned int i = 0; i < m_pWorldCommandList.size(); i++)
+	// finish deferred rendering
+	for (unsigned i = 0; i < m_pCameras.size(); i++)
 	{
-		m_pDeviceContext->ExecuteCommandList(m_pWorldCommandList[i].Get(), true); // Execute pass 1.
-		m_pWorldCommandList[i].ReleaseAndGetAddressOf();
-	}
+		if (!m_pCameras[i]->GetActive())
+			continue;
 
+		// Create command lists and record commands into them.
+		m_pCameras[i]->GetDeferredContext(0)->FinishCommandList(true, m_pCameras[i]->GetCommandList(0));
+		m_pCameras[i]->GetDeferredContext(1)->FinishCommandList(true, m_pCameras[i]->GetCommandList(1));
+	}
+	// execute deferred rendering
+	for (unsigned i = 0; i < m_pCameras.size(); i++)
+	{
+		if (!m_pCameras[i]->GetActive())
+			continue;
+
+		m_pDeviceContext->ExecuteCommandList(*m_pCameras[i]->GetCommandList(0), true); // Execute pass 1.
+		m_pCameras[i]->ReleaseCommandList(0);
+		m_pDeviceContext->ExecuteCommandList(*m_pCameras[i]->GetCommandList(1), true); // Execute pass 1.
+		m_pCameras[i]->ReleaseCommandList(1);
+	}
 	UINT stride = sizeof(DefaultVertex);
 	UINT offset = 0;
 
@@ -211,9 +267,8 @@ void Renderer::Update(ObjectManager * objManager)
 	m_pDeviceContext->OMSetRenderTargets(1, default_RTT.renderTargetViewMap.GetAddressOf(), default_RTT.depthStencilView.Get());
 
 	m_pDeviceContext->ClearRenderTargetView(default_RTT.renderTargetViewMap.Get(), DirectX::Colors::Transparent);
-	m_pDeviceContext->ClearDepthStencilView(default_RTT.depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	RenderSet(m_pDeviceContext.Get(), default_pipeline, default_RTT, default_viewport, D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
-	for (unsigned int i = 0; i < m_pRTT.size(); i++)
+	for (unsigned i = 0; i < m_pCameras.size(); i++)
 	{
 		m_pDeviceContext->VSSetConstantBuffers(0, 1, &constBufferRTTPos);
 		DirectX::XMFLOAT4 RTPos = DirectX::XMFLOAT4(0, 0, 0, 1);
@@ -235,14 +290,28 @@ void Renderer::Update(ObjectManager * objManager)
 		m_pDeviceContext->IASetVertexBuffers(0, 1, default_vertexBuffer.GetAddressOf(), &stride, &offset);
 
 		// convert msaa srv to single sampling srv
-		
-		m_pDeviceContext->ResolveSubresource((ID3D11Resource*)m_pRTT[i].outTexture.Get(), D3D11CalcSubresource(0, 0, 1),
-			(ID3D11Resource*)m_pRTT[i].renderTargetTextureMap.Get(), D3D11CalcSubresource(0, 0, 1), DXGI_FORMAT_R32G32B32A32_FLOAT);
+
+		m_pDeviceContext->ResolveSubresource((ID3D11Resource*)m_pCameras[i]->GetRTTWorld()->outTexture.Get(), D3D11CalcSubresource(0, 0, 1),
+			(ID3D11Resource*)m_pCameras[i]->GetRTTWorld()->renderTargetTextureMap.Get(), D3D11CalcSubresource(0, 0, 1), DXGI_FORMAT_R32G32B32A32_FLOAT);
 		ID3D11ShaderResourceView *baseTexture[]{
 			(ID3D11ShaderResourceView*)
-			m_pRTT[i].outSRV.Get()
+			m_pCameras[i]->GetRTTWorld()->outSRV.Get()
 		};
 		m_pDeviceContext->PSSetShaderResources(0, 1, baseTexture);
+
+		// Set the index buffer.
+		m_pDeviceContext->Draw(1, 0);
+
+		// clear depth for UI
+		m_pDeviceContext->ClearDepthStencilView(default_RTT.depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+		m_pDeviceContext->ResolveSubresource((ID3D11Resource*)m_pCameras[i]->GetRTTUI()->outTexture.Get(), D3D11CalcSubresource(0, 0, 1),
+			(ID3D11Resource*)m_pCameras[i]->GetRTTUI()->renderTargetTextureMap.Get(), D3D11CalcSubresource(0, 0, 1), DXGI_FORMAT_R32G32B32A32_FLOAT);
+		ID3D11ShaderResourceView *baseTextureUI[]{
+			(ID3D11ShaderResourceView*)
+			m_pCameras[i]->GetRTTUI()->outSRV.Get()
+		};
+		m_pDeviceContext->PSSetShaderResources(0, 1, baseTextureUI);
 
 		// Set the index buffer.
 		m_pDeviceContext->Draw(1, 0);
@@ -327,39 +396,52 @@ void Renderer::Resize(bool isFullScreen, int width, int height) {
 	}
 	threads.clear();
 
-	for (size_t i = 0; i < UEngine::DrawType_COUNT; i++)
+	for (unsigned i = 0; i < m_pCameras.size(); i++)
 	{
-		m_pRTT[i].depthStencilBuffer.ReleaseAndGetAddressOf();
-		m_pRTT[i].depthStencilState.ReleaseAndGetAddressOf();
-		m_pRTT[i].depthStencilView.ReleaseAndGetAddressOf();
-		m_pRTT[i].outSRV.ReleaseAndGetAddressOf();
-		m_pRTT[i].outTexture.ReleaseAndGetAddressOf();
-		m_pRTT[i].renderTargetTextureMap.ReleaseAndGetAddressOf();
-		m_pRTT[i].renderTargetViewMap.ReleaseAndGetAddressOf();
-		m_pRTT[i].shaderResourceViewMap.ReleaseAndGetAddressOf();
-		CreateRenderToTexture(m_pRTT[i], (UINT)(clientSize.right - clientSize.left), (UINT)(clientSize.bottom - clientSize.top));
-		InitViewport(m_pViewports[i], clientSize);
+		m_pCameras[i]->GetRTTWorld()->depthStencilBuffer.ReleaseAndGetAddressOf();
+		m_pCameras[i]->GetRTTWorld()->depthStencilState.ReleaseAndGetAddressOf();
+		m_pCameras[i]->GetRTTWorld()->depthStencilView.ReleaseAndGetAddressOf();
+		m_pCameras[i]->GetRTTWorld()->outSRV.ReleaseAndGetAddressOf();
+		m_pCameras[i]->GetRTTWorld()->outTexture.ReleaseAndGetAddressOf();
+		m_pCameras[i]->GetRTTWorld()->renderTargetTextureMap.ReleaseAndGetAddressOf();
+		m_pCameras[i]->GetRTTWorld()->renderTargetViewMap.ReleaseAndGetAddressOf();
+		m_pCameras[i]->GetRTTWorld()->shaderResourceViewMap.ReleaseAndGetAddressOf();
+
+		RECT clientSize;
+		GetClientRect(hWnd, &clientSize);
+		D3D11_VIEWPORT * rttViewPort = new D3D11_VIEWPORT;
+		InitViewport(*rttViewPort, clientSize);
+		m_pCameras[i]->SetViewport(rttViewPort);
+#pragma region WORLD_RTT
+		UEngine::RenderToTexture * rtt = new UEngine::RenderToTexture;
+		CreateRenderToTexture(rtt, rttViewPort->Width, rttViewPort->Height);
+		m_pCameras[i]->SetRTTWorld(rtt);
+#pragma endregion
+#pragma region UI_RTT
+		rtt = new UEngine::RenderToTexture;
+		CreateRenderToTexture(rtt, rttViewPort->Width, rttViewPort->Height);
+		m_pCameras[i]->SetRTTUI(rtt);
+#pragma endregion
+		m_pCameras[i]->CreateNewDeferredContext(m_pDevice.Get());
 	}
 	m_pSwapCahin->SetFullscreenState(isFullScreen, nullptr);
 }
 void Renderer::LoadObject(const char * name, GameObject * gameObject) {
 	RenderComponent * model = new Render_World();
-	model->Init(m_pWorldDeferredContext[UEngine::DrawType_WORLD].Get(), &m_pPipelines[UEngine::PipelineType_NO_ANIMATION],
-		&m_pRTT[UEngine::DrawType_WORLD], &m_pViewports[UEngine::DrawType_WORLD]);
+	model->Init(&m_pPipelines[UEngine::PipelineType_NO_ANIMATION]);
 	model->ReadBin(name, m_pDevice.Get(), m_pDeviceContext.Get());
+	model->SetType(UEngine::DrawType_WORLD);
 	gameObject->SetRenderComponent(model);
-	gameObject->SetDrawType(UEngine::DrawType_WORLD);
 	gameObject->GetTransform()->SetMatrix(DirectX::XMMatrixIdentity());
 }
 void Renderer::LoadGUI(const char * textureName, GameObject * gameObject) {
 	// load texture
 	RenderComponent * textModel = new Render_UI();
 	Render_UI * ptr = (Render_UI*)textModel;
-	ptr->Init(m_pWorldDeferredContext[UEngine::DrawType_UI].Get(), &m_pPipelines[UEngine::PipelineType_UI],
-		&m_pRTT[UEngine::DrawType_UI], &m_pViewports[UEngine::PipelineType_UI]);
+	ptr->Init(&m_pPipelines[UEngine::PipelineType_UI]);
 	ptr->ReadBin(textureName, m_pDevice.Get(), m_pDeviceContext.Get());
+	ptr->SetType(UEngine::DrawType_UI);
 	gameObject->SetRenderComponent(textModel);
-	gameObject->SetDrawType(UEngine::DrawType_UI);
 	gameObject->GetTransform()->SetMatrix(DirectX::XMMatrixIdentity());
 }
 void Renderer::LoadGUI(const WCHAR * inputString, unsigned length, GameObject * gameObject) {
@@ -370,11 +452,10 @@ void Renderer::LoadGUI(const WCHAR * inputString, unsigned length, GameObject * 
 	textFormat.textColor = D2D1::ColorF::White;
 	textFormat.dpiX = 150;
 	textFormat.dpiY = 200;
-	textModel->Init(m_pWorldDeferredContext[UEngine::DrawType_UI].Get(), &m_pPipelines[UEngine::PipelineType_UI], 
-		&m_pRTT[UEngine::DrawType_UI], &m_pViewports[UEngine::DrawType_UI]);
+	ptr->Init(&m_pPipelines[UEngine::PipelineType_UI]);
 	ptr->Init(m_pDevice.Get(), inputString, length, L"Verdana", 50, textFormat);
+	ptr->SetType(UEngine::DrawType_UI);
 	gameObject->SetRenderComponent(textModel);
-	gameObject->SetDrawType(UEngine::DrawType_UI);
 	gameObject->GetTransform()->SetMatrix(DirectX::XMMatrixIdentity());
 }
 void Renderer::ChangeGUI(const char * textStr, GameObject * gameObject, UEngine::TextFormat * textFormat) {
@@ -561,7 +642,7 @@ void Renderer::CreateNewDeferredContext(UVector<Microsoft::WRL::ComPtr<ID3D11Dev
 	m_pWorldCommandList.push_back(nullptr);
 	m_pDevice->CreateDeferredContext(NULL, m_pDeferredContexts[m_pDeferredContexts.size() - 1].GetAddressOf());
 }
-void Renderer::CreateRenderToTexture(UEngine::RenderToTexture & rtt, UINT width, UINT height) {
+void Renderer::CreateRenderToTexture(UEngine::RenderToTexture * rtt, UINT width, UINT height) {
 #pragma region descDepth_buffer
 	D3D11_TEXTURE2D_DESC depthBuffer;
 	depthBuffer.Width = width;
@@ -608,13 +689,13 @@ void Renderer::CreateRenderToTexture(UEngine::RenderToTexture & rtt, UINT width,
 	descDSV.Flags = NULL;
 	descDSV.Texture2D.MipSlice = NULL;
 #pragma endregion
-	m_pDevice->CreateTexture2D(&depthBuffer, nullptr, rtt.depthStencilBuffer.GetAddressOf());
+	m_pDevice->CreateTexture2D(&depthBuffer, nullptr, rtt->depthStencilBuffer.GetAddressOf());
 	// Create depth stencil state
-	m_pDevice->CreateDepthStencilState(&depthState, rtt.depthStencilState.GetAddressOf());
+	m_pDevice->CreateDepthStencilState(&depthState, rtt->depthStencilState.GetAddressOf());
 	// Create the depth stencil view
-	m_pDevice->CreateDepthStencilView(rtt.depthStencilBuffer.Get(), // Depth stencil texture
+	m_pDevice->CreateDepthStencilView(rtt->depthStencilBuffer.Get(), // Depth stencil texture
 		&descDSV, // Depth stencil desc
-		rtt.depthStencilView.GetAddressOf());  // [out] Depth stencil view
+		rtt->depthStencilView.GetAddressOf());  // [out] Depth stencil view
 
 	D3D11_TEXTURE2D_DESC desc;
 	ZeroMemory(&desc, sizeof(desc));
@@ -630,7 +711,7 @@ void Renderer::CreateRenderToTexture(UEngine::RenderToTexture & rtt, UINT width,
 	desc.CPUAccessFlags = 0;
 	desc.MiscFlags = 0;
 
-	m_pDevice->CreateTexture2D(&desc, nullptr, &rtt.renderTargetTextureMap);
+	m_pDevice->CreateTexture2D(&desc, nullptr, &rtt->renderTargetTextureMap);
 
 	/////////////////////// Map's Render Target
 	// Setup the description of the render target view.
@@ -639,10 +720,10 @@ void Renderer::CreateRenderToTexture(UEngine::RenderToTexture & rtt, UINT width,
 	renderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMS;
 	renderTargetViewDesc.Texture2D.MipSlice = 0;
 
-	HRESULT h_ok = m_pDevice->CreateRenderTargetView(rtt.renderTargetTextureMap.Get(), &renderTargetViewDesc, &rtt.renderTargetViewMap);
+	HRESULT h_ok = m_pDevice->CreateRenderTargetView(rtt->renderTargetTextureMap.Get(), &renderTargetViewDesc, &rtt->renderTargetViewMap);
 
-	rtt.width = width;
-	rtt.height = height;
+	rtt->width = width;
+	rtt->height = height;
 	
 	desc.SampleDesc.Count = 1;
 	desc.SampleDesc.Quality = 0;
@@ -655,27 +736,8 @@ void Renderer::CreateRenderToTexture(UEngine::RenderToTexture & rtt, UINT width,
 	singleSRVDesc.Texture2D.MostDetailedMip = 0;
 	singleSRVDesc.Texture2D.MipLevels = 1;
 
-	m_pDevice->CreateTexture2D(&desc, nullptr, &rtt.outTexture);
-	m_pDevice->CreateShaderResourceView(rtt.outTexture.Get(), &singleSRVDesc, &rtt.outSRV);
-}
-void Renderer::AddNewLayer(RECT clientSize) {
-	D3D11_VIEWPORT rttViewPort;
-#pragma region WORLD_STATIC_RTT
-	CreateNewDeferredContext(m_pWorldDeferredContext);
-	m_pRTT.push_back(UEngine::RenderToTexture());
-	CreateRenderToTexture(m_pRTT[UEngine::DrawType_WORLD], (UINT)(clientSize.right - clientSize.left), (UINT)(clientSize.bottom - clientSize.top));
-
-	InitViewport(rttViewPort, clientSize);
-	m_pViewports.push_back(rttViewPort);
-#pragma endregion
-#pragma region UI_RTT
-	CreateNewDeferredContext(m_pWorldDeferredContext);
-	m_pRTT.push_back(UEngine::RenderToTexture());
-	CreateRenderToTexture(m_pRTT[UEngine::DrawType_UI], (UINT)(clientSize.right - clientSize.left), (UINT)(clientSize.bottom - clientSize.top));
-	
-	InitViewport(rttViewPort, clientSize);
-	m_pViewports.push_back(rttViewPort);
-#pragma endregion
+	m_pDevice->CreateTexture2D(&desc, nullptr, &rtt->outTexture);
+	m_pDevice->CreateShaderResourceView(rtt->outTexture.Get(), &singleSRVDesc, &rtt->outSRV);
 }
 void Renderer::AddBasicPipelines() {
 #pragma region INITIALIZATION
@@ -729,7 +791,7 @@ void Renderer::AddBasicPipelines() {
 	pipeline.input_layout = default_pipeline.input_layout;
 	m_pPipelines.push_back(pipeline);
 }
-void Renderer::RequestNewRTT(UEngine::RenderToTexture & rtt, UINT width, UINT height, ID3D11DeviceContext ** m_pWorldDeferredContext)
+void Renderer::RequestNewRTT(UEngine::RenderToTexture * rtt, UINT width, UINT height, ID3D11DeviceContext ** m_pWorldDeferredContext)
 {
 	CreateRenderToTexture(rtt, width, height);
 	m_pDevice->CreateDeferredContext(NULL, m_pWorldDeferredContext);

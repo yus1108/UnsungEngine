@@ -3,6 +3,10 @@
 
 // enum definition
 namespace UEngine {
+	enum ComponentType {
+		ComponentType_CAMERA,
+		ComponentType_COUNT
+	};
 	enum MouseInputType {
 		MouseInputType_LEFT,
 		MouseInputType_RIGHT,

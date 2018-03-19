@@ -7,6 +7,7 @@ class GameState
 private:
 	Renderer renderer;
 	ObjectManager objManager;
+	GameObject * camera;
 	GameObject * gameObject;
 	GameObject * text;
 	GameObject * logo;

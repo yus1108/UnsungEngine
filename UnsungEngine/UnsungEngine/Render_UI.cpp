@@ -147,47 +147,44 @@ void Render_UI::Init(ID3D11Device * m_pDevice, const WCHAR * textString, UINT32 
 	this->textFormat = textFormat;
 	loadingDone = true;
 }
-void Render_UI::Init(ID3D11DeviceContext * deviceContext, UEngine::pipeline_state_t * pipeline, UEngine::RenderToTexture * rtt, D3D11_VIEWPORT * viewport)
+void Render_UI::Init(UEngine::pipeline_state_t * pipeline)
 {
-	RenderComponent::Init(deviceContext, pipeline, rtt, viewport);
+	RenderComponent::Init(pipeline);
 }
 
-void Render_UI::DrawObj(Renderer * render, Transform * transform)
+void Render_UI::DrawObj(Renderer * render, Transform * transform, Component * m_pCamera)
 {
 	if (loadingDone && isActive)
 	{
-		render->RenderSet(m_pDeviceContext, *m_pPipeline, *m_pRTT, *m_viewport, D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
 		UINT stride = sizeof(DefaultVertex);
 		UINT offset = 0;
 
-		m_pDeviceContext->VSSetConstantBuffers(0, 1, &render->constBufferRTTPos);
+		CameraComponent * camera = (CameraComponent*)m_pCamera;
+		camera->GetDeferredContext(UEngine::DrawType_UI)->VSSetConstantBuffers(0, 1, &render->constBufferRTTPos);
 		DirectX::XMFLOAT4 RTPos = transform->GetPosition4();
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
 		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
-		m_pDeviceContext->Map(render->constBufferRTTPos, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
+		camera->GetDeferredContext(UEngine::DrawType_UI)->Map(render->constBufferRTTPos, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
 		memcpy(mappedResource.pData, &RTPos, sizeof(DirectX::XMFLOAT4));
-		m_pDeviceContext->Unmap(render->constBufferRTTPos, 0);
+		camera->GetDeferredContext(UEngine::DrawType_UI)->Unmap(render->constBufferRTTPos, 0);
 
-		m_pDeviceContext->GSSetConstantBuffers(1, 1, &render->constBufferRTTSize);
+		camera->GetDeferredContext(UEngine::DrawType_UI)->GSSetConstantBuffers(1, 1, &render->constBufferRTTSize);
 		DirectX::XMFLOAT3 scale = transform->GetScale();
 		DirectX::XMFLOAT4 RTSize = DirectX::XMFLOAT4(-scale.x, -scale.y, scale.x, scale.y);
 		mappedResource;
 		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
-		m_pDeviceContext->Map(render->constBufferRTTSize, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
+		camera->GetDeferredContext(UEngine::DrawType_UI)->Map(render->constBufferRTTSize, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
 		memcpy(mappedResource.pData, &RTSize, sizeof(DirectX::XMFLOAT4));
-		m_pDeviceContext->Unmap(render->constBufferRTTSize, 0);
+		camera->GetDeferredContext(UEngine::DrawType_UI)->Unmap(render->constBufferRTTSize, 0);
 
-		// set vertex info
-		m_pDeviceContext->IASetVertexBuffers(0, 1, &render->default_vertexBuffer, &stride, &offset);
 		// set texture info
 		ID3D11ShaderResourceView *baseTexture[]{
 			(ID3D11ShaderResourceView*)
 			m_pOffscreenSRV.Get()
 		};
-		m_pDeviceContext->PSSetShaderResources(0, 1, baseTexture);
-		m_pDeviceContext->IASetVertexBuffers(0, 1, render->default_vertexBuffer.GetAddressOf(), &stride, &offset);
-		m_pDeviceContext->Draw(1, 0);
-		
+		camera->GetDeferredContext(UEngine::DrawType_UI)->PSSetShaderResources(0, 1, baseTexture);
+		camera->GetDeferredContext(UEngine::DrawType_UI)->IASetVertexBuffers(0, 1, render->default_vertexBuffer.GetAddressOf(), &stride, &offset);
+		camera->GetDeferredContext(UEngine::DrawType_UI)->Draw(1, 0);
 	}
 }
 

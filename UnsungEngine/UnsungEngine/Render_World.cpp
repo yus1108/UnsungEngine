@@ -19,25 +19,24 @@ void Render_World::Init(ID3D11Device * m_pDevice, const WCHAR * textString, UINT
 {
 }
 
-void Render_World::Init(ID3D11DeviceContext * deviceContext, UEngine::pipeline_state_t * pipeline, UEngine::RenderToTexture * rtt, D3D11_VIEWPORT * viewport)
+void Render_World::Init(UEngine::pipeline_state_t * pipeline)
 {
-	RenderComponent::Init(deviceContext, pipeline, rtt, viewport);
+	RenderComponent::Init(pipeline);
 }
 
-void Render_World::DrawObj(Renderer * render, Transform * transform)
+void Render_World::DrawObj(Renderer * render, Transform * transform, Component * m_pCamera)
 {
 	if (loadingDone && isActive) {
-		render->RenderSet(m_pDeviceContext, *m_pPipeline, *m_pRTT, *m_viewport, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-		m_pDeviceContext->VSSetConstantBuffers(0, 1, &render->constBufferWorld);
-		m_pDeviceContext->VSSetConstantBuffers(1, 1, &render->constBufferScene);
-		m_pDeviceContext->PSSetConstantBuffers(2, 1, &render->constBufferDLight);
-		m_pDeviceContext->PSSetConstantBuffers(3, 1, &render->constBufferPLight);
-		m_pDeviceContext->PSSetConstantBuffers(4, 1, &render->constBufferSLight);
-		m_pDeviceContext->PSSetConstantBuffers(5, 1, &render->constBufferLightInfo);
-
 		UINT stride = sizeof(SIMPLE_VERTEX);
 		UINT offset = 0;
+
+		CameraComponent * camera = (CameraComponent*)m_pCamera;
+		camera->GetDeferredContext(UEngine::DrawType_WORLD)->VSSetConstantBuffers(0, 1, &render->constBufferWorld);
+		camera->GetDeferredContext(UEngine::DrawType_WORLD)->VSSetConstantBuffers(1, 1, &render->constBufferScene);
+		camera->GetDeferredContext(UEngine::DrawType_WORLD)->PSSetConstantBuffers(2, 1, &render->constBufferDLight);
+		camera->GetDeferredContext(UEngine::DrawType_WORLD)->PSSetConstantBuffers(3, 1, &render->constBufferPLight);
+		camera->GetDeferredContext(UEngine::DrawType_WORLD)->PSSetConstantBuffers(4, 1, &render->constBufferSLight);
+		camera->GetDeferredContext(UEngine::DrawType_WORLD)->PSSetConstantBuffers(5, 1, &render->constBufferLightInfo);
 
 		//AnimateModel(obj, 1);
 
@@ -47,20 +46,22 @@ void Render_World::DrawObj(Renderer * render, Transform * transform)
 		worldMat = DirectX::XMMatrixTranspose(worldMat);
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
 		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
-		m_pDeviceContext->Map(render->constBufferWorld, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
+		camera->GetDeferredContext(UEngine::DrawType_WORLD)->Map(render->constBufferWorld, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
 		memcpy(mappedResource.pData, &worldMat, sizeof(DirectX::XMMATRIX));
-		m_pDeviceContext->Unmap(render->constBufferWorld, 0);
+		camera->GetDeferredContext(UEngine::DrawType_WORLD)->Unmap(render->constBufferWorld, 0);
 		worldMat = DirectX::XMMatrixTranspose(worldMat);
 
-		DirectX::XMMATRIX originalView = DirectX::XMMatrixIdentity();
-		originalView.r[3] = DirectX::XMVectorSet(0, 5, -20, 1);
+		DirectX::XMMATRIX originalView = camera->GetOriginalView();
 		DirectX::XMVECTOR determinant = DirectX::XMMatrixDeterminant(originalView);
-		float aspectRatio = (m_viewport->Width / m_viewport->Height);
+		float aspectRatio = (camera->GetViewport()->Width / camera->GetViewport()->Height);
+		camera->SetAspectRatio(aspectRatio);
 		SCENE sceneToShader;
 		sceneToShader.viewMat = DirectX::XMMatrixInverse(&determinant, originalView);
 		sceneToShader.viewMat = DirectX::XMMatrixTranspose(sceneToShader.viewMat);
-		sceneToShader.perspectivMat = DirectX::XMMatrixPerspectiveFovLH(3.14159f / 3.0f, aspectRatio, 0.1f, 100.0f);
+		sceneToShader.perspectivMat = DirectX::XMMatrixPerspectiveFovLH(camera->GetAngle(), aspectRatio, camera->GetNearZ(), camera->GetFarZ());
 		sceneToShader.perspectivMat = DirectX::XMMatrixTranspose(sceneToShader.perspectivMat);
+		camera->SetSceneToShader(sceneToShader);
+
 		DLIGHT dLight;
 		dLight.lightColor = DirectX::XMFLOAT4(1, 1, 1, 1);
 		dLight.lightDirection = DirectX::XMFLOAT3(0, 0, 1);
@@ -70,30 +71,29 @@ void Render_World::DrawObj(Renderer * render, Transform * transform)
 		SLIGHT sLight;
 		ZeroMemory(&sLight, sizeof(sLight));
 
-		mappedResource;
 		// view matrix buffer
 		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
-		m_pDeviceContext->Map(render->constBufferScene, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
+		camera->GetDeferredContext(UEngine::DrawType_WORLD)->Map(render->constBufferScene, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
 		memcpy(mappedResource.pData, &sceneToShader, sizeof(SCENE));
-		m_pDeviceContext->Unmap(render->constBufferScene, 0);
+		camera->GetDeferredContext(UEngine::DrawType_WORLD)->Unmap(render->constBufferScene, 0);
 
 		// directional light buffer
 		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
-		m_pDeviceContext->Map(render->constBufferDLight, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
+		camera->GetDeferredContext(UEngine::DrawType_WORLD)->Map(render->constBufferDLight, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
 		memcpy(mappedResource.pData, &dLight, sizeof(DLIGHT));
-		m_pDeviceContext->Unmap(render->constBufferDLight, 0);
+		camera->GetDeferredContext(UEngine::DrawType_WORLD)->Unmap(render->constBufferDLight, 0);
 
 		// point light buffer
 		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
-		m_pDeviceContext->Map(render->constBufferPLight, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
+		camera->GetDeferredContext(UEngine::DrawType_WORLD)->Map(render->constBufferPLight, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
 		memcpy(mappedResource.pData, &pLight, sizeof(PLIGHT));
-		m_pDeviceContext->Unmap(render->constBufferPLight, 0);
+		camera->GetDeferredContext(UEngine::DrawType_WORLD)->Unmap(render->constBufferPLight, 0);
 
 		// spot light buffer
 		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
-		m_pDeviceContext->Map(render->constBufferSLight, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
+		camera->GetDeferredContext(UEngine::DrawType_WORLD)->Map(render->constBufferSLight, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
 		memcpy(mappedResource.pData, &sLight, sizeof(SLIGHT));
-		m_pDeviceContext->Unmap(render->constBufferSLight, 0);
+		camera->GetDeferredContext(UEngine::DrawType_WORLD)->Unmap(render->constBufferSLight, 0);
 
 
 		for (unsigned int i = 0; i < geometryComponent->countIndexBuffer.size(); i++)
@@ -108,26 +108,26 @@ void Render_World::DrawObj(Renderer * render, Transform * transform)
 				lightInfo.specular = materialComponent->material_info[i][graphics::components::SPECULAR].value;
 				lightInfo.emissive = materialComponent->material_info[i][graphics::components::EMISSIVE].value;
 				ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
-				m_pDeviceContext->Map(render->constBufferLightInfo, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
+				camera->GetDeferredContext(UEngine::DrawType_WORLD)->Map(render->constBufferLightInfo, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
 				memcpy(mappedResource.pData, &lightInfo, sizeof(LIGHTINFO));
-				m_pDeviceContext->Unmap(render->constBufferLightInfo, 0);
+				camera->GetDeferredContext(UEngine::DrawType_WORLD)->Unmap(render->constBufferLightInfo, 0);
 
 				// set texture info
 				ID3D11ShaderResourceView *diffuseView[]{
 					(ID3D11ShaderResourceView*)
 					materialComponent->material_info[i][graphics::components::DIFFUSE].input.texture_resource
 				};
-				m_pDeviceContext->PSSetShaderResources(0, 1, diffuseView);
+				camera->GetDeferredContext(UEngine::DrawType_WORLD)->PSSetShaderResources(0, 1, diffuseView);
 				ID3D11ShaderResourceView *specularView[]{
 					(ID3D11ShaderResourceView*)
 					materialComponent->material_info[i][graphics::components::SPECULAR].input.texture_resource
 				};
-				m_pDeviceContext->PSSetShaderResources(1, 1, specularView);
+				camera->GetDeferredContext(UEngine::DrawType_WORLD)->PSSetShaderResources(1, 1, specularView);
 				ID3D11ShaderResourceView *emissiveView[]{
 					(ID3D11ShaderResourceView*)
 					materialComponent->material_info[i][graphics::components::EMISSIVE].input.texture_resource
 				};
-				m_pDeviceContext->PSSetShaderResources(2, 1, emissiveView);
+				camera->GetDeferredContext(UEngine::DrawType_WORLD)->PSSetShaderResources(2, 1, emissiveView);
 				ID3D11ShaderResourceView *normalView[]{
 					(ID3D11ShaderResourceView*)
 					materialComponent->material_info[i][graphics::components::NORMAL].input.texture_resource
@@ -136,13 +136,13 @@ void Render_World::DrawObj(Renderer * render, Transform * transform)
 				{
 					normalView[0] = (ID3D11ShaderResourceView*)materialComponent->material_info[i][graphics::components::BUMP].input.texture_resource;
 				}
-				m_pDeviceContext->PSSetShaderResources(3, 1, normalView);
+				camera->GetDeferredContext(UEngine::DrawType_WORLD)->PSSetShaderResources(3, 1, normalView);
 			}
 
 			// Set the index buffer.
-			m_pDeviceContext->IASetVertexBuffers(0, 1, geometryComponent->vertexBuffer[i].GetAddressOf(), &stride, &offset);
-			m_pDeviceContext->IASetIndexBuffer(geometryComponent->indexBuffers[i].Get(), DXGI_FORMAT_R32_UINT, 0);
-			m_pDeviceContext->DrawIndexed(geometryComponent->countIndexBuffer[i], 0, 0);
+			camera->GetDeferredContext(UEngine::DrawType_WORLD)->IASetVertexBuffers(0, 1, geometryComponent->vertexBuffer[i].GetAddressOf(), &stride, &offset);
+			camera->GetDeferredContext(UEngine::DrawType_WORLD)->IASetIndexBuffer(geometryComponent->indexBuffers[i].Get(), DXGI_FORMAT_R32_UINT, 0);
+			camera->GetDeferredContext(UEngine::DrawType_WORLD)->DrawIndexed(geometryComponent->countIndexBuffer[i], 0, 0);
 		}
 	}
 }

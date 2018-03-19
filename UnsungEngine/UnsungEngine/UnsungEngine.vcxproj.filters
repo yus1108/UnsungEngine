@@ -108,6 +108,12 @@
     <ClInclude Include="DebugRenderer.h">
       <Filter>Render</Filter>
     </ClInclude>
+    <ClInclude Include="Component.h">
+      <Filter>Game\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraComponent.h">
+      <Filter>Game\Component</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -157,6 +163,12 @@
     </ClCompile>
     <ClCompile Include="DebugRenderer.cpp">
       <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Component.cpp">
+      <Filter>Game\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraComponent.cpp">
+      <Filter>Game\Component</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -1,6 +1,7 @@
 #pragma once
 #include <unordered_map>
 #include "GameObject.h"
+#include "CameraComponent.h"
 
 class ObjectManager
 {
@@ -12,7 +13,7 @@ public:
 
 	void Init();
 	void Update();
-	void Render(UVector<UEngine::RenderToTexture>& m_pRTT, UVector<Microsoft::WRL::ComPtr<ID3D11DeviceContext>>& m_pWorldDeferredContext, UVector<Microsoft::WRL::ComPtr<ID3D11CommandList>>& m_pWorldCommandList, Renderer * render);
+	void Render(CameraComponent * m_pCamera, Renderer * render);
 	void Clear();
 
 	GameObject * GetGameObject(unsigned i);

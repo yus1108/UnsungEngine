@@ -25,24 +25,65 @@ void ObjectManager::Update() {
 	}
 }
 
-void ObjectManager::Render(UVector<UEngine::RenderToTexture> & m_pRTT,
-	UVector<Microsoft::WRL::ComPtr<ID3D11DeviceContext>> & m_pWorldDeferredContext,
-	UVector<Microsoft::WRL::ComPtr<ID3D11CommandList>> & m_pWorldCommandList, Renderer * render) {
+void ObjectManager::Render(CameraComponent * m_pCamera, Renderer * render) {
 	std::vector<std::thread> threads;
-	threads.push_back(std::thread([&]() {
+	//threads.push_back(std::thread([&]() {
 		for each (std::pair<int, GameObject*> obj in gameObjects)
 		{
 			if (obj.second && obj.second->GetActive())
 			{
-				obj.second->GetRenderComponent()->DrawObj(render, obj.second->GetTransform());
-				// Create command lists and record commands into them.
+				if (obj.second->GetRenderComponent())
+				{
+					unsigned drawType = (unsigned)obj.second->GetRenderComponent()->GetType();
+#pragma region RENDER_SET
+					switch (drawType)
+					{
+					case UEngine::DrawType_WORLD:
+						m_pCamera->GetDeferredContext(drawType)->OMSetDepthStencilState(m_pCamera->GetRTTWorld()->depthStencilState.Get(), 1);
+						m_pCamera->GetDeferredContext(drawType)->OMSetRenderTargets(1, 
+							m_pCamera->GetRTTWorld()->renderTargetViewMap.GetAddressOf(), 
+							m_pCamera->GetRTTWorld()->depthStencilView.Get());
+						break;
+					case UEngine::DrawType_UI:
+						m_pCamera->GetDeferredContext(drawType)->OMSetDepthStencilState(m_pCamera->GetRTTUI()->depthStencilState.Get(), 1);
+						m_pCamera->GetDeferredContext(drawType)->OMSetRenderTargets(1, 
+							m_pCamera->GetRTTUI()->renderTargetViewMap.GetAddressOf(),
+							m_pCamera->GetRTTUI()->depthStencilView.Get());
+						break;
+					default:
+						break;
+					}
+					m_pCamera->GetDeferredContext(drawType)->OMSetBlendState(
+						obj.second->GetRenderComponent()->GetPipeline()->blendingState.Get(), NULL, 0xffffffff);
+					m_pCamera->GetDeferredContext(drawType)->RSSetViewports(1, m_pCamera->GetViewport());
+
+					// Bind depth stencil state
+					m_pCamera->GetDeferredContext(drawType)->RSSetState(obj.second->GetRenderComponent()->GetPipeline()->rasterState.Get());
+					ID3D11SamplerState *sampler[]{ obj.second->GetRenderComponent()->GetPipeline()->samplerState.Get() };
+					m_pCamera->GetDeferredContext(drawType)->PSSetSamplers(0, 1, sampler);
+
+					// set shaders and input layout
+					m_pCamera->GetDeferredContext(drawType)->VSSetShader(obj.second->GetRenderComponent()->GetPipeline()->vertex_shader.Get(), nullptr, 0);
+					m_pCamera->GetDeferredContext(drawType)->PSSetShader(obj.second->GetRenderComponent()->GetPipeline()->pixel_shader.Get(), nullptr, 0);
+					m_pCamera->GetDeferredContext(drawType)->GSSetShader(obj.second->GetRenderComponent()->GetPipeline()->geometry_shader.Get(), nullptr, 0);
+					m_pCamera->GetDeferredContext(drawType)->IASetInputLayout(obj.second->GetRenderComponent()->GetPipeline()->input_layout.Get());
+					switch (drawType)
+					{
+					case UEngine::DrawType_WORLD:
+						m_pCamera->GetDeferredContext(drawType)->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+						break;
+					case UEngine::DrawType_UI:
+						m_pCamera->GetDeferredContext(drawType)->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+						break;
+					default:
+						break;
+					}
+#pragma endregion
+					obj.second->GetRenderComponent()->DrawObj(render, obj.second->GetTransform(), m_pCamera);
+				}
 			}
 		}
-		for (unsigned i = 0; i < (unsigned)UEngine::DrawType_COUNT; i++)
-		{
-			m_pWorldDeferredContext[i]->FinishCommandList(true, m_pWorldCommandList[i].GetAddressOf());
-		}
-	}));
+	//}));
 	for (auto& thread : threads)
 		thread.join();
 }

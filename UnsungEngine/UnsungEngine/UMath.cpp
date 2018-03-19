@@ -6,7 +6,7 @@ float UMath::Convert_DegreeToRad(float degree)
 	return degree / 180.0f * 3.14159f;
 }
 
-float UMath::Convert_DegreeToRad(double degree)
+double UMath::Convert_DegreeToRad(double degree)
 {
 	return degree / 180.0 * 3.14159265359;
 }

@@ -142,6 +142,8 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CameraComponent.h" />
+    <ClInclude Include="Component.h" />
     <ClInclude Include="DDSTextureLoader.h" />
     <ClInclude Include="DebugRenderer.h" />
     <ClInclude Include="Definition.h" />
@@ -165,6 +167,8 @@
     <ClInclude Include="WICTextureLoader.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CameraComponent.cpp" />
+    <ClCompile Include="Component.cpp" />
     <ClCompile Include="DDSTextureLoader.cpp" />
     <ClCompile Include="DebugRenderer.cpp" />
     <ClCompile Include="GameObject.cpp" />

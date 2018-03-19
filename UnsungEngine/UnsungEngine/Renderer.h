@@ -1,7 +1,8 @@
 #pragma once
-#include "RenderComponent.h"
 #include "GameObject.h"
 #include "ObjectManager.h"
+#include "CameraComponent.h"
+#include "RenderComponent.h"
 
 class Renderer
 {
@@ -20,9 +21,8 @@ private:
 	UVector<Microsoft::WRL::ComPtr<ID3D11DeviceContext>>	m_pWorldDeferredContext;
 	UVector<Microsoft::WRL::ComPtr<ID3D11CommandList>>		m_pWorldCommandList;
 
-	UVector<D3D11_VIEWPORT>		m_pViewports;
 	UVector<UEngine::pipeline_state_t>	m_pPipelines;
-	UVector<UEngine::RenderToTexture>	m_pRTT;
+	UVector<CameraComponent*> m_pCameras;
 
 	ID3D11Buffer * constBufferWorld;
 	ID3D11Buffer * constBufferScene;
@@ -37,6 +37,12 @@ private:
 public:
 	Renderer();
 	~Renderer();
+
+	void ClearCameras() { m_pCameras.clear(); }
+	unsigned GetSizeCameras() { return m_pCameras.size(); }
+	void AddCameras(CameraComponent * component);
+	CameraComponent * GetCameras(unsigned i) { return m_pCameras[i]; }
+	void RemoveCameras(unsigned i);
 
 	void Init();
 	void Update(ObjectManager * objManager);
@@ -63,9 +69,8 @@ private:
 		SIZE_T GShaderLength, const D3D11_INPUT_ELEMENT_DESC * vLayout, UINT layoutLength);
 
 	void CreateNewDeferredContext(UVector<Microsoft::WRL::ComPtr<ID3D11DeviceContext>> & m_pDeferredContexts);
-	void CreateRenderToTexture(UEngine::RenderToTexture & rtt, UINT width, UINT height);
-	void AddNewLayer(RECT clientSize);
+	void CreateRenderToTexture(UEngine::RenderToTexture * rtt, UINT width, UINT height);
 	void AddBasicPipelines();
-	void RequestNewRTT(UEngine::RenderToTexture & rtt, UINT width, UINT height, ID3D11DeviceContext ** m_pWorldDeferredContext);
+	void RequestNewRTT(UEngine::RenderToTexture * rtt, UINT width, UINT height, ID3D11DeviceContext ** m_pWorldDeferredContext);
 };
 
