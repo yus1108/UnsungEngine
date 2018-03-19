@@ -63,6 +63,7 @@
 
 // headers for Engine Architecture
 #include "GameState.h"
+#include "GameObject.h"
 #include "Renderer.h"
 #include "Component.h"
 #include "CameraComponent.h"
@@ -70,7 +71,6 @@
 #include "Render_World.h"
 #include "Render_UI.h"
 #include "Transform.h"
-#include "GameObject.h"
 #include "ObjectManager.h"
 
 // include shader headers

@@ -19,6 +19,7 @@ private:
 	UEngine::RenderToTexture * m_pRTTUI;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_pDeferredContext[2];
 	Microsoft::WRL::ComPtr<ID3D11CommandList> m_pCommandList[2];
+	Renderer * m_pRenderer;
 public:
 	CameraComponent();
 	~CameraComponent();
@@ -46,10 +47,11 @@ public:
 	void SetSceneToShader(SCENE s) { sceneToShader = s; };
 	SCENE GetSceneToShader() { return sceneToShader; };
 
-	void Init(UEngine::ComponentType _type, bool _active);
+	void Init(UEngine::ComponentType _type, bool _active, GameObject * _parent);
 	void Init(Renderer * renderer);
 
 	void CreateNewDeferredContext(ID3D11Device * m_pDevice);
+	void Clear();
 
 	void LookAt(DirectX::XMVECTOR targetPos);
 	void ForwardLookAt(DirectX::XMVECTOR targetPos);

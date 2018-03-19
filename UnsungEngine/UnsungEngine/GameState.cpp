@@ -20,14 +20,14 @@ void GameState::Init()
 	objManager.Init();
 
 	CameraComponent * cameraComponent = new CameraComponent();
-	cameraComponent->Init(UEngine::ComponentType_CAMERA, true);
+	cameraComponent->Init(UEngine::ComponentType_CAMERA, true, camera);
 	cameraComponent->Init(&renderer);
 	camera->AddComponent(cameraComponent);
+	camera->SetActive(false);
 	objManager.AddGameObject(camera);
 
 	// load model
 	renderer.LoadObject("Assets/WOS_CommandCenter.bin", gameObject);
-	//gameObject->SetActive(false);
 	objManager.AddGameObject(gameObject);
 
 	// load logo

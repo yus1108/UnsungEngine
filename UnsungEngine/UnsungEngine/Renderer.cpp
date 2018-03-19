@@ -36,23 +36,17 @@ void Renderer::AddCameras(CameraComponent * component)
 
 #pragma region WORLD_RTT
 	UEngine::RenderToTexture * rtt = new UEngine::RenderToTexture;
-	CreateRenderToTexture(rtt, rttViewPort->Width, rttViewPort->Height);
+	CreateRenderToTexture(rtt, (UINT)rttViewPort->Width, (UINT)rttViewPort->Height);
 	component->SetRTTWorld(rtt);
 #pragma endregion
 #pragma region UI_RTT
 	rtt = new UEngine::RenderToTexture;
-	CreateRenderToTexture(rtt, rttViewPort->Width, rttViewPort->Height);
+	CreateRenderToTexture(rtt, (UINT)rttViewPort->Width, (UINT)rttViewPort->Height);
 	component->SetRTTUI(rtt);
 #pragma endregion
 	component->CreateNewDeferredContext(m_pDevice.Get());
 
 	m_pCameras.push_back(component);
-}
-void Renderer::RemoveCameras(unsigned i)
-{
-	if (m_pCameras[i])
-		delete m_pCameras[i];
-	m_pCameras.erase(i);
 }
 
 void Renderer::Init()
@@ -218,30 +212,15 @@ void Renderer::Update(ObjectManager * objManager)
 	// render for each camera
 	for (unsigned i = 0; i < m_pCameras.size(); i++)
 	{
-		if (!m_pCameras[i]->GetActive())
+		if (!m_pCameras[i]->GetActive() && !m_pCameras[i]->GetParent()->GetActive())
 			continue;
 
-#pragma region CLEAR_BUFFER
-		// clearing world
-		m_pCameras[i]->GetDeferredContext(0)->OMSetDepthStencilState(m_pCameras[i]->GetRTTWorld()->depthStencilState.Get(), 1);
-		m_pCameras[i]->GetDeferredContext(0)->OMSetRenderTargets(1, m_pCameras[i]->GetRTTWorld()->renderTargetViewMap.GetAddressOf(), 
-			m_pCameras[i]->GetRTTWorld()->depthStencilView.Get());
-		m_pCameras[i]->GetDeferredContext(0)->ClearRenderTargetView(m_pCameras[i]->GetRTTWorld()->renderTargetViewMap.Get(), DirectX::Colors::Transparent);
-		m_pCameras[i]->GetDeferredContext(0)->ClearDepthStencilView(m_pCameras[i]->GetRTTWorld()->depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
-
-		// clearing ui
-		m_pCameras[i]->GetDeferredContext(1)->OMSetDepthStencilState(m_pCameras[i]->GetRTTUI()->depthStencilState.Get(), 1);
-		m_pCameras[i]->GetDeferredContext(1)->OMSetRenderTargets(1, m_pCameras[i]->GetRTTUI()->renderTargetViewMap.GetAddressOf(), 
-			m_pCameras[i]->GetRTTWorld()->depthStencilView.Get());
-		m_pCameras[i]->GetDeferredContext(1)->ClearRenderTargetView(m_pCameras[i]->GetRTTUI()->renderTargetViewMap.Get(), DirectX::Colors::Transparent);
-		m_pCameras[i]->GetDeferredContext(1)->ClearDepthStencilView(m_pCameras[i]->GetRTTUI()->depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
-#pragma endregion
 		objManager->Render(m_pCameras[i], this);
 	}
 	// finish deferred rendering
 	for (unsigned i = 0; i < m_pCameras.size(); i++)
 	{
-		if (!m_pCameras[i]->GetActive())
+		if (!m_pCameras[i]->GetActive() && !m_pCameras[i]->GetParent()->GetActive())
 			continue;
 
 		// Create command lists and record commands into them.
@@ -251,7 +230,7 @@ void Renderer::Update(ObjectManager * objManager)
 	// execute deferred rendering
 	for (unsigned i = 0; i < m_pCameras.size(); i++)
 	{
-		if (!m_pCameras[i]->GetActive())
+		if (!m_pCameras[i]->GetActive() && !m_pCameras[i]->GetParent()->GetActive())
 			continue;
 
 		m_pDeviceContext->ExecuteCommandList(*m_pCameras[i]->GetCommandList(0), true); // Execute pass 1.
@@ -270,16 +249,29 @@ void Renderer::Update(ObjectManager * objManager)
 	RenderSet(m_pDeviceContext.Get(), default_pipeline, default_RTT, default_viewport, D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
 	for (unsigned i = 0; i < m_pCameras.size(); i++)
 	{
+		if (!m_pCameras[i]->GetActive() && !m_pCameras[i]->GetParent()->GetActive())
+			continue;
+
 		m_pDeviceContext->VSSetConstantBuffers(0, 1, &constBufferRTTPos);
-		DirectX::XMFLOAT4 RTPos = DirectX::XMFLOAT4(0, 0, 0, 1);
+		DirectX::XMFLOAT2 viewCenter = DirectX::XMFLOAT2(m_pCameras[i]->GetViewport()->Width - m_pCameras[i]->GetViewport()->TopLeftX,
+			m_pCameras[i]->GetViewport()->Height - m_pCameras[i]->GetViewport()->TopLeftY);
+		viewCenter.x /= (default_viewport.Width - default_viewport.TopLeftX);
+		viewCenter.x = viewCenter.x - 1.0f;
+		viewCenter.y /= (default_viewport.Height - default_viewport.TopLeftY);
+		viewCenter.y = viewCenter.y - 1.0f;
+		DirectX::XMFLOAT4 RTPos = DirectX::XMFLOAT4(viewCenter.x, viewCenter.y, 0, 1);
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
 		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
 		m_pDeviceContext->Map(constBufferRTTPos, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
 		memcpy(mappedResource.pData, &RTPos, sizeof(DirectX::XMFLOAT4));
 		m_pDeviceContext->Unmap(constBufferRTTPos, 0);
 
+		DirectX::XMFLOAT2 viewLength = DirectX::XMFLOAT2((m_pCameras[i]->GetViewport()->Width - m_pCameras[i]->GetViewport()->TopLeftX) / 2.0f,
+			(m_pCameras[i]->GetViewport()->Height - m_pCameras[i]->GetViewport()->TopLeftY) / 2.0f);
+		viewLength.x /= ((default_viewport.Width - default_viewport.TopLeftX) / 2.0f);
+		viewLength.y /= ((default_viewport.Height - default_viewport.TopLeftY) / 2.0f);
 		m_pDeviceContext->GSSetConstantBuffers(1, 1, &constBufferRTTSize);
-		DirectX::XMFLOAT4 RTSize = DirectX::XMFLOAT4(-1, -1, 1, 1);
+		DirectX::XMFLOAT4 RTSize = DirectX::XMFLOAT4(-viewLength.x, -viewLength.y, viewLength.x, viewLength.y);
 		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
 		m_pDeviceContext->Map(constBufferRTTSize, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
 		memcpy(mappedResource.pData, &RTSize, sizeof(DirectX::XMFLOAT4));
@@ -290,7 +282,6 @@ void Renderer::Update(ObjectManager * objManager)
 		m_pDeviceContext->IASetVertexBuffers(0, 1, default_vertexBuffer.GetAddressOf(), &stride, &offset);
 
 		// convert msaa srv to single sampling srv
-
 		m_pDeviceContext->ResolveSubresource((ID3D11Resource*)m_pCameras[i]->GetRTTWorld()->outTexture.Get(), D3D11CalcSubresource(0, 0, 1),
 			(ID3D11Resource*)m_pCameras[i]->GetRTTWorld()->renderTargetTextureMap.Get(), D3D11CalcSubresource(0, 0, 1), DXGI_FORMAT_R32G32B32A32_FLOAT);
 		ID3D11ShaderResourceView *baseTexture[]{
@@ -299,12 +290,13 @@ void Renderer::Update(ObjectManager * objManager)
 		};
 		m_pDeviceContext->PSSetShaderResources(0, 1, baseTexture);
 
-		// Set the index buffer.
+		// Draw
 		m_pDeviceContext->Draw(1, 0);
 
 		// clear depth for UI
 		m_pDeviceContext->ClearDepthStencilView(default_RTT.depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
+		// convert msaa srv to single sampling srv
 		m_pDeviceContext->ResolveSubresource((ID3D11Resource*)m_pCameras[i]->GetRTTUI()->outTexture.Get(), D3D11CalcSubresource(0, 0, 1),
 			(ID3D11Resource*)m_pCameras[i]->GetRTTUI()->renderTargetTextureMap.Get(), D3D11CalcSubresource(0, 0, 1), DXGI_FORMAT_R32G32B32A32_FLOAT);
 		ID3D11ShaderResourceView *baseTextureUI[]{
@@ -313,7 +305,7 @@ void Renderer::Update(ObjectManager * objManager)
 		};
 		m_pDeviceContext->PSSetShaderResources(0, 1, baseTextureUI);
 
-		// Set the index buffer.
+		// Draw
 		m_pDeviceContext->Draw(1, 0);
 	}
 
@@ -398,14 +390,7 @@ void Renderer::Resize(bool isFullScreen, int width, int height) {
 
 	for (unsigned i = 0; i < m_pCameras.size(); i++)
 	{
-		m_pCameras[i]->GetRTTWorld()->depthStencilBuffer.ReleaseAndGetAddressOf();
-		m_pCameras[i]->GetRTTWorld()->depthStencilState.ReleaseAndGetAddressOf();
-		m_pCameras[i]->GetRTTWorld()->depthStencilView.ReleaseAndGetAddressOf();
-		m_pCameras[i]->GetRTTWorld()->outSRV.ReleaseAndGetAddressOf();
-		m_pCameras[i]->GetRTTWorld()->outTexture.ReleaseAndGetAddressOf();
-		m_pCameras[i]->GetRTTWorld()->renderTargetTextureMap.ReleaseAndGetAddressOf();
-		m_pCameras[i]->GetRTTWorld()->renderTargetViewMap.ReleaseAndGetAddressOf();
-		m_pCameras[i]->GetRTTWorld()->shaderResourceViewMap.ReleaseAndGetAddressOf();
+		m_pCameras[i]->Clear();
 
 		RECT clientSize;
 		GetClientRect(hWnd, &clientSize);
@@ -414,15 +399,14 @@ void Renderer::Resize(bool isFullScreen, int width, int height) {
 		m_pCameras[i]->SetViewport(rttViewPort);
 #pragma region WORLD_RTT
 		UEngine::RenderToTexture * rtt = new UEngine::RenderToTexture;
-		CreateRenderToTexture(rtt, rttViewPort->Width, rttViewPort->Height);
+		CreateRenderToTexture(rtt, (UINT)rttViewPort->Width, (UINT)rttViewPort->Height);
 		m_pCameras[i]->SetRTTWorld(rtt);
 #pragma endregion
 #pragma region UI_RTT
 		rtt = new UEngine::RenderToTexture;
-		CreateRenderToTexture(rtt, rttViewPort->Width, rttViewPort->Height);
+		CreateRenderToTexture(rtt, (UINT)rttViewPort->Width, (UINT)rttViewPort->Height);
 		m_pCameras[i]->SetRTTUI(rtt);
 #pragma endregion
-		m_pCameras[i]->CreateNewDeferredContext(m_pDevice.Get());
 	}
 	m_pSwapCahin->SetFullscreenState(isFullScreen, nullptr);
 }

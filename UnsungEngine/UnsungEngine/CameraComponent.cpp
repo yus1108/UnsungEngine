@@ -10,6 +10,14 @@ CameraComponent::CameraComponent()
 }
 CameraComponent::~CameraComponent()
 {
+	for (unsigned i = 0; i < m_pRenderer->GetSizeCameras(); i++)
+	{
+		if (m_pRenderer->GetCameras(i) == this)
+		{
+			m_pRenderer->RemoveCameras(i);
+			break;
+		}
+	}
 	if (m_pViewport)
 		delete m_pViewport;
 	if (m_pRTTWorld)
@@ -18,13 +26,13 @@ CameraComponent::~CameraComponent()
 		delete m_pRTTUI;
 }
 
-void CameraComponent::Init(UEngine::ComponentType _type, bool _active)
+void CameraComponent::Init(UEngine::ComponentType _type, bool _active, GameObject * _parent)
 {
-	Component::Init(_type, _active);
+	Component::Init(_type, _active, _parent);
 }
-
 void CameraComponent::Init(Renderer * renderer)
 {
+	m_pRenderer = renderer;
 	renderer->AddCameras(this);
 
 	// perspective view
@@ -48,6 +56,14 @@ void CameraComponent::CreateNewDeferredContext(ID3D11Device * m_pDevice)
 {
 	m_pDevice->CreateDeferredContext(NULL, m_pDeferredContext[0].GetAddressOf());
 	m_pDevice->CreateDeferredContext(NULL, m_pDeferredContext[1].GetAddressOf());
+}
+void CameraComponent::Clear() {
+	if (m_pViewport)
+		delete m_pViewport;
+	if (m_pRTTWorld)
+		delete m_pRTTWorld;
+	if (m_pRTTUI)
+		delete m_pRTTUI;
 }
 
 void CameraComponent::LookAt(DirectX::XMVECTOR targetPos)
