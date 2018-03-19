@@ -26,10 +26,8 @@ Renderer::~Renderer()
 		constBufferRTTSize->Release();
 }
 
-void Renderer::AddCameras(CameraComponent * component)
+void Renderer::AddCameras(CameraComponent * component, RECT clientSize)
 {
-	RECT clientSize;
-	GetClientRect(hWnd, &clientSize);
 	D3D11_VIEWPORT * rttViewPort = new D3D11_VIEWPORT;
 	InitViewport(*rttViewPort, clientSize);
 	component->SetViewport(rttViewPort);
@@ -258,7 +256,14 @@ void Renderer::Update(ObjectManager * objManager)
 		viewCenter.x /= (default_viewport.Width - default_viewport.TopLeftX);
 		viewCenter.x = viewCenter.x - 1.0f;
 		viewCenter.y /= (default_viewport.Height - default_viewport.TopLeftY);
-		viewCenter.y = viewCenter.y - 1.0f;
+		viewCenter.y = -viewCenter.y + 1.0f;
+		DirectX::XMFLOAT2 viewLength = DirectX::XMFLOAT2((m_pCameras[i]->GetViewport()->Width - m_pCameras[i]->GetViewport()->TopLeftX) / 2.0f,
+			(m_pCameras[i]->GetViewport()->Height - m_pCameras[i]->GetViewport()->TopLeftY) / 2.0f);
+		viewLength.x /= ((default_viewport.Width - default_viewport.TopLeftX) / 2.0f);
+		viewLength.y /= ((default_viewport.Height - default_viewport.TopLeftY) / 2.0f);
+		viewCenter.x += viewLength.x;
+		viewCenter.y -= viewLength.y;
+
 		DirectX::XMFLOAT4 RTPos = DirectX::XMFLOAT4(viewCenter.x, viewCenter.y, 0, 1);
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
 		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
@@ -266,10 +271,7 @@ void Renderer::Update(ObjectManager * objManager)
 		memcpy(mappedResource.pData, &RTPos, sizeof(DirectX::XMFLOAT4));
 		m_pDeviceContext->Unmap(constBufferRTTPos, 0);
 
-		DirectX::XMFLOAT2 viewLength = DirectX::XMFLOAT2((m_pCameras[i]->GetViewport()->Width - m_pCameras[i]->GetViewport()->TopLeftX) / 2.0f,
-			(m_pCameras[i]->GetViewport()->Height - m_pCameras[i]->GetViewport()->TopLeftY) / 2.0f);
-		viewLength.x /= ((default_viewport.Width - default_viewport.TopLeftX) / 2.0f);
-		viewLength.y /= ((default_viewport.Height - default_viewport.TopLeftY) / 2.0f);
+		
 		m_pDeviceContext->GSSetConstantBuffers(1, 1, &constBufferRTTSize);
 		DirectX::XMFLOAT4 RTSize = DirectX::XMFLOAT4(-viewLength.x, -viewLength.y, viewLength.x, viewLength.y);
 		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
@@ -392,10 +394,13 @@ void Renderer::Resize(bool isFullScreen, int width, int height) {
 	{
 		m_pCameras[i]->Clear();
 
-		RECT clientSize;
-		GetClientRect(hWnd, &clientSize);
+		RECT changedSize;
+		changedSize.left = clientSize.right * m_pCameras[i]->GetViewRatio().x;
+		changedSize.top = clientSize.bottom * m_pCameras[i]->GetViewRatio().y;
+		changedSize.right = clientSize.right * m_pCameras[i]->GetViewRatio().z;
+		changedSize.bottom = clientSize.bottom *m_pCameras[i]->GetViewRatio().w;
 		D3D11_VIEWPORT * rttViewPort = new D3D11_VIEWPORT;
-		InitViewport(*rttViewPort, clientSize);
+		InitViewport(*rttViewPort, changedSize);
 		m_pCameras[i]->SetViewport(rttViewPort);
 #pragma region WORLD_RTT
 		UEngine::RenderToTexture * rtt = new UEngine::RenderToTexture;

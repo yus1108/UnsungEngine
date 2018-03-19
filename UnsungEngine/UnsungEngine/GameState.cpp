@@ -4,7 +4,7 @@
 
 GameState::GameState()
 {
-	camera = new GameObject();
+	mainCamera = new GameObject();
 	gameObject = new GameObject();
 	text = new GameObject();
 	logo = new GameObject();
@@ -20,11 +20,11 @@ void GameState::Init()
 	objManager.Init();
 
 	CameraComponent * cameraComponent = new CameraComponent();
-	cameraComponent->Init(UEngine::ComponentType_CAMERA, true, camera);
-	cameraComponent->Init(&renderer);
-	camera->AddComponent(cameraComponent);
-	camera->SetActive(false);
-	objManager.AddGameObject(camera);
+	cameraComponent->Init(UEngine::ComponentType_CAMERA, true, mainCamera);
+	cameraComponent->Init(&renderer, DirectX::XMFLOAT4(0.2f, 0.2f, 0.7f, 0.7f));
+	mainCamera->AddComponent(cameraComponent);
+	mainCamera->SetActive(false);
+	objManager.AddGameObject(mainCamera);
 
 	// load model
 	renderer.LoadObject("Assets/WOS_CommandCenter.bin", gameObject);

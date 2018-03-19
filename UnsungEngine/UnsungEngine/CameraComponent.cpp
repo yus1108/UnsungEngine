@@ -30,21 +30,28 @@ void CameraComponent::Init(UEngine::ComponentType _type, bool _active, GameObjec
 {
 	Component::Init(_type, _active, _parent);
 }
-void CameraComponent::Init(Renderer * renderer)
+void CameraComponent::Init(Renderer * renderer, DirectX::XMFLOAT4 viewRatio)
 {
 	m_pRenderer = renderer;
-	renderer->AddCameras(this);
+	this->viewRatio = viewRatio;
+	RECT clientSize;
+	GetClientRect(hWnd, &clientSize);
+	clientSize.left = clientSize.right * viewRatio.x;
+	clientSize.top = clientSize.bottom * viewRatio.y;
+	clientSize.right *= viewRatio.z;
+	clientSize.bottom *= viewRatio.w;
+	renderer->AddCameras(this, clientSize);
 
 	// perspective view
 	SetAngle(60 / 180.0f * 3.14159f);
 	nearZ = 0.1f;
-	farZ = 1000;
+	farZ = 100;
 	DirectX::XMMATRIX originalView = DirectX::XMMatrixIdentity();
 	originalView.r[3] = DirectX::XMVectorSet(0, 5, -20, 1); //
 	forwardRotation = DirectX::XMMatrixIdentity();
 	SetOriginalView(originalView);
 
-	aspectRatio = (m_pViewport->Width / m_pViewport->Height);
+	aspectRatio = ((m_pViewport->Width - m_pViewport->TopLeftX) / (m_pViewport->Height - -m_pViewport->TopLeftY));
 	DirectX::XMVECTOR determinant = DirectX::XMMatrixDeterminant(originalView);
 	sceneToShader.viewMat = DirectX::XMMatrixInverse(&determinant, originalView);
 	sceneToShader.viewMat = DirectX::XMMatrixTranspose(sceneToShader.viewMat);

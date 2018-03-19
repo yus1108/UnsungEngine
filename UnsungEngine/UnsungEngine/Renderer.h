@@ -40,7 +40,7 @@ public:
 
 	void ClearCameras() { m_pCameras.clear(); }
 	unsigned GetSizeCameras() { return m_pCameras.size(); }
-	void AddCameras(CameraComponent * component);
+	void AddCameras(CameraComponent * component, RECT clientSize);
 	CameraComponent * GetCameras(unsigned i) { return m_pCameras[i]; }
 	void RemoveCameras(unsigned i) { m_pCameras.erase(i); }
 

@@ -69,7 +69,10 @@ void ObjectManager::Render(CameraComponent * m_pCamera, Renderer * render) {
 				}
 				m_pCamera->GetDeferredContext(drawType)->OMSetBlendState(
 					obj.second->GetRenderComponent()->GetPipeline()->blendingState.Get(), NULL, 0xffffffff);
-				m_pCamera->GetDeferredContext(drawType)->RSSetViewports(1, m_pCamera->GetViewport());
+				D3D11_VIEWPORT viewport = *m_pCamera->GetViewport();
+				viewport.TopLeftX = 0;
+				viewport.TopLeftY = 0;
+				m_pCamera->GetDeferredContext(drawType)->RSSetViewports(1, &viewport);
 
 				// Bind depth stencil state
 				m_pCamera->GetDeferredContext(drawType)->RSSetState(obj.second->GetRenderComponent()->GetPipeline()->rasterState.Get());
