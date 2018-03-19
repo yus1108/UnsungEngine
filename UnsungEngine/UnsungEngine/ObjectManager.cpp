@@ -40,6 +40,10 @@ void ObjectManager::Render(CameraComponent * m_pCamera, Renderer * render) {
 		m_pCamera->GetRTTWorld()->depthStencilView.Get());
 	m_pCamera->GetDeferredContext(1)->ClearRenderTargetView(m_pCamera->GetRTTUI()->renderTargetViewMap.Get(), DirectX::Colors::Transparent);
 	m_pCamera->GetDeferredContext(1)->ClearDepthStencilView(m_pCamera->GetRTTUI()->depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+	D3D11_VIEWPORT viewport = *m_pCamera->GetViewport();
+	viewport.TopLeftX = 0;
+	viewport.TopLeftY = 0;
 #pragma endregion
 
 	for each (std::pair<int, GameObject*> obj in gameObjects)
@@ -69,9 +73,6 @@ void ObjectManager::Render(CameraComponent * m_pCamera, Renderer * render) {
 				}
 				m_pCamera->GetDeferredContext(drawType)->OMSetBlendState(
 					obj.second->GetRenderComponent()->GetPipeline()->blendingState.Get(), NULL, 0xffffffff);
-				D3D11_VIEWPORT viewport = *m_pCamera->GetViewport();
-				viewport.TopLeftX = 0;
-				viewport.TopLeftY = 0;
 				m_pCamera->GetDeferredContext(drawType)->RSSetViewports(1, &viewport);
 
 				// Bind depth stencil state

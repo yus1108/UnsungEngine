@@ -53,6 +53,12 @@ public:
 	void SetSceneToShader(SCENE s) { sceneToShader = s; };
 
 	void Init(UEngine::ComponentType _type, bool _active, GameObject * _parent);
+	/*
+	Function name: Init
+	param: renderer - rendering class
+	param: viewRatio - size ratio of camera view relative to the main render target (0 - 1)(x = left, y = top, z = right, w = bottom)
+	return: void
+	*/
 	void Init(Renderer * renderer, DirectX::XMFLOAT4 viewRatio);
 
 	void CreateNewDeferredContext(ID3D11Device * m_pDevice);
@@ -63,4 +69,3 @@ public:
 	void TurnTo(DirectX::XMVECTOR targetPos, float speed);
 	void MouseLook(POINT mousePos, float speed);
 };
-

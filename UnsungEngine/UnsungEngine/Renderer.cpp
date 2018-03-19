@@ -231,9 +231,11 @@ void Renderer::Update(ObjectManager * objManager)
 		if (!m_pCameras[i]->GetActive() && !m_pCameras[i]->GetParent()->GetActive())
 			continue;
 
-		m_pDeviceContext->ExecuteCommandList(*m_pCameras[i]->GetCommandList(0), true); // Execute pass 1.
+		if (m_pCameras[i]->GetCommandList(0))
+			m_pDeviceContext->ExecuteCommandList(*m_pCameras[i]->GetCommandList(0), true); // Execute pass 1.
+		if (m_pCameras[i]->GetCommandList(1))
+			m_pDeviceContext->ExecuteCommandList(*m_pCameras[i]->GetCommandList(1), true); // Execute pass 1.
 		m_pCameras[i]->ReleaseCommandList(0);
-		m_pDeviceContext->ExecuteCommandList(*m_pCameras[i]->GetCommandList(1), true); // Execute pass 1.
 		m_pCameras[i]->ReleaseCommandList(1);
 	}
 	UINT stride = sizeof(DefaultVertex);
@@ -251,18 +253,14 @@ void Renderer::Update(ObjectManager * objManager)
 			continue;
 
 		m_pDeviceContext->VSSetConstantBuffers(0, 1, &constBufferRTTPos);
-		DirectX::XMFLOAT2 viewCenter = DirectX::XMFLOAT2(m_pCameras[i]->GetViewport()->Width - m_pCameras[i]->GetViewport()->TopLeftX,
-			m_pCameras[i]->GetViewport()->Height - m_pCameras[i]->GetViewport()->TopLeftY);
-		viewCenter.x /= (default_viewport.Width - default_viewport.TopLeftX);
+		DirectX::XMFLOAT2 viewCenter = DirectX::XMFLOAT2(m_pCameras[i]->GetViewport()->Width / 2.0f + m_pCameras[i]->GetViewport()->TopLeftX,
+			m_pCameras[i]->GetViewport()->Height / 2.0f + m_pCameras[i]->GetViewport()->TopLeftY);
+		viewCenter.x /= (default_viewport.Width / 2.0f + default_viewport.TopLeftX);
 		viewCenter.x = viewCenter.x - 1.0f;
-		viewCenter.y /= (default_viewport.Height - default_viewport.TopLeftY);
+		viewCenter.y /= (default_viewport.Height / 2.0f + default_viewport.TopLeftY);
 		viewCenter.y = -viewCenter.y + 1.0f;
-		DirectX::XMFLOAT2 viewLength = DirectX::XMFLOAT2((m_pCameras[i]->GetViewport()->Width - m_pCameras[i]->GetViewport()->TopLeftX) / 2.0f,
-			(m_pCameras[i]->GetViewport()->Height - m_pCameras[i]->GetViewport()->TopLeftY) / 2.0f);
-		viewLength.x /= ((default_viewport.Width - default_viewport.TopLeftX) / 2.0f);
-		viewLength.y /= ((default_viewport.Height - default_viewport.TopLeftY) / 2.0f);
-		viewCenter.x += viewLength.x;
-		viewCenter.y -= viewLength.y;
+		DirectX::XMFLOAT2 viewLength = DirectX::XMFLOAT2((m_pCameras[i]->GetViewRatio().z - m_pCameras[i]->GetViewRatio().x),
+			(m_pCameras[i]->GetViewRatio().w - m_pCameras[i]->GetViewRatio().y));
 
 		DirectX::XMFLOAT4 RTPos = DirectX::XMFLOAT4(viewCenter.x, viewCenter.y, 0, 1);
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -271,7 +269,6 @@ void Renderer::Update(ObjectManager * objManager)
 		memcpy(mappedResource.pData, &RTPos, sizeof(DirectX::XMFLOAT4));
 		m_pDeviceContext->Unmap(constBufferRTTPos, 0);
 
-		
 		m_pDeviceContext->GSSetConstantBuffers(1, 1, &constBufferRTTSize);
 		DirectX::XMFLOAT4 RTSize = DirectX::XMFLOAT4(-viewLength.x, -viewLength.y, viewLength.x, viewLength.y);
 		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));

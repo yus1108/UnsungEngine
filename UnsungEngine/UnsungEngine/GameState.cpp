@@ -21,7 +21,7 @@ void GameState::Init()
 
 	CameraComponent * cameraComponent = new CameraComponent();
 	cameraComponent->Init(UEngine::ComponentType_CAMERA, true, mainCamera);
-	cameraComponent->Init(&renderer, DirectX::XMFLOAT4(0.2f, 0.2f, 0.7f, 0.7f));
+	cameraComponent->Init(&renderer, DirectX::XMFLOAT4(0.2f, 0.2f, 0.8f, 0.8f));
 	mainCamera->AddComponent(cameraComponent);
 	mainCamera->SetActive(false);
 	objManager.AddGameObject(mainCamera);
@@ -45,7 +45,7 @@ void GameState::Init()
 	//text->SetActive(false);
 	objManager.AddGameObject(text);
 
-	//renderer.Resize(true, 1920, 1024);
+	renderer.Resize(false, 1920, 1024);
 	//renderer.Resize(false, 1280, 768);
 }
 

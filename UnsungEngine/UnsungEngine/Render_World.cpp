@@ -53,7 +53,7 @@ void Render_World::DrawObj(Renderer * render, Transform * transform, Component *
 
 		DirectX::XMMATRIX originalView = camera->GetOriginalView();
 		DirectX::XMVECTOR determinant = DirectX::XMMatrixDeterminant(originalView);
-		float aspectRatio = ((camera->GetViewport()->Width - camera->GetViewport()->TopLeftX) / (camera->GetViewport()->Height - -camera->GetViewport()->TopLeftY));
+		float aspectRatio = ((camera->GetViewport()->Width) / (camera->GetViewport()->Height));
 		camera->SetAspectRatio(aspectRatio);
 		SCENE sceneToShader;
 		sceneToShader.viewMat = DirectX::XMMatrixInverse(&determinant, originalView);
