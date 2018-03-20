@@ -187,8 +187,6 @@ void Render_UI::DrawObj(Renderer * render, Transform * transform, Component * m_
 		deferredContext->PSSetShaderResources(0, 1, baseTexture);
 		deferredContext->IASetVertexBuffers(0, 1, render->default_vertexBuffer.GetAddressOf(), &stride, &offset);
 		deferredContext->Draw(1, 0);
-		// to find exception: remove it when it's fixed
-		camera = (CameraComponent*)m_pCamera;
 	}
 }
 

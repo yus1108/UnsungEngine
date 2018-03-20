@@ -768,8 +768,8 @@ void Renderer::AddBasicPipelines() {
 #pragma endregion
 	// PipelineType_NO_ANIMATION
 	m_pDevice->CreateRasterizerState(&rasterizerState, pipeline.rasterState.GetAddressOf());
-	pipeline.samplerState = default_pipeline.samplerState;
-	pipeline.blendingState = default_pipeline.blendingState;
+	pipeline.samplerState = default_pipeline.samplerState.Get();
+	pipeline.blendingState = default_pipeline.blendingState.Get();
 	pipeline.drawType = UEngine::DrawType_WORLD;
 	m_pPipelines.push_back(pipeline);
 
@@ -779,14 +779,14 @@ void Renderer::AddBasicPipelines() {
 	m_pPipelines.push_back(pipeline);
 
 	// PipelineType_UI
-	pipeline.rasterState = default_pipeline.rasterState;
-	pipeline.samplerState = default_pipeline.samplerState;
-	pipeline.blendingState = default_pipeline.blendingState;
+	pipeline.rasterState = default_pipeline.rasterState.Get();
+	pipeline.samplerState = default_pipeline.samplerState.Get();
+	pipeline.blendingState = default_pipeline.blendingState.Get();
 	pipeline.drawType = UEngine::DrawType_UI;
-	pipeline.vertex_shader = default_pipeline.vertex_shader;
-	pipeline.pixel_shader = default_pipeline.pixel_shader;
-	pipeline.geometry_shader = default_pipeline.geometry_shader;
-	pipeline.input_layout = default_pipeline.input_layout;
+	pipeline.vertex_shader = default_pipeline.vertex_shader.Get();
+	pipeline.pixel_shader = default_pipeline.pixel_shader.Get();
+	pipeline.geometry_shader = default_pipeline.geometry_shader.Get();
+	pipeline.input_layout = default_pipeline.input_layout.Get();
 	m_pPipelines.push_back(pipeline);
 }
 void Renderer::RequestNewRTT(UEngine::RenderToTexture * rtt, UINT width, UINT height, ID3D11DeviceContext ** m_pWorldDeferredContext)

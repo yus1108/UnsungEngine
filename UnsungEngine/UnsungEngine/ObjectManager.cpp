@@ -58,7 +58,14 @@ void ObjectManager::Render(CameraComponent * m_pCamera, Renderer * render) {
 		{
 			if (obj.second->GetRenderComponent())
 			{
-				DrawObj(m_pCamera, render, viewport, obj.second);
+				try
+				{
+					DrawObj(m_pCamera, render, viewport, obj.second);
+				}
+				catch (const std::exception&)
+				{
+					std::cout << "bug" << std::endl;
+				}
 			}
 		}
 	}

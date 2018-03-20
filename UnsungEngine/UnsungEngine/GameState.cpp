@@ -20,6 +20,21 @@ void GameState::Init()
 	renderer.Init();
 	objManager.Init();
 
+	CameraComponent * cameraComponent = new CameraComponent();
+	cameraComponent->Init(UEngine::ComponentType_CAMERA, true, mainCamera);
+	cameraComponent->Init(&renderer, DirectX::XMFLOAT4(0, 0, 1, 1));
+	mainCamera->AddComponent(cameraComponent);
+	mainCamera->SetActive(false);
+	objManager.AddGameObject(mainCamera);
+
+	// load model
+	renderer.LoadObject("Assets/WOS_CommandCenter.bin", gameObject);
+	objManager.AddGameObject(gameObject);
+
+	renderer.LoadObject("Assets/WOS_CommandCenter.bin", gameObject2);
+	gameObject2->GetTransform()->SetMatrix(DirectX::XMMatrixMultiply(DirectX::XMMatrixIdentity(), DirectX::XMMatrixTranslation(0.5f, 0, 0)));
+	objManager.AddGameObject(gameObject2);
+
 	// load logo
 	renderer.LoadGUI("Assets/TempLogo.png", logo);
 	DirectX::XMMATRIX worldMat = DirectX::XMMatrixScaling(0.1f, 0.1f, 1);
@@ -36,25 +51,6 @@ void GameState::Init()
 	text->GetTransform()->SetMatrix(worldMat2);
 	//text->SetActive(false);
 	objManager.AddGameObject(text);
-
-	CameraComponent * cameraComponent = new CameraComponent();
-	cameraComponent->Init(UEngine::ComponentType_CAMERA, true, mainCamera);
-	cameraComponent->Init(&renderer, DirectX::XMFLOAT4(0, 0, 1, 1));
-	mainCamera->AddComponent(cameraComponent);
-	mainCamera->SetActive(false);
-	objManager.AddGameObject(mainCamera);
-
-	
-
-	// load model
-	renderer.LoadObject("Assets/WOS_CommandCenter.bin", gameObject);
-	objManager.AddGameObject(gameObject);
-
-	renderer.LoadObject("Assets/WOS_CommandCenter.bin", gameObject2);
-	gameObject2->GetTransform()->SetMatrix(DirectX::XMMatrixMultiply(DirectX::XMMatrixIdentity(), DirectX::XMMatrixTranslation(0.5f, 0, 0)));
-	objManager.AddGameObject(gameObject2);
-
-	
 
 	//renderer.Resize(true, 1920, 1024);
 	//renderer.Resize(false, 1280, 768);
