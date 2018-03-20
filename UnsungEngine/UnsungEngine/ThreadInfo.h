@@ -5,15 +5,15 @@
 
 class ThreadInfo {
 	std::mutex * mMutex;
+	std::condition_variable * joinConds;
 	std::condition_variable * mCond;
 	bool LockFlag;
 public:
+	bool jobStart;
 	void(*func)(UVector<void*>);
-	bool taskDone;
-	bool isJoined;
 	UVector<void*> parameters;
 
-	ThreadInfo(std::mutex * mMutex, std::condition_variable * mCond);
+	ThreadInfo(std::mutex * mMutex, std::condition_variable * mCond, std::condition_variable * joinConds);
 	~ThreadInfo();
 	void Job();
 	void Signal();

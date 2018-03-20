@@ -98,21 +98,25 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	std::thread mainThreads[1];
 	gameState.Init();
 	UVector<void*> args;
-	//ThreadPool threadPool;
-	//int threadNum = threadPool.AddTask((void(*)(UVector<void*>))threadPool.TestMethod, args);
-	//std::cout << "thread " << threadNum << std::endl;
-	//threadPool.Join(threadNum);
+	ThreadPool threadPool;
+
+	
+	
 	mainThreads[0] = std::thread([&]() {
 		while (!isTerminate)
 		{
 			utime.Signal();
 			utime.Throttle(THROTTLE);
-			//threadNum = threadPool.AddTask((void(*)(UVector<void*>))threadPool.TestMethod, args);
-			//std::cout << "thread " << threadNum << std::endl;
+			
+			//for (int i = 0; i < NUM_THREADS; i++)
+			//{
+			//	int threadNum = threadPool.AddTask((void(*)(UVector<void*>))threadPool.TestMethod, args);
+			//	//std::cout << "thread " << threadNum << std::endl;
+			//}
 			gameState.Update();
-			/*if (threadNum >= 0)
+			/*for (int i = 0; i < NUM_THREADS; i++)
 			{
-				threadPool.Join(threadNum);
+				threadPool.Join(i);
 			}*/
 			std::unique_lock<std::mutex> mainLock(mainMutex);
 		}
