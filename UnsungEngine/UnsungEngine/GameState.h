@@ -9,6 +9,7 @@ private:
 	ObjectManager objManager;
 	GameObject * mainCamera;
 	GameObject * gameObject;
+	GameObject * gameObject2;
 	GameObject * text;
 	GameObject * logo;
 public:

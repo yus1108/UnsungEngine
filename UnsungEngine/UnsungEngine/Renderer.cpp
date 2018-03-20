@@ -208,23 +208,18 @@ void Renderer::Update(ObjectManager * objManager)
 		return;
 
 	// render for each camera
+	std::vector<std::thread> threads;
 	for (unsigned i = 0; i < m_pCameras.size(); i++)
-	{
-		if (!m_pCameras[i]->GetActive() && !m_pCameras[i]->GetParent()->GetActive())
-			continue;
-
-		objManager->Render(m_pCameras[i], this);
-	}
+		threads.push_back(std::thread(&Renderer::DeferredRendering, this, objManager, i));
+	for (auto& thread : threads)
+		thread.join();
+	threads.clear();
 	// finish deferred rendering
 	for (unsigned i = 0; i < m_pCameras.size(); i++)
-	{
-		if (!m_pCameras[i]->GetActive() && !m_pCameras[i]->GetParent()->GetActive())
-			continue;
-
-		// Create command lists and record commands into them.
-		m_pCameras[i]->GetDeferredContext(0)->FinishCommandList(true, m_pCameras[i]->GetCommandList(0));
-		m_pCameras[i]->GetDeferredContext(1)->FinishCommandList(true, m_pCameras[i]->GetCommandList(1));
-	}
+		threads.push_back(std::thread(&Renderer::FinishComands, this, i));
+	for (auto& thread : threads)
+		thread.join();
+	threads.clear();
 	// execute deferred rendering
 	for (unsigned i = 0; i < m_pCameras.size(); i++)
 	{
@@ -309,6 +304,27 @@ void Renderer::Update(ObjectManager * objManager)
 	}
 
 	m_pSwapCahin->Present(0, 0);
+}
+
+void Renderer::DeferredRendering(ObjectManager * objManager, int i) {
+	if (!m_pCameras[i]->GetActive() && !m_pCameras[i]->GetParent()->GetActive())
+		return;
+	objManager->Render(m_pCameras[i], this);
+}
+void Renderer::FinishComands(int i) {
+	if (!m_pCameras[i]->GetActive() && !m_pCameras[i]->GetParent()->GetActive())
+		return;
+
+	// Create command lists and record commands into them.
+	std::thread t0 = std::thread([&]() {
+		m_pCameras[i]->GetDeferredContext(0)->FinishCommandList(true, m_pCameras[i]->GetCommandList(0));
+	});
+	std::thread t1 = std::thread([&]() {
+		m_pCameras[i]->GetDeferredContext(1)->FinishCommandList(true, m_pCameras[i]->GetCommandList(1));
+	});
+
+	t0.join();
+	t1.join();
 }
 
 void Renderer::Resize(bool isFullScreen, int width, int height) {
@@ -436,10 +452,12 @@ void Renderer::LoadGUI(const WCHAR * inputString, unsigned length, GameObject * 
 	Render_UI * ptr = (Render_UI*)textModel;
 	UEngine::TextFormat textFormat;
 	textFormat.textColor = D2D1::ColorF::White;
-	textFormat.dpiX = 150;
-	textFormat.dpiY = 200;
+	textFormat.dpiX = 100;
+	textFormat.dpiY = 400;
+	textFormat.width = 400;
+	textFormat.height = 200;
 	ptr->Init(&m_pPipelines[UEngine::PipelineType_UI]);
-	ptr->Init(m_pDevice.Get(), inputString, length, L"Verdana", 50, textFormat);
+	ptr->Init(m_pDevice.Get(), inputString, length, L"Verdana", 30, textFormat);
 	ptr->SetType(UEngine::DrawType_UI);
 	gameObject->SetRenderComponent(textModel);
 	gameObject->GetTransform()->SetMatrix(DirectX::XMMatrixIdentity());
@@ -622,12 +640,6 @@ void Renderer::InitInputLayout(UEngine::pipeline_state_t & pipeline, const void 
 		pipeline.input_layout = nullptr;
 }
 
-void Renderer::CreateNewDeferredContext(UVector<Microsoft::WRL::ComPtr<ID3D11DeviceContext>> & m_pDeferredContexts)
-{
-	m_pDeferredContexts.push_back(nullptr);
-	m_pWorldCommandList.push_back(nullptr);
-	m_pDevice->CreateDeferredContext(NULL, m_pDeferredContexts[m_pDeferredContexts.size() - 1].GetAddressOf());
-}
 void Renderer::CreateRenderToTexture(UEngine::RenderToTexture * rtt, UINT width, UINT height) {
 #pragma region descDepth_buffer
 	D3D11_TEXTURE2D_DESC depthBuffer;

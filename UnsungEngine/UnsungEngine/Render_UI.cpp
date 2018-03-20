@@ -160,31 +160,35 @@ void Render_UI::DrawObj(Renderer * render, Transform * transform, Component * m_
 		UINT offset = 0;
 
 		CameraComponent * camera = (CameraComponent*)m_pCamera;
-		camera->GetDeferredContext(UEngine::DrawType_UI)->VSSetConstantBuffers(0, 1, &render->constBufferRTTPos);
+		ID3D11DeviceContext * deferredContext = camera->GetDeferredContext(UEngine::DrawType_UI);
+
+		deferredContext->VSSetConstantBuffers(0, 1, &render->constBufferRTTPos);
+		deferredContext->GSSetConstantBuffers(1, 1, &render->constBufferRTTSize);
+
 		DirectX::XMFLOAT4 RTPos = transform->GetPosition4();
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
 		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
-		camera->GetDeferredContext(UEngine::DrawType_UI)->Map(render->constBufferRTTPos, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
+		deferredContext->Map(render->constBufferRTTPos, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
 		memcpy(mappedResource.pData, &RTPos, sizeof(DirectX::XMFLOAT4));
-		camera->GetDeferredContext(UEngine::DrawType_UI)->Unmap(render->constBufferRTTPos, 0);
+		deferredContext->Unmap(render->constBufferRTTPos, 0);
 
-		camera->GetDeferredContext(UEngine::DrawType_UI)->GSSetConstantBuffers(1, 1, &render->constBufferRTTSize);
 		DirectX::XMFLOAT3 scale = transform->GetScale();
 		DirectX::XMFLOAT4 RTSize = DirectX::XMFLOAT4(-scale.x, -scale.y, scale.x, scale.y);
-		mappedResource;
 		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
-		camera->GetDeferredContext(UEngine::DrawType_UI)->Map(render->constBufferRTTSize, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
+		deferredContext->Map(render->constBufferRTTSize, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
 		memcpy(mappedResource.pData, &RTSize, sizeof(DirectX::XMFLOAT4));
-		camera->GetDeferredContext(UEngine::DrawType_UI)->Unmap(render->constBufferRTTSize, 0);
+		deferredContext->Unmap(render->constBufferRTTSize, 0);
 
 		// set texture info
 		ID3D11ShaderResourceView *baseTexture[]{
 			(ID3D11ShaderResourceView*)
 			m_pOffscreenSRV.Get()
 		};
-		camera->GetDeferredContext(UEngine::DrawType_UI)->PSSetShaderResources(0, 1, baseTexture);
-		camera->GetDeferredContext(UEngine::DrawType_UI)->IASetVertexBuffers(0, 1, render->default_vertexBuffer.GetAddressOf(), &stride, &offset);
-		camera->GetDeferredContext(UEngine::DrawType_UI)->Draw(1, 0);
+		deferredContext->PSSetShaderResources(0, 1, baseTexture);
+		deferredContext->IASetVertexBuffers(0, 1, render->default_vertexBuffer.GetAddressOf(), &stride, &offset);
+		deferredContext->Draw(1, 0);
+		// to find exception: remove it when it's fixed
+		camera = (CameraComponent*)m_pCamera;
 	}
 }
 

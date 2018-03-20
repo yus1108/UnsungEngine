@@ -18,8 +18,6 @@ private:
 	Microsoft::WRL::ComPtr<IDXGISwapChain>					m_pSwapCahin;
 	Microsoft::WRL::ComPtr<ID3D11Device>					m_pDevice;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext>				m_pDeviceContext;
-	UVector<Microsoft::WRL::ComPtr<ID3D11DeviceContext>>	m_pWorldDeferredContext;
-	UVector<Microsoft::WRL::ComPtr<ID3D11CommandList>>		m_pWorldCommandList;
 
 	UVector<UEngine::pipeline_state_t>	m_pPipelines;
 	UVector<CameraComponent*> m_pCameras;
@@ -47,6 +45,9 @@ public:
 	void Init();
 	void Update(ObjectManager * objManager);
 
+	void DeferredRendering(ObjectManager * objManager, int i);
+	void FinishComands(int i);
+
 	void Resize(bool isFullScreen, int width, int height);
 	void LoadObject(const char * name, GameObject * gameObject);
 	void LoadGUI(const char * textureName, GameObject * gameObject);
@@ -68,7 +69,6 @@ private:
 		const void * pPShaderByteCode, SIZE_T PShaderLength, const void * pGShaderByteCode,
 		SIZE_T GShaderLength, const D3D11_INPUT_ELEMENT_DESC * vLayout, UINT layoutLength);
 
-	void CreateNewDeferredContext(UVector<Microsoft::WRL::ComPtr<ID3D11DeviceContext>> & m_pDeferredContexts);
 	void CreateRenderToTexture(UEngine::RenderToTexture * rtt, UINT width, UINT height);
 	void AddBasicPipelines();
 	void RequestNewRTT(UEngine::RenderToTexture * rtt, UINT width, UINT height, ID3D11DeviceContext ** m_pWorldDeferredContext);

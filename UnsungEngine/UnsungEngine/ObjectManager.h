@@ -14,6 +14,7 @@ public:
 	void Init();
 	void Update();
 	void Render(CameraComponent * m_pCamera, Renderer * render);
+	void DrawObj(CameraComponent * m_pCamera, Renderer * render, D3D11_VIEWPORT viewport, GameObject * obj);
 	void Clear();
 
 	GameObject * GetGameObject(unsigned i);
