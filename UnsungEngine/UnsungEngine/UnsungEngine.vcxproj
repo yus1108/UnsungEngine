@@ -159,6 +159,8 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="SystemDefinition.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="ThreadInfo.h" />
+    <ClInclude Include="ThreadPool.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="UMath.h" />
     <ClInclude Include="UnsungEngine.h" />
@@ -185,6 +187,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="ThreadInfo.cpp" />
+    <ClCompile Include="ThreadPool.cpp" />
     <ClCompile Include="Transform.cpp" />
     <ClCompile Include="UMath.cpp" />
     <ClCompile Include="UnsungEngine.cpp" />

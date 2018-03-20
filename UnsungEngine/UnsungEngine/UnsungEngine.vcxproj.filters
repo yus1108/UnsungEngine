@@ -114,6 +114,12 @@
     <ClInclude Include="CameraComponent.h">
       <Filter>Game\Component</Filter>
     </ClInclude>
+    <ClInclude Include="ThreadPool.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadInfo.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -169,6 +175,12 @@
     </ClCompile>
     <ClCompile Include="CameraComponent.cpp">
       <Filter>Game\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="ThreadPool.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="ThreadInfo.cpp">
+      <Filter>Utility</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

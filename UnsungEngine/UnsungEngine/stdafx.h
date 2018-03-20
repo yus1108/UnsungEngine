@@ -57,6 +57,8 @@
 #include "UVector.h"
 #include "UTime.h"
 #include "UMath.h"
+#include "ThreadInfo.h"
+#include "ThreadPool.h"
 #include "Input.h"
 #include "SystemDefinition.h"
 #include "Definition.h"

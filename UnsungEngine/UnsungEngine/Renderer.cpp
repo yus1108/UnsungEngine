@@ -779,15 +779,23 @@ void Renderer::AddBasicPipelines() {
 	m_pPipelines.push_back(pipeline);
 
 	// PipelineType_UI
-	pipeline.rasterState = default_pipeline.rasterState.Get();
-	pipeline.samplerState = default_pipeline.samplerState.Get();
-	pipeline.blendingState = default_pipeline.blendingState.Get();
-	pipeline.drawType = UEngine::DrawType_UI;
-	pipeline.vertex_shader = default_pipeline.vertex_shader.Get();
-	pipeline.pixel_shader = default_pipeline.pixel_shader.Get();
-	pipeline.geometry_shader = default_pipeline.geometry_shader.Get();
-	pipeline.input_layout = default_pipeline.input_layout.Get();
-	m_pPipelines.push_back(pipeline);
+	// Create view layout
+	UEngine::pipeline_state_t uiPipeline;
+	D3D11_INPUT_ELEMENT_DESC vLayoutUI[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+	InitInputLayout(uiPipeline,
+		Default_VS, ARRAYSIZE(Default_VS),
+		Default_PS, ARRAYSIZE(Default_PS),
+		Default_GS, ARRAYSIZE(Default_GS),
+		vLayoutUI, ARRAYSIZE(vLayoutUI));
+	uiPipeline.rasterState = default_pipeline.rasterState.Get();
+	uiPipeline.samplerState = default_pipeline.samplerState.Get();
+	uiPipeline.blendingState = default_pipeline.blendingState.Get();
+	uiPipeline.drawType = UEngine::DrawType_UI;
+	m_pPipelines.push_back(uiPipeline);
 }
 void Renderer::RequestNewRTT(UEngine::RenderToTexture * rtt, UINT width, UINT height, ID3D11DeviceContext ** m_pWorldDeferredContext)
 {

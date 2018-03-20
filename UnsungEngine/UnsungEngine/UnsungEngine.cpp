@@ -65,6 +65,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		return 10;
 	}
 
+
 #pragma region arguement_handling
 	//LPWSTR command = GetCommandLine();
 	//size_t origsize = wcslen(command) + 1;
@@ -96,12 +97,23 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	bool succeedTerminating = false;
 	std::thread mainThreads[1];
 	gameState.Init();
+	UVector<void*> args;
+	//ThreadPool threadPool;
+	//int threadNum = threadPool.AddTask((void(*)(UVector<void*>))threadPool.TestMethod, args);
+	//std::cout << "thread " << threadNum << std::endl;
+	//threadPool.Join(threadNum);
 	mainThreads[0] = std::thread([&]() {
 		while (!isTerminate)
 		{
 			utime.Signal();
 			utime.Throttle(THROTTLE);
+			//threadNum = threadPool.AddTask((void(*)(UVector<void*>))threadPool.TestMethod, args);
+			//std::cout << "thread " << threadNum << std::endl;
 			gameState.Update();
+			/*if (threadNum >= 0)
+			{
+				threadPool.Join(threadNum);
+			}*/
 			std::unique_lock<std::mutex> mainLock(mainMutex);
 		}
 		std::unique_lock<std::mutex> mainLock(mainMutex);
