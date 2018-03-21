@@ -4,7 +4,7 @@
 ThreadPool::ThreadPool()
 {
 	for (int i = 0; i < NUM_THREADS; i++)
-		threadInfos.push_back(ThreadInfo(&mMutexs[i], &mConds[i], &joinConds[i]));
+		threadInfos.push_back(ThreadInfo(&mMutexs[i], &mConds[i]));
 	for (int i = 0; i < NUM_THREADS; i++)
 		threads.push_back(std::thread(&ThreadPool::AddThread, this, i));
 }
@@ -22,10 +22,10 @@ void ThreadPool::AddThread(int i) {
 int ThreadPool::AddTask(void(*func)(UVector<void*>), UVector<void*> args) {
 	for (int i = 0; i < NUM_THREADS; i++)
 	{
-		if (!threadInfos[i].func)
+		if (!threadInfos[i].func && !threadInfos[i].isJoined)
 		{
 			std::unique_lock<std::mutex> uLock(mMutexs[i]);
-			threadInfos[i].jobStart = true;
+			threadInfos[i].isJoined = false;
 			threadInfos[i].func = func;
 			threadInfos[i].parameters = args;
 			threadInfos[i].Signal();
@@ -42,6 +42,7 @@ void ThreadPool::TestMethod(UVector<void*> args) {
 
 void ThreadPool::Join(int i) {
 	threadInfos[i].Join();
+	threadInfos[i].isJoined = true;
 }
 
 

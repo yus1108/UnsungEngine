@@ -40,6 +40,9 @@
     <Filter Include="Game\Component">
       <UniqueIdentifier>{184b3415-f315-472c-90a2-cac0a03f54ea}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\Particle_Shaders">
+      <UniqueIdentifier>{69fb9ab9-c082-438a-91be-fac37b98446d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -211,6 +214,15 @@
     </FxCompile>
     <FxCompile Include="Shaders\Static_VS.hlsl">
       <Filter>Shaders\Static_Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Particle_VS.hlsl">
+      <Filter>Shaders\Particle_Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Particle_GS.hlsl">
+      <Filter>Shaders\Particle_Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Particle_PS.hlsl">
+      <Filter>Shaders\Particle_Shaders</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>
