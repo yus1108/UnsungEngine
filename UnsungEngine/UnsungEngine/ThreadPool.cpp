@@ -1,12 +1,17 @@
 #include "stdafx.h"
 #include "ThreadPool.h"
-
+#include <functional>
 ThreadPool::ThreadPool()
 {
 	for (int i = 0; i < NUM_THREADS; i++)
 		threadInfos.push_back(ThreadInfo(&mMutexs[i], &mConds[i]));
 	for (int i = 0; i < NUM_THREADS; i++)
 		threads.push_back(std::thread(&ThreadPool::AddThread, this, i));
+
+	auto test = std::bind(TestMethod, std::placeholders::_1);
+	UVector<void*> arg;
+	test(arg);
+	test(arg);
 }
 ThreadPool::~ThreadPool()
 {
