@@ -73,6 +73,7 @@
 #include "RenderComponent.h"
 #include "Render_World.h"
 #include "Render_UI.h"
+#include "Render_Particle.h"
 #include "Transform.h"
 #include "ObjectManager.h"
 

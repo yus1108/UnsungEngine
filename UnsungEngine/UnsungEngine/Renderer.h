@@ -8,6 +8,7 @@ class Renderer
 {
 	friend class Render_World;
 	friend class Render_UI;
+	friend class Render_Particle;
 private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> default_vertexBuffer;
 	UEngine::RenderToTexture default_RTT;
@@ -53,6 +54,7 @@ public:
 	void LoadObject(const char * name, GameObject * gameObject);
 	void LoadGUI(const char * textureName, GameObject * gameObject);
 	void LoadGUI(const WCHAR * inputString, unsigned length, GameObject * gameObject);
+	void LoadParticle(const char * name, GameObject * gameObject);
 	void ChangeGUI(const char * textStr, GameObject * gameObject, UEngine::TextFormat * textFormat = nullptr);
 private:
 	void RenderSet(ID3D11DeviceContext * m_pDeviceContext, UEngine::pipeline_state_t & pipeline, UEngine::RenderToTexture & rtt,

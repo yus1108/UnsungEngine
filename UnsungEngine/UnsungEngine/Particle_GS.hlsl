@@ -29,8 +29,8 @@ void main(point INPUT_VERTEX input[1] : SV_POSITION, inout TriangleStream< GSOut
 	GSOutput verts[MAXVERTS] =
 	{
 		float4(-0.01f,-0.01f,0,0), float4(0,0,0,1),
-		float4(-0.01f,0.01f,0,0), float4(0,0,0,1),
 		float4(0.01f,-0.01f,0,0), float4(0,0,0,1),
+		float4(-0.01f,0.01f,0,0), float4(0,0,0,1),
 		float4(0.01f,0.01f,0,0), float4(0,0,0,1)
 	};
 
@@ -47,6 +47,9 @@ void main(point INPUT_VERTEX input[1] : SV_POSITION, inout TriangleStream< GSOut
 	for (uint i = 0; i < MAXVERTS; ++i)
 	{
 		// send verts to the rasterizer
+		verts[i].posH = mul(verts[i].posH, projectionMatrix);
+		verts[i].posH.z = verts[i].posH.z / verts[i].posH.w;
+		verts[i].posH.w = 1;
 		output.Append(verts[i]);
 	}
 	// do not connect to other triangles

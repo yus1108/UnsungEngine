@@ -68,6 +68,17 @@ namespace UEngine {
 		UINT width;
 		UINT height;
 	};
+
+	struct DefaultVertex
+	{
+		DirectX::XMFLOAT3 pos;
+		DirectX::XMFLOAT2 tex;
+	};
+	struct ColorVertex
+	{
+		DirectX::XMFLOAT3 pos;
+		DirectX::XMFLOAT4 color;
+	};
 }
 
 
@@ -150,12 +161,6 @@ namespace graphics
 		std::bitset<64> pipeline_id;
 	};
 }
-
-struct DefaultVertex
-{
-	DirectX::XMFLOAT3 pos;
-	DirectX::XMFLOAT2 tex;
-};
 
 struct SIMPLE_VERTEX {
 	DirectX::XMFLOAT3 pos;

@@ -156,7 +156,7 @@ void Render_UI::DrawObj(Renderer * render, Transform * transform, Component * m_
 {
 	if (loadingDone && isActive)
 	{
-		UINT stride = sizeof(DefaultVertex);
+		UINT stride = sizeof(UEngine::DefaultVertex);
 		UINT offset = 0;
 
 		CameraComponent * camera = (CameraComponent*)m_pCamera;

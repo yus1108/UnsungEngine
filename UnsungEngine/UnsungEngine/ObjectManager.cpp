@@ -47,7 +47,7 @@ void ObjectManager::Render(CameraComponent * m_pCamera, Renderer * render) {
 	D3D11_VIEWPORT viewport = *m_pCamera->GetViewport();
 	viewport.TopLeftX = 0;
 	viewport.TopLeftY = 0;
-	for (int i = 0; i < threads.size(); i++)
+	for (unsigned i = 0; i < threads.size(); i++)
 		threadPool.Join(threads[i]);
 	threads.clear();
 #pragma endregion

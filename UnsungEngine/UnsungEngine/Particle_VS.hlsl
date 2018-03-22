@@ -12,7 +12,7 @@ struct OUTPUT_VERTEX
 
 cbuffer WORLD : register(b0)
 {
-	float4x4 worldMatrix[1000];
+	float4 worldMatrix[1000];
 }
 cbuffer SCENE : register(b1)
 {
@@ -31,8 +31,8 @@ OUTPUT_VERTEX main(INPUT_VERTEX fromVertexBuffer)
 	//	localH[i] = mul(localH[i], worldMatrix[i]);
 	//	localH[i] = mul(localH[i], viewMatrix[i]);
 	//}
-	localH[0] = mul(localH[0], worldMatrix[0]);
-	localH[0] = mul(localH[0], viewMatrix[0]);
+	localH += worldMatrix[0];
+	localH = mul(localH, viewMatrix);
 	sendToRasterizer.projectedCoordinate = localH;
 	sendToRasterizer.colorOut = fromVertexBuffer.color;
 

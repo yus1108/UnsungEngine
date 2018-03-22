@@ -175,7 +175,7 @@ void Renderer::Init()
 		InitConstBuffer(sizeof(LIGHTINFO), &constBufferLightInfo);
 		InitConstBuffer(sizeof(DirectX::XMFLOAT4), &constBufferRTTPos);
 		InitConstBuffer(sizeof(DirectX::XMFLOAT4), &constBufferRTTSize);
-		InitConstBuffer(sizeof(DirectX::XMMATRIX) * 1000, &constBufferParticleWorld);
+		InitConstBuffer(sizeof(DirectX::XMFLOAT4) * 1000, &constBufferParticleWorld);
 	}));	// TODO: add constant buffers
 	threads.push_back(std::thread([&]() {
 		AddBasicPipelines();
@@ -187,7 +187,7 @@ void Renderer::Init()
 
 #pragma region MODEL_LOADING
 	// Basic Model Loading
-	DefaultVertex cpu_vertex;
+	UEngine::DefaultVertex cpu_vertex;
 	cpu_vertex.pos = DirectX::XMFLOAT3();
 	cpu_vertex.tex = DirectX::XMFLOAT2();
 
@@ -196,7 +196,7 @@ void Renderer::Init()
 	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
 	bufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
 	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bufferDesc.ByteWidth = (UINT)sizeof(DefaultVertex);
+	bufferDesc.ByteWidth = (UINT)sizeof(UEngine::DefaultVertex);
 	D3D11_SUBRESOURCE_DATA initData;
 	ZeroMemory(&initData, sizeof(initData));
 	initData.pSysMem = &cpu_vertex;
@@ -212,15 +212,15 @@ void Renderer::Update(ObjectManager * objManager)
 
 	// render for each camera
 	UVector<int> threads;
-	for (int i = 0; i < m_pCameras.size(); i++)
+	for (unsigned i = 0; i < m_pCameras.size(); i++)
 		threads.push_back(threadPool.AddTask(std::bind(&Renderer::DeferredRendering, this, objManager, i)));
-	for (int i = 0; i < threads.size(); i++)
+	for (unsigned i = 0; i < threads.size(); i++)
 		threadPool.Join(threads[i]);
 	threads.clear();
 	// finish deferred rendering
 	for (unsigned i = 0; i < m_pCameras.size(); i++)
 		threads.push_back(threadPool.AddTask(std::bind(&Renderer::FinishComands, this, i)));
-	for (int i = 0; i < threads.size(); i++)
+	for (unsigned i = 0; i < threads.size(); i++)
 		threadPool.Join(threads[i]);
 	threads.clear();
 	// execute deferred rendering
@@ -236,7 +236,7 @@ void Renderer::Update(ObjectManager * objManager)
 		m_pCameras[i]->ReleaseCommandList(0);
 		m_pCameras[i]->ReleaseCommandList(1);
 	}
-	UINT stride = sizeof(DefaultVertex);
+	UINT stride = sizeof(UEngine::DefaultVertex);
 	UINT offset = 0;
 
 	// clearing depth buffer and render target
@@ -463,6 +463,16 @@ void Renderer::LoadGUI(const WCHAR * inputString, unsigned length, GameObject * 
 	ptr->Init(m_pDevice.Get(), inputString, length, L"Verdana", 30, textFormat);
 	ptr->SetType(UEngine::DrawType_UI);
 	gameObject->SetRenderComponent(textModel);
+	gameObject->GetTransform()->SetMatrix(DirectX::XMMatrixIdentity());
+}
+void Renderer::LoadParticle(const char * name, GameObject * gameObject) {
+	RenderComponent * particleModel = new Render_Particle();
+	Render_Particle * ptr = (Render_Particle*)particleModel;
+	ptr->Init(&m_pPipelines[UEngine::PipelineType_PARTICLE]);
+	ptr->Init(m_pDevice.Get());
+	ptr->ReadBin(name, m_pDevice.Get(), m_pDeviceContext.Get());
+	ptr->SetType(UEngine::DrawType_WORLD);
+	gameObject->SetRenderComponent(particleModel);
 	gameObject->GetTransform()->SetMatrix(DirectX::XMMatrixIdentity());
 }
 void Renderer::ChangeGUI(const char * textStr, GameObject * gameObject, UEngine::TextFormat * textFormat) {

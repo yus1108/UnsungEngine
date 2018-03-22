@@ -12,10 +12,10 @@ private:
 	GameObject * mainCamera;
 	GameObject * mainCamera2;
 	GameObject * gameObject;
-	GameObject * gameObject2;
-	GameObject * text;
-	GameObject * logo;
-	GameObject * logo2;
+	//GameObject * gameObject2;
+	//GameObject * text;
+	//GameObject * logo;
+	//GameObject * logo2;
 public:
 	GameState();
 	~GameState();
