@@ -21,4 +21,3 @@ public:
 	//void Add_Axis(UnitNode * node);
 	void Flush();
 };
-

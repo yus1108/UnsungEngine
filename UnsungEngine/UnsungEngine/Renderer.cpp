@@ -5,6 +5,7 @@
 Renderer::Renderer()
 {
 	loadingDone = false;
+	debugRenderer = nullptr;
 }
 Renderer::~Renderer()
 {
@@ -26,6 +27,8 @@ Renderer::~Renderer()
 		constBufferRTTSize->Release();
 	if (constBufferParticleWorld)
 		constBufferParticleWorld->Release();
+	if (debugRenderer)
+		delete debugRenderer;
 }
 
 void Renderer::AddCameras(CameraComponent * component, RECT clientSize)
@@ -185,7 +188,10 @@ void Renderer::Init()
 	}
 	threads.clear();
 
-#pragma region MODEL_LOADING
+	// debugrenderer
+	debugRenderer = new DebugRenderer(m_pDevice.Get(), m_pDeviceContext.Get());
+
+#pragma region Default_Vertex
 	// Basic Model Loading
 	UEngine::DefaultVertex cpu_vertex;
 	cpu_vertex.pos = DirectX::XMFLOAT3();

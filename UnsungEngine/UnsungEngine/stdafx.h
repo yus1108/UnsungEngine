@@ -68,6 +68,7 @@
 #include "GameState.h"
 #include "GameObject.h"
 #include "Renderer.h"
+#include "DebugRenderer.h"
 #include "Component.h"
 #include "CameraComponent.h"
 #include "RenderComponent.h"
