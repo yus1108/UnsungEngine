@@ -10,6 +10,7 @@ GameState::GameState()
 	gameObject2 = new GameObject();
 	text = new GameObject();
 	logo = new GameObject();
+	logo2 = new GameObject();
 }
 
 GameState::~GameState()
@@ -47,10 +48,17 @@ void GameState::Init()
 	objManager.AddGameObject(gameObject2);
 
 	// load logo
-	renderer.LoadGUI("Assets/TempLogo.png", logo);
+	renderer.LoadGUI("Assets/tiles_12.dds", logo);
 	DirectX::XMMATRIX worldMat = DirectX::XMMatrixScaling(0.1f, 0.1f, 1);
 	logo->GetTransform()->SetMatrix(worldMat);
 	objManager.AddGameObject(logo);
+	//objManager.RemoveGameObject(logo);
+
+	// load logo
+	renderer.LoadGUI("Assets/tiles_12.dds", logo2);
+	worldMat = DirectX::XMMatrixScaling(0.12f, 0.1f, 1);
+	logo2->GetTransform()->SetMatrix(worldMat);
+	objManager.AddGameObject(logo2);
 	//objManager.RemoveGameObject(logo);
 
 	// load text

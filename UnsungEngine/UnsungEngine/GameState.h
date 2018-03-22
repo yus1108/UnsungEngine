@@ -15,6 +15,7 @@ private:
 	GameObject * gameObject2;
 	GameObject * text;
 	GameObject * logo;
+	GameObject * logo2;
 public:
 	GameState();
 	~GameState();
