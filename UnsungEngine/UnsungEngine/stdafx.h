@@ -82,3 +82,6 @@
 #include "Default_GS.csh"
 #include "Static_VS.csh"
 #include "Static_PS.csh"
+#include "Particle_VS.csh"
+#include "Particle_GS.csh"
+#include "Particle_PS.csh"

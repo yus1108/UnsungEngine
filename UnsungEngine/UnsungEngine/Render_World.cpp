@@ -15,10 +15,6 @@ Render_World::~Render_World()
 	delete animationComponent;
 }
 
-void Render_World::Init(ID3D11Device * m_pDevice, const WCHAR * textString, UINT32 textLength, const WCHAR * msc_fontName, const FLOAT msc_fontSize, UEngine::TextFormat textFormat)
-{
-}
-
 void Render_World::Init(UEngine::pipeline_state_t * pipeline)
 {
 	RenderComponent::Init(pipeline);

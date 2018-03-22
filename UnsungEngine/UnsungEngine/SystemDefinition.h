@@ -3,6 +3,7 @@
 
 // enum definition
 namespace UEngine {
+	// TODO: Add new component type
 	enum ComponentType {
 		ComponentType_CAMERA,
 		ComponentType_COUNT
@@ -22,9 +23,11 @@ namespace UEngine {
 		DrawType_COUNT
 	};
 
+	// TODO: Add new pipeline enum
 	enum PipelineType {
 		PipelineType_NO_ANIMATION,
 		PipelineType_ANIMATION,
+		PipelineType_PARTICLE,
 		PipelineType_UI,
 		PipelineType_COUNT
 	};

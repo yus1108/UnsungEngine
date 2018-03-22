@@ -43,6 +43,9 @@
     <Filter Include="Shaders\Particle_Shaders">
       <UniqueIdentifier>{69fb9ab9-c082-438a-91be-fac37b98446d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Render\RenderComponents">
+      <UniqueIdentifier>{fe2b8e74-6d6a-456c-beae-6db97cc6c758}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -59,12 +62,6 @@
     </ClInclude>
     <ClInclude Include="WICTextureLoader.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Render_UI.h">
-      <Filter>Render</Filter>
-    </ClInclude>
-    <ClInclude Include="Render_World.h">
-      <Filter>Render</Filter>
     </ClInclude>
     <ClInclude Include="RenderComponent.h">
       <Filter>Render</Filter>
@@ -123,6 +120,15 @@
     <ClInclude Include="ThreadInfo.h">
       <Filter>Utility</Filter>
     </ClInclude>
+    <ClInclude Include="Render_Particle.h">
+      <Filter>Render\RenderComponents</Filter>
+    </ClInclude>
+    <ClInclude Include="Render_UI.h">
+      <Filter>Render\RenderComponents</Filter>
+    </ClInclude>
+    <ClInclude Include="Render_World.h">
+      <Filter>Render\RenderComponents</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -133,12 +139,6 @@
     </ClCompile>
     <ClCompile Include="WICTextureLoader.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Render_UI.cpp">
-      <Filter>Render</Filter>
-    </ClCompile>
-    <ClCompile Include="Render_World.cpp">
-      <Filter>Render</Filter>
     </ClCompile>
     <ClCompile Include="RenderComponent.cpp">
       <Filter>Render</Filter>
@@ -184,6 +184,15 @@
     </ClCompile>
     <ClCompile Include="ThreadInfo.cpp">
       <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="Render_Particle.cpp">
+      <Filter>Render\RenderComponents</Filter>
+    </ClCompile>
+    <ClCompile Include="Render_UI.cpp">
+      <Filter>Render\RenderComponents</Filter>
+    </ClCompile>
+    <ClCompile Include="Render_World.cpp">
+      <Filter>Render\RenderComponents</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

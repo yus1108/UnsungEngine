@@ -153,6 +153,7 @@
     <ClInclude Include="ObjectManager.h" />
     <ClInclude Include="RenderComponent.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="Render_Particle.h" />
     <ClInclude Include="Render_UI.h" />
     <ClInclude Include="Render_World.h" />
     <ClInclude Include="Resource.h" />
@@ -179,6 +180,7 @@
     <ClCompile Include="ObjectManager.cpp" />
     <ClCompile Include="RenderComponent.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="Render_Particle.cpp" />
     <ClCompile Include="Render_UI.cpp" />
     <ClCompile Include="Render_World.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -212,17 +214,29 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Geometry</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
-      <VariableName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">(%Filename)</VariableName>
-      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">(%Filename).csh</HeaderFileOutput>
+      <VariableName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename)</VariableName>
+      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).csh</HeaderFileOutput>
+      <VariableName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(Filename)</VariableName>
+      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(Filename).csh</HeaderFileOutput>
+      <VariableName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(Filename)</VariableName>
+      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(Filename).csh</HeaderFileOutput>
+      <VariableName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename)</VariableName>
+      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).csh</HeaderFileOutput>
     </FxCompile>
     <FxCompile Include="Particle_PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <VariableName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">(%Filename)</VariableName>
-      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">(%Filename).csh</HeaderFileOutput>
+      <VariableName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename)</VariableName>
+      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).csh</HeaderFileOutput>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
+      <VariableName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(Filename)</VariableName>
+      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(Filename).csh</HeaderFileOutput>
+      <VariableName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(Filename)</VariableName>
+      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(Filename).csh</HeaderFileOutput>
+      <VariableName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename)</VariableName>
+      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).csh</HeaderFileOutput>
     </FxCompile>
     <FxCompile Include="Particle_VS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
@@ -230,8 +244,14 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
-      <VariableName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">(%filename)</VariableName>
-      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">(%filename).csh</HeaderFileOutput>
+      <VariableName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename)</VariableName>
+      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).csh</HeaderFileOutput>
+      <VariableName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(Filename)</VariableName>
+      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(Filename).csh</HeaderFileOutput>
+      <VariableName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(Filename)</VariableName>
+      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(Filename).csh</HeaderFileOutput>
+      <VariableName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename)</VariableName>
+      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).csh</HeaderFileOutput>
     </FxCompile>
     <FxCompile Include="Shaders\Default_GS.hlsl">
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>

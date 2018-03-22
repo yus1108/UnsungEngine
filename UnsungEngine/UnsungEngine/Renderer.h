@@ -30,6 +30,7 @@ private:
 	ID3D11Buffer * constBufferLightInfo;
 	ID3D11Buffer * constBufferRTTPos;
 	ID3D11Buffer * constBufferRTTSize;
+	ID3D11Buffer * constBufferParticleWorld;
 
 	bool loadingDone;
 public:
@@ -58,6 +59,7 @@ private:
 		D3D11_VIEWPORT & viewport, D3D11_PRIMITIVE_TOPOLOGY topology);
 	void DebugSet(UEngine::pipeline_state_t * pipeline);
 
+	// initialization functions
 	void InitViewport(D3D11_VIEWPORT & _viewport, RECT clientSize);
 	void InitDeviceContextSwapchain(RECT clientSize);
 	void InitRenderTargetView(UEngine::RenderToTexture & rtt);
@@ -70,7 +72,9 @@ private:
 		SIZE_T GShaderLength, const D3D11_INPUT_ELEMENT_DESC * vLayout, UINT layoutLength);
 
 	void CreateRenderToTexture(UEngine::RenderToTexture * rtt, UINT width, UINT height);
-	void AddBasicPipelines();
 	void RequestNewRTT(UEngine::RenderToTexture * rtt, UINT width, UINT height, ID3D11DeviceContext ** m_pWorldDeferredContext);
+
+	// add more pipelines when it is necessary
+	void AddBasicPipelines();
 };
 

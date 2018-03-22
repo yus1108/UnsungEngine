@@ -1,17 +1,15 @@
 #pragma once
-class Render_World : public RenderComponent
+class Render_Particle : public RenderComponent
 {
 private:
-	Geometry * geometryComponent;
-	Material * materialComponent;
-	Animation * animationComponent;
+	UVector<DirectX::XMMATRIX> particles;
 public:
-	Render_World();
-	virtual ~Render_World();
+	Render_Particle();
+	virtual ~Render_Particle();
 
 	void Init(ID3D11Device * m_pDevice, const WCHAR * textString, UINT32 textLength,
 		const WCHAR * msc_fontName, const FLOAT msc_fontSize,
-		UEngine::TextFormat textFormat = UEngine::TextFormat()) {};
+		UEngine::TextFormat textFormat = UEngine::TextFormat());
 	void Init(UEngine::pipeline_state_t * pipeline);
 	void DrawObj(Renderer * render, Transform * transform, Component * m_pCamera);
 	void ReadBin(const char * filename, ID3D11Device * m_pDevice,

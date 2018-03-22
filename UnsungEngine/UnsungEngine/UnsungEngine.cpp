@@ -105,7 +105,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		{
 			utime.Signal();
 			utime.Throttle(THROTTLE);
-			
 			gameState.Update();
 			std::unique_lock<std::mutex> mainLock(mainMutex);
 		}

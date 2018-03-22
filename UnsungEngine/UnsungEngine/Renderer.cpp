@@ -24,6 +24,8 @@ Renderer::~Renderer()
 		constBufferRTTPos->Release();
 	if (constBufferRTTSize)
 		constBufferRTTSize->Release();
+	if (constBufferParticleWorld)
+		constBufferParticleWorld->Release();
 }
 
 void Renderer::AddCameras(CameraComponent * component, RECT clientSize)
@@ -173,10 +175,11 @@ void Renderer::Init()
 		InitConstBuffer(sizeof(LIGHTINFO), &constBufferLightInfo);
 		InitConstBuffer(sizeof(DirectX::XMFLOAT4), &constBufferRTTPos);
 		InitConstBuffer(sizeof(DirectX::XMFLOAT4), &constBufferRTTSize);
+		InitConstBuffer(sizeof(DirectX::XMMATRIX) * 1000, &constBufferParticleWorld);
 	}));	// TODO: add constant buffers
 	threads.push_back(std::thread([&]() {
 		AddBasicPipelines();
-	})); // Adding Render To Texture and pipelines
+	})); // TODO: Adding pipelines
 	for (auto& thread : threads) {
 		thread.join();
 	}
@@ -562,7 +565,7 @@ void Renderer::InitDeviceContextSwapchain(RECT clientSize) {
 	m_pSwapchainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	m_pSwapchainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 	m_pSwapchainDesc.OutputWindow = hWnd;
-	m_pSwapchainDesc.SampleDesc.Count = 8;
+	m_pSwapchainDesc.SampleDesc.Count = 4;
 	m_pSwapchainDesc.SampleDesc.Quality = 0;
 	m_pSwapchainDesc.Windowed = TRUE;
 
@@ -737,7 +740,14 @@ void Renderer::CreateRenderToTexture(UEngine::RenderToTexture * rtt, UINT width,
 	m_pDevice->CreateTexture2D(&desc, nullptr, &rtt->outTexture);
 	m_pDevice->CreateShaderResourceView(rtt->outTexture.Get(), &singleSRVDesc, &rtt->outSRV);
 }
+void Renderer::RequestNewRTT(UEngine::RenderToTexture * rtt, UINT width, UINT height, ID3D11DeviceContext ** m_pWorldDeferredContext)
+{
+	CreateRenderToTexture(rtt, width, height);
+	m_pDevice->CreateDeferredContext(NULL, m_pWorldDeferredContext);
+}
+
 void Renderer::AddBasicPipelines() {
+	m_pPipelines.reserve(UEngine::PipelineType_COUNT);
 #pragma region INITIALIZATION
 	UEngine::pipeline_state_t pipeline;
 	D3D11_RASTERIZER_DESC rasterizerState;
@@ -771,15 +781,32 @@ void Renderer::AddBasicPipelines() {
 	pipeline.samplerState = default_pipeline.samplerState.Get();
 	pipeline.blendingState = default_pipeline.blendingState.Get();
 	pipeline.drawType = UEngine::DrawType_WORLD;
-	m_pPipelines.push_back(pipeline);
+	m_pPipelines[UEngine::PipelineType_NO_ANIMATION] = pipeline;
 
 	// PipelineType_ANIMATION
 	//m_pDevice->CreateVertexShader(pVShaderByteCode, VShaderLength, nullptr, pipeline.vertex_shader.GetAddressOf());
 	pipeline.vertex_shader = nullptr;
-	m_pPipelines.push_back(pipeline);
+	m_pPipelines[UEngine::PipelineType_ANIMATION] = pipeline;
+
+	// PipelineType_Particle
+	UEngine::pipeline_state_t particlePipeline;
+	D3D11_INPUT_ELEMENT_DESC vLayoutParticle[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+	InitInputLayout(particlePipeline,
+		Particle_VS, ARRAYSIZE(Particle_VS),
+		Particle_PS, ARRAYSIZE(Particle_PS),
+		Particle_GS, ARRAYSIZE(Particle_GS),
+		vLayoutParticle, ARRAYSIZE(vLayoutParticle));
+	m_pDevice->CreateRasterizerState(&rasterizerState, particlePipeline.rasterState.GetAddressOf());
+	particlePipeline.samplerState = default_pipeline.samplerState.Get();
+	particlePipeline.blendingState = default_pipeline.blendingState.Get();
+	particlePipeline.drawType = UEngine::DrawType_WORLD;
+	m_pPipelines[UEngine::PipelineType_PARTICLE] = particlePipeline;
 
 	// PipelineType_UI
-	// Create view layout
 	UEngine::pipeline_state_t uiPipeline;
 	D3D11_INPUT_ELEMENT_DESC vLayoutUI[] =
 	{
@@ -795,10 +822,5 @@ void Renderer::AddBasicPipelines() {
 	uiPipeline.samplerState = default_pipeline.samplerState.Get();
 	uiPipeline.blendingState = default_pipeline.blendingState.Get();
 	uiPipeline.drawType = UEngine::DrawType_UI;
-	m_pPipelines.push_back(uiPipeline);
-}
-void Renderer::RequestNewRTT(UEngine::RenderToTexture * rtt, UINT width, UINT height, ID3D11DeviceContext ** m_pWorldDeferredContext)
-{
-	CreateRenderToTexture(rtt, width, height);
-	m_pDevice->CreateDeferredContext(NULL, m_pWorldDeferredContext);
+	m_pPipelines[UEngine::PipelineType_UI] = uiPipeline;
 }
