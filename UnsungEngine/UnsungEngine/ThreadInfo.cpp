@@ -7,14 +7,13 @@ ThreadInfo::ThreadInfo(std::mutex * mMutex, std::condition_variable * mCond)
 	func = nullptr;
 	this->mMutex = mMutex;
 	this->mCond = mCond;
-	LockFlag = true;
-	isJoined = true;
-	//func = (void(*)(UVector<void*>))testFunc;
+	isExit = true;
+	isJoined = false;
 }
 
 ThreadInfo::~ThreadInfo()
 {
-	LockFlag = false;
+	isExit = false;
 	mCond->notify_all();
 }
 
@@ -23,12 +22,15 @@ void ThreadInfo::Job()
 	while (true)
 	{
 		std::unique_lock<std::mutex> uLock(*mMutex);
+		lockFlag = true;
+		isJoined = true;
 		mCond->wait(uLock);
-		if (!LockFlag)
+		lockFlag = false;
+		if (!isExit)
 			return;
 
 		if (func)
-			func(parameters);
+			func();
 
 		func = nullptr;
 	}
@@ -40,8 +42,12 @@ void ThreadInfo::Signal()
 }
 
 void ThreadInfo::Join() {
-	while (func)
+	while (!isJoined)
 	{
-
+		if (!lockFlag)
+		{
+			mCond->notify_one();
+			//std::cout << "force task" << std::endl;
+		}
 	}
 }

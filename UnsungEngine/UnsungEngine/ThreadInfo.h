@@ -6,11 +6,11 @@
 class ThreadInfo {
 	std::mutex * mMutex;
 	std::condition_variable * mCond;
-	bool LockFlag;
+	bool isExit;
 public:
+	bool lockFlag;
 	bool isJoined;
-	void(*func)(UVector<void*>);
-	UVector<void*> parameters;
+	std::function<void()> func;
 
 	ThreadInfo(std::mutex * mMutex, std::condition_variable * mCond);
 	~ThreadInfo();

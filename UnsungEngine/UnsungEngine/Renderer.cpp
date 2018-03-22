@@ -208,17 +208,17 @@ void Renderer::Update(ObjectManager * objManager)
 		return;
 
 	// render for each camera
-	std::vector<std::thread> threads;
-	for (unsigned i = 0; i < m_pCameras.size(); i++)
-		threads.push_back(std::thread(&Renderer::DeferredRendering, this, objManager, i));
-	for (auto& thread : threads)
-		thread.join();
+	UVector<int> threads;
+	for (int i = 0; i < m_pCameras.size(); i++)
+		threads.push_back(threadPool.AddTask(std::bind(&Renderer::DeferredRendering, this, objManager, i)));
+	for (int i = 0; i < threads.size(); i++)
+		threadPool.Join(threads[i]);
 	threads.clear();
 	// finish deferred rendering
 	for (unsigned i = 0; i < m_pCameras.size(); i++)
-		threads.push_back(std::thread(&Renderer::FinishComands, this, i));
-	for (auto& thread : threads)
-		thread.join();
+		threads.push_back(threadPool.AddTask(std::bind(&Renderer::FinishComands, this, i)));
+	for (int i = 0; i < threads.size(); i++)
+		threadPool.Join(threads[i]);
 	threads.clear();
 	// execute deferred rendering
 	for (unsigned i = 0; i < m_pCameras.size(); i++)
@@ -316,15 +316,15 @@ void Renderer::FinishComands(int i) {
 		return;
 
 	// Create command lists and record commands into them.
-	std::thread t0 = std::thread([&]() {
+	int t0 = threadPool.AddTask([&]() {
 		m_pCameras[i]->GetDeferredContext(0)->FinishCommandList(true, m_pCameras[i]->GetCommandList(0));
 	});
-	std::thread t1 = std::thread([&]() {
+	int t1 = threadPool.AddTask([&]() {
 		m_pCameras[i]->GetDeferredContext(1)->FinishCommandList(true, m_pCameras[i]->GetCommandList(1));
 	});
-
-	t0.join();
-	t1.join();
+	
+	threadPool.Join(t0);
+	threadPool.Join(t1);
 }
 
 void Renderer::Resize(bool isFullScreen, int width, int height) {

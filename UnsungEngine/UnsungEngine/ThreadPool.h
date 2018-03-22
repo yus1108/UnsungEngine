@@ -17,8 +17,8 @@ public:
 	ThreadPool();
 	~ThreadPool();
 
-	int AddTask(void(*func)(UVector<void*>), UVector<void*> args);
-	static void TestMethod(UVector<void*> args);
+	int AddTask(std::function<void()> func);
+	static void TestMethod(int i);
 	void Join(int i);
 };
 

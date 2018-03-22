@@ -26,9 +26,9 @@ void ObjectManager::Update() {
 }
 
 void ObjectManager::Render(CameraComponent * m_pCamera, Renderer * render) {
-	std::vector<std::thread> threads;
 #pragma region CLEAR_BUFFER
-	threads.push_back(std::thread([&]() {
+	UVector<int> threads;
+	threads.push_back(threadPool.AddTask([&]() {
 		// clearing world
 		m_pCamera->GetDeferredContext(0)->OMSetDepthStencilState(m_pCamera->GetRTTWorld()->depthStencilState.Get(), 1);
 		m_pCamera->GetDeferredContext(0)->OMSetRenderTargets(1, m_pCamera->GetRTTWorld()->renderTargetViewMap.GetAddressOf(),
@@ -36,7 +36,7 @@ void ObjectManager::Render(CameraComponent * m_pCamera, Renderer * render) {
 		m_pCamera->GetDeferredContext(0)->ClearRenderTargetView(m_pCamera->GetRTTWorld()->renderTargetViewMap.Get(), DirectX::Colors::Transparent);
 		m_pCamera->GetDeferredContext(0)->ClearDepthStencilView(m_pCamera->GetRTTWorld()->depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}));
-	threads.push_back(std::thread([&]() {
+	threads.push_back(threadPool.AddTask([&]() {
 		// clearing ui
 		m_pCamera->GetDeferredContext(1)->OMSetDepthStencilState(m_pCamera->GetRTTUI()->depthStencilState.Get(), 1);
 		m_pCamera->GetDeferredContext(1)->OMSetRenderTargets(1, m_pCamera->GetRTTUI()->renderTargetViewMap.GetAddressOf(),
@@ -47,10 +47,10 @@ void ObjectManager::Render(CameraComponent * m_pCamera, Renderer * render) {
 	D3D11_VIEWPORT viewport = *m_pCamera->GetViewport();
 	viewport.TopLeftX = 0;
 	viewport.TopLeftY = 0;
-#pragma endregion
-	for (auto& thread : threads)
-		thread.join();
+	for (int i = 0; i < threads.size(); i++)
+		threadPool.Join(threads[i]);
 	threads.clear();
+#pragma endregion
 
 	for each (std::pair<int, GameObject*> obj in gameObjects)
 	{

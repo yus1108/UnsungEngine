@@ -41,6 +41,7 @@
 #include <wincodec.h>
 #include <wchar.h>
 #include <math.h>
+#include <functional>
 
 // reference additional headers your program requires here
 #include <array>

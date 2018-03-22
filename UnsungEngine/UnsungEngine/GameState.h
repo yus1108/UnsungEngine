@@ -2,6 +2,8 @@
 #include "Renderer.h"
 #include "ObjectManager.h"
 
+extern ThreadPool threadPool;
+
 class GameState
 {
 private:

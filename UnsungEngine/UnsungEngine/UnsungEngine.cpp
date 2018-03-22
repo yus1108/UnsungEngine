@@ -16,6 +16,7 @@ GameState gameState;
 Input input;
 bool isTerminate;
 std::mutex mainMutex;
+ThreadPool threadPool;
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -98,26 +99,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	std::thread mainThreads[1];
 	gameState.Init();
 	UVector<void*> args;
-	ThreadPool threadPool;
 
-	
-	
 	mainThreads[0] = std::thread([&]() {
 		while (!isTerminate)
 		{
 			utime.Signal();
 			utime.Throttle(THROTTLE);
 			
-			for (int i = 0; i < NUM_THREADS; i++)
-			{
-				int threadNum = threadPool.AddTask((void(*)(UVector<void*>))threadPool.TestMethod, args);
-				//std::cout << "thread " << threadNum << std::endl;
-			}
 			gameState.Update();
-			for (int i = 0; i < NUM_THREADS; i++)
-			{
-				threadPool.Join(i);
-			}
 			std::unique_lock<std::mutex> mainLock(mainMutex);
 		}
 		std::unique_lock<std::mutex> mainLock(mainMutex);
