@@ -96,11 +96,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	
 	isTerminate = false;
 	bool succeedTerminating = false;
-	std::thread mainThreads[1];
+	std::thread mainThread;
 	gameState.Init();
 	UVector<void*> args;
 
-	mainThreads[0] = std::thread([&]() {
+	mainThread = std::thread([&]() {
 		while (!isTerminate)
 		{
 			utime.Signal();
@@ -112,8 +112,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		std::unique_lock<std::mutex> mainLock(mainMutex);
 		succeedTerminating = true;
 	});
-	for (auto& thread : mainThreads)
-		thread.detach();
+	mainThread.detach();
 
     // Main message loop:
 	while (true)

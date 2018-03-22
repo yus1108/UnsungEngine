@@ -5,6 +5,7 @@
 
 #define TURN_CONSOLE 1
 #define THROTTLE 200
+// max 5 threads per camera
 #define NUM_THREADS 100
 
 // external variables
