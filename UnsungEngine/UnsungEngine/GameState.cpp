@@ -23,14 +23,17 @@ void GameState::Init()
 
 	CameraComponent * cameraComponent = new CameraComponent();
 	cameraComponent->Init(UEngine::ComponentType_CAMERA, true, mainCamera);
-	cameraComponent->Init(&renderer, DirectX::XMFLOAT4(0, 0, 0.5f, 1));
+	cameraComponent->Init(&renderer, DirectX::XMFLOAT4(0, 0, 1, 1));
 	mainCamera->AddComponent(cameraComponent);
 	mainCamera->SetActive(false);
 	objManager.AddGameObject(mainCamera);
 
 	CameraComponent * cameraComponent2 = new CameraComponent();
 	cameraComponent2->Init(UEngine::ComponentType_CAMERA, true, mainCamera2);
-	cameraComponent2->Init(&renderer, DirectX::XMFLOAT4(0.5f, 0, 1, 1));
+	cameraComponent2->Init(&renderer, DirectX::XMFLOAT4(0.78f, 0.05f, 0.98f, 0.25f));
+	DirectX::XMMATRIX camera2Pos = DirectX::XMMatrixRotationY(UMath::Convert_DegreeToRad(-90.0f));
+	camera2Pos.r[3] = DirectX::XMVectorSet(20, 5, 0, 1);
+	cameraComponent2->SetOriginalView(camera2Pos);
 	mainCamera2->AddComponent(cameraComponent2);
 	mainCamera2->SetActive(false);
 	objManager.AddGameObject(mainCamera2);
