@@ -47,7 +47,7 @@ void ThreadInfo::Join() {
 		if (!lockFlag)
 		{
 			mCond->notify_one();
-			//std::cout << "force task" << std::endl;
+			std::unique_lock<std::mutex> uLock(*mMutex);
 		}
 	}
 }

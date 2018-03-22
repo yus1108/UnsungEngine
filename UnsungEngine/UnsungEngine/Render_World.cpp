@@ -42,15 +42,12 @@ void Render_World::DrawObj(Renderer * render, Transform * transform, Component *
 		//AnimateModel(obj, 1);
 
 		// world matrix
-		worldMat = transform->GetMatrix();
-		
-		worldMat = DirectX::XMMatrixTranspose(worldMat);
+		DirectX::XMMATRIX worldMat = DirectX::XMMatrixTranspose(transform->GetMatrix());
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
 		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
 		deferredContext->Map(render->constBufferWorld, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
 		memcpy(mappedResource.pData, &worldMat, sizeof(DirectX::XMMATRIX));
 		deferredContext->Unmap(render->constBufferWorld, 0);
-		worldMat = DirectX::XMMatrixTranspose(worldMat);
 
 		DirectX::XMMATRIX originalView = camera->GetOriginalView();
 		DirectX::XMVECTOR determinant = DirectX::XMMatrixDeterminant(originalView);
@@ -379,7 +376,6 @@ void Render_World::ReadBin(const char * filename, ID3D11Device * m_pDevice, ID3D
 
 		file.close();
 
-		worldMat = DirectX::XMMatrixIdentity();
 		loadingDone = true;
 
 		// Load Textures

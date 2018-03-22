@@ -5,6 +5,7 @@
 GameState::GameState()
 {
 	mainCamera = new GameObject();
+	mainCamera2 = new GameObject();
 	gameObject = new GameObject();
 	gameObject2 = new GameObject();
 	text = new GameObject();
@@ -22,10 +23,17 @@ void GameState::Init()
 
 	CameraComponent * cameraComponent = new CameraComponent();
 	cameraComponent->Init(UEngine::ComponentType_CAMERA, true, mainCamera);
-	cameraComponent->Init(&renderer, DirectX::XMFLOAT4(0, 0, 1, 1));
+	cameraComponent->Init(&renderer, DirectX::XMFLOAT4(0, 0, 0.5f, 1));
 	mainCamera->AddComponent(cameraComponent);
 	mainCamera->SetActive(false);
 	objManager.AddGameObject(mainCamera);
+
+	CameraComponent * cameraComponent2 = new CameraComponent();
+	cameraComponent2->Init(UEngine::ComponentType_CAMERA, true, mainCamera2);
+	cameraComponent2->Init(&renderer, DirectX::XMFLOAT4(0.5f, 0, 1, 1));
+	mainCamera2->AddComponent(cameraComponent2);
+	mainCamera2->SetActive(false);
+	objManager.AddGameObject(mainCamera2);
 
 	// load model
 	renderer.LoadObject("Assets/WOS_CommandCenter.bin", gameObject);

@@ -10,6 +10,7 @@ private:
 	Renderer renderer;
 	ObjectManager objManager;
 	GameObject * mainCamera;
+	GameObject * mainCamera2;
 	GameObject * gameObject;
 	GameObject * gameObject2;
 	GameObject * text;

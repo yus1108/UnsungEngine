@@ -10,7 +10,6 @@ protected:
 	UEngine::pipeline_state_t * m_pPipeline;
 	UEngine::DrawType type;
 
-	DirectX::XMMATRIX worldMat;
 	bool loadingDone;
 	bool isActive;
 public:

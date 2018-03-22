@@ -51,7 +51,7 @@ void CameraComponent::Init(Renderer * renderer, DirectX::XMFLOAT4 viewRatio)
 	forwardRotation = DirectX::XMMatrixIdentity();
 	SetOriginalView(originalView);
 
-	aspectRatio = ((m_pViewport->Width - m_pViewport->TopLeftX) / (m_pViewport->Height - -m_pViewport->TopLeftY));
+	aspectRatio = ((m_pViewport->Width) / (m_pViewport->Height));
 	DirectX::XMVECTOR determinant = DirectX::XMMatrixDeterminant(originalView);
 	sceneToShader.viewMat = DirectX::XMMatrixInverse(&determinant, originalView);
 	sceneToShader.viewMat = DirectX::XMMatrixTranspose(sceneToShader.viewMat);
