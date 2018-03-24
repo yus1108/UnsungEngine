@@ -74,10 +74,15 @@ namespace UEngine {
 		DirectX::XMFLOAT3 pos;
 		DirectX::XMFLOAT2 tex;
 	};
-	struct ColorVertex
+	struct ParticleVertex
 	{
 		DirectX::XMFLOAT3 pos;
 		DirectX::XMFLOAT4 color;
+		DirectX::XMFLOAT2 tex;
+	};
+	struct ParticleConstBuffer {
+		DirectX::XMFLOAT4 worldmat;
+		DirectX::XMFLOAT4 scale;
 	};
 }
 

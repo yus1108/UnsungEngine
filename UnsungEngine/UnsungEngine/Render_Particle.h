@@ -6,9 +6,10 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView>	m_pOffscreenRenderTarget;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_pOffscreenSRV;
 
-	UVector<UEngine::ColorVertex> cpu_side_buffer;
+	UVector<UEngine::ParticleVertex> cpu_side_buffer;
 	ID3D11Buffer * gpu_side_buffer = nullptr;
-	UVector<DirectX::XMVECTOR> particles;
+	UVector<UEngine::ParticleConstBuffer> particles;
+	UVector<UEngine::ParticleConstBuffer> worldPos;
 public:
 	Render_Particle();
 	virtual ~Render_Particle();
@@ -18,6 +19,7 @@ public:
 		UEngine::TextFormat textFormat = UEngine::TextFormat()) {};
 	void Init(UEngine::pipeline_state_t * pipeline);
 	void Init(ID3D11Device * device);
+	void Update(Transform * transform);
 	void DrawObj(Renderer * render, Transform * transform, Component * m_pCamera);
 	void ReadBin(const char * filename, ID3D11Device * m_pDevice,
 		ID3D11DeviceContext * m_pDeviceContext, DirectX::XMFLOAT4 color = DirectX::XMFLOAT4(1, 1, 1, 1));

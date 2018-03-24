@@ -19,5 +19,6 @@ public:
 	GameObject * GetParent() { return parentObject; }
 
 	virtual void Init(UEngine::ComponentType _type, bool _active, GameObject * _parent) = 0;
+	virtual void Update() = 0;
 };
 

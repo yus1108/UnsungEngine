@@ -10,12 +10,13 @@ private:
 	Renderer renderer;
 	ObjectManager objManager;
 	GameObject * mainCamera;
+	GameObject * txt_frameRate;
 	GameObject * mainCamera2;
 	GameObject * gameObject;
-	//GameObject * gameObject2;
-	//GameObject * text;
-	//GameObject * logo;
-	//GameObject * logo2;
+
+	GameObject * gameObject2;
+	GameObject * logo;
+	GameObject * logo2;
 public:
 	GameState();
 	~GameState();

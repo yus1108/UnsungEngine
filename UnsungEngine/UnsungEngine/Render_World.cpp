@@ -20,6 +20,15 @@ void Render_World::Init(UEngine::pipeline_state_t * pipeline)
 	RenderComponent::Init(pipeline);
 }
 
+void Render_World::Update(Transform * transform)
+{
+	if (loadingDone && isActive)
+	{
+		//AnimateModel(obj, 1);
+		worldMat = DirectX::XMMatrixTranspose(transform->GetMatrix());
+	}
+}
+
 void Render_World::DrawObj(Renderer * render, Transform * transform, Component * m_pCamera)
 {
 	if (loadingDone && isActive) {
@@ -35,26 +44,12 @@ void Render_World::DrawObj(Renderer * render, Transform * transform, Component *
 		deferredContext->PSSetConstantBuffers(4, 1, &render->constBufferSLight);
 		deferredContext->PSSetConstantBuffers(5, 1, &render->constBufferLightInfo);
 
-		//AnimateModel(obj, 1);
-
 		// world matrix
-		DirectX::XMMATRIX worldMat = DirectX::XMMatrixTranspose(transform->GetMatrix());
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
 		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
 		deferredContext->Map(render->constBufferWorld, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
 		memcpy(mappedResource.pData, &worldMat, sizeof(DirectX::XMMATRIX));
 		deferredContext->Unmap(render->constBufferWorld, 0);
-
-		DirectX::XMMATRIX originalView = camera->GetOriginalView();
-		DirectX::XMVECTOR determinant = DirectX::XMMatrixDeterminant(originalView);
-		float aspectRatio = ((camera->GetViewport()->Width) / (camera->GetViewport()->Height));
-		camera->SetAspectRatio(aspectRatio);
-		SCENE sceneToShader;
-		sceneToShader.viewMat = DirectX::XMMatrixInverse(&determinant, originalView);
-		sceneToShader.viewMat = DirectX::XMMatrixTranspose(sceneToShader.viewMat);
-		sceneToShader.perspectivMat = DirectX::XMMatrixPerspectiveFovLH(camera->GetAngle(), aspectRatio, camera->GetNearZ(), camera->GetFarZ());
-		sceneToShader.perspectivMat = DirectX::XMMatrixTranspose(sceneToShader.perspectivMat);
-		camera->SetSceneToShader(sceneToShader);
 
 		DLIGHT dLight;
 		dLight.lightColor = DirectX::XMFLOAT4(1, 1, 1, 1);
@@ -68,7 +63,7 @@ void Render_World::DrawObj(Renderer * render, Transform * transform, Component *
 		// view matrix buffer
 		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
 		deferredContext->Map(render->constBufferScene, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
-		memcpy(mappedResource.pData, &sceneToShader, sizeof(SCENE));
+		memcpy(mappedResource.pData, &camera->GetSceneToShader(), sizeof(SCENE));
 		deferredContext->Unmap(render->constBufferScene, 0);
 
 		// directional light buffer
@@ -89,13 +84,12 @@ void Render_World::DrawObj(Renderer * render, Transform * transform, Component *
 		memcpy(mappedResource.pData, &sLight, sizeof(SLIGHT));
 		deferredContext->Unmap(render->constBufferSLight, 0);
 
-
 		for (unsigned int i = 0; i < geometryComponent->countIndexBuffer.size(); i++)
 		{
 			if (i < materialComponent->matCount) {
 				LIGHTINFO lightInfo;
 				// light information buffer
-				DirectX::XMStoreFloat4(&lightInfo.specConstant, originalView.r[3]);
+				DirectX::XMStoreFloat4(&lightInfo.specConstant, camera->GetOriginalView().r[3]);
 				lightInfo.specConstant.w = materialComponent->material_info[i][graphics::components::SHININESS].value[0];
 				lightInfo.ambient = materialComponent->material_info[i][graphics::components::AMBIENT].value;
 				lightInfo.diffuse = materialComponent->material_info[i][graphics::components::DIFFUSE].value;

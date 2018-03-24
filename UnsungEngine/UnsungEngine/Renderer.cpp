@@ -178,7 +178,7 @@ void Renderer::Init()
 		InitConstBuffer(sizeof(LIGHTINFO), &constBufferLightInfo);
 		InitConstBuffer(sizeof(DirectX::XMFLOAT4), &constBufferRTTPos);
 		InitConstBuffer(sizeof(DirectX::XMFLOAT4), &constBufferRTTSize);
-		InitConstBuffer(sizeof(DirectX::XMFLOAT4) * 1000, &constBufferParticleWorld);
+		InitConstBuffer(sizeof(UEngine::ParticleConstBuffer) * 1000, &constBufferParticleWorld);
 	}));	// TODO: add constant buffers
 	threads.push_back(std::thread([&]() {
 		AddBasicPipelines();
@@ -219,20 +219,30 @@ void Renderer::Update(ObjectManager * objManager)
 	// render for each camera
 	UVector<int> threads;
 	for (unsigned i = 0; i < m_pCameras.size(); i++)
-		threads.push_back(threadPool.AddTask(std::bind(&Renderer::DeferredRendering, this, objManager, i)));
+	{
+		if (m_pCameras[i]->GetActive() && m_pCameras[i]->GetParent()->GetActive())
+			threads.push_back(threadPool.AddTask(std::bind(&Renderer::DeferredRendering, this, objManager, i)));
+	}
 	for (unsigned i = 0; i < threads.size(); i++)
+	{
 		threadPool.Join(threads[i]);
+	}
 	threads.clear();
 	// finish deferred rendering
 	for (unsigned i = 0; i < m_pCameras.size(); i++)
-		threads.push_back(threadPool.AddTask(std::bind(&Renderer::FinishComands, this, i)));
+	{
+		if (m_pCameras[i]->GetActive() && m_pCameras[i]->GetParent()->GetActive())
+			threads.push_back(threadPool.AddTask(std::bind(&Renderer::FinishComands, this, i)));
+	}
 	for (unsigned i = 0; i < threads.size(); i++)
+	{
 		threadPool.Join(threads[i]);
+	}
 	threads.clear();
 	// execute deferred rendering
 	for (unsigned i = 0; i < m_pCameras.size(); i++)
 	{
-		if (!m_pCameras[i]->GetActive() && !m_pCameras[i]->GetParent()->GetActive())
+		if (!m_pCameras[i]->GetActive() || !m_pCameras[i]->GetParent()->GetActive())
 			continue;
 
 		if (*m_pCameras[i]->GetCommandList(0))
@@ -253,7 +263,7 @@ void Renderer::Update(ObjectManager * objManager)
 	RenderSet(m_pDeviceContext.Get(), default_pipeline, default_RTT, default_viewport, D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
 	for (unsigned i = 0; i < m_pCameras.size(); i++)
 	{
-		if (!m_pCameras[i]->GetActive() && !m_pCameras[i]->GetParent()->GetActive())
+		if (!m_pCameras[i]->GetActive() || !m_pCameras[i]->GetParent()->GetActive())
 			continue;
 
 		m_pDeviceContext->VSSetConstantBuffers(0, 1, &constBufferRTTPos);
@@ -316,12 +326,12 @@ void Renderer::Update(ObjectManager * objManager)
 }
 
 void Renderer::DeferredRendering(ObjectManager * objManager, int i) {
-	if (!m_pCameras[i]->GetActive() && !m_pCameras[i]->GetParent()->GetActive())
+	if (!m_pCameras[i]->GetActive() || !m_pCameras[i]->GetParent()->GetActive())
 		return;
 	objManager->Render(m_pCameras[i], this);
 }
 void Renderer::FinishComands(int i) {
-	if (!m_pCameras[i]->GetActive() && !m_pCameras[i]->GetParent()->GetActive())
+	if (!m_pCameras[i]->GetActive() || !m_pCameras[i]->GetParent()->GetActive())
 		return;
 
 	// Create command lists and record commands into them.
@@ -455,7 +465,7 @@ void Renderer::LoadGUI(const char * textureName, GameObject * gameObject) {
 	gameObject->SetRenderComponent(textModel);
 	gameObject->GetTransform()->SetMatrix(DirectX::XMMatrixIdentity());
 }
-void Renderer::LoadGUI(const WCHAR * inputString, unsigned length, GameObject * gameObject) {
+void Renderer::LoadGUI(const WCHAR * inputString, unsigned length, GameObject * gameObject, unsigned cameraIndex) {
 	// load texture
 	RenderComponent * textModel = new Render_UI();
 	Render_UI * ptr = (Render_UI*)textModel;
@@ -468,6 +478,7 @@ void Renderer::LoadGUI(const WCHAR * inputString, unsigned length, GameObject * 
 	ptr->Init(&m_pPipelines[UEngine::PipelineType_UI]);
 	ptr->Init(m_pDevice.Get(), inputString, length, L"Verdana", 30, textFormat);
 	ptr->SetType(UEngine::DrawType_UI);
+	ptr->SetCamera(cameraIndex);
 	gameObject->SetRenderComponent(textModel);
 	gameObject->GetTransform()->SetMatrix(DirectX::XMMatrixIdentity());
 }
@@ -492,6 +503,7 @@ void Renderer::ChangeGUI(const char * textStr, GameObject * gameObject, UEngine:
 	((Render_UI*)gameObject->GetRenderComponent())->ChangeText(m_pDevice.Get(), m_pDeviceContext.Get(), wcstring, (UINT32)newsize);
 	delete[] wcstring;
 }
+
 void Renderer::RenderSet(ID3D11DeviceContext * m_pDeviceContext, UEngine::pipeline_state_t & pipeline, UEngine::RenderToTexture & rtt,
 	D3D11_VIEWPORT & viewport, D3D11_PRIMITIVE_TOPOLOGY topology) {
 	// clearing backbuffer
@@ -810,6 +822,7 @@ void Renderer::AddBasicPipelines() {
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 	InitInputLayout(particlePipeline,
 		Particle_VS, ARRAYSIZE(Particle_VS),

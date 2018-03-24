@@ -60,6 +60,7 @@ public:
 	return: void
 	*/
 	void Init(Renderer * renderer, DirectX::XMFLOAT4 viewRatio);
+	void Update();
 
 	void CreateNewDeferredContext(ID3D11Device * m_pDevice);
 	void Clear();

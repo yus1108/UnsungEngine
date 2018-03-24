@@ -17,10 +17,14 @@ Render_Particle::~Render_Particle()
 void Render_Particle::Init(UEngine::pipeline_state_t * pipeline)
 {
 	RenderComponent::Init(pipeline);
-	particles.push_back(DirectX::XMVECTOR());
+	particles.push_back(UEngine::ParticleConstBuffer());
+	particles.push_back(UEngine::ParticleConstBuffer());
+	particles[1].worldmat.x = 2;
+	worldPos.push_back(UEngine::ParticleConstBuffer());
+	worldPos.push_back(UEngine::ParticleConstBuffer());
 
 	// Basic Model Loading
-	UEngine::ColorVertex cpu_vertex;
+	UEngine::ParticleVertex cpu_vertex;
 	cpu_vertex.pos = DirectX::XMFLOAT3(0, 5, 0);
 	cpu_vertex.color = DirectX::XMFLOAT4(1, 1, 1, 1);
 	cpu_side_buffer.push_back(cpu_vertex);
@@ -33,84 +37,75 @@ void Render_Particle::Init(ID3D11Device * device)
 	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
 	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bufferDesc.ByteWidth = (UINT)(sizeof(UEngine::ColorVertex) * cpu_side_buffer.size());
+	bufferDesc.ByteWidth = (UINT)(sizeof(UEngine::ParticleVertex) * cpu_side_buffer.size());
 	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
 	device->CreateBuffer(&bufferDesc, nullptr, &gpu_side_buffer);
+}
+
+void Render_Particle::Update(Transform * transform)
+{
+	if (loadingDone && isActive)
+	{
+		for (unsigned i = 0; i < particles.size(); i++)
+		{
+			using namespace DirectX;
+			float deltaTime = (float)utime.DeltaTime();
+			if (deltaTime < 1000)
+			{
+				particles[i].worldmat.y -= deltaTime;
+				XMVECTOR tempPos = XMLoadFloat4(&particles[i].worldmat);
+				tempPos += transform->GetMatrix().r[3];
+				worldPos[i] = UEngine::ParticleConstBuffer();
+				XMStoreFloat4(&worldPos[i].worldmat, tempPos);
+				worldPos[i].worldmat.w = 0;
+				worldPos[i].scale = DirectX::XMFLOAT4(1, 1, 0, 0);
+			}
+		}
+	}
 }
 
 void Render_Particle::DrawObj(Renderer * render, Transform * transform, Component * m_pCamera)
 {
 	if (loadingDone && isActive)
 	{
-		UINT stride = sizeof(UEngine::ColorVertex);
+		UINT stride = sizeof(UEngine::ParticleVertex);
 		UINT offset = 0;
 
 		CameraComponent * camera = (CameraComponent*)m_pCamera;
 		ID3D11DeviceContext * deferredContext = camera->GetDeferredContext(UEngine::DrawType_WORLD);
 
-		float deltaTime = (float)utime.DeltaTime();
-		if (deltaTime < 1000)
-		{
-			//cpu_side_buffer[0].pos.y -= deltaTime / 100.0f;
-		}
-
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
 		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
 		deferredContext->Map(gpu_side_buffer, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
-		memcpy(mappedResource.pData, &cpu_side_buffer[0], sizeof(UEngine::ColorVertex) * cpu_side_buffer.size());
+		memcpy(mappedResource.pData, &cpu_side_buffer[0], sizeof(UEngine::ParticleVertex) * cpu_side_buffer.size());
 		deferredContext->Unmap(gpu_side_buffer, 0);
 
 		deferredContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
 		deferredContext->VSSetConstantBuffers(0, 1, &render->constBufferParticleWorld);
 		deferredContext->VSSetConstantBuffers(1, 1, &render->constBufferScene);
+		deferredContext->GSSetConstantBuffers(0, 1, &render->constBufferParticleWorld);
 		deferredContext->GSSetConstantBuffers(1, 1, &render->constBufferScene);
-
-		UVector<DirectX::XMFLOAT4> worldPos;
-		for (unsigned i = 0; i < particles.size(); i++)
-		{
-			using namespace DirectX;
-			if (deltaTime < 1000)
-			{
-				particles[i].m128_f32[1] -= deltaTime / 10.0f;
-				XMVECTOR tempPos = transform->GetMatrix().r[3] + particles[i];
-				worldPos.push_back(XMFLOAT4());
-				XMStoreFloat4(&worldPos[i], tempPos);
-				worldPos[i].w = 0;
-			}
-			
-		}
 
 		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
 		deferredContext->Map(render->constBufferParticleWorld, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
-		memcpy(mappedResource.pData, &worldPos[0], sizeof(DirectX::XMFLOAT4) * worldPos.size());
+		memcpy(mappedResource.pData, &worldPos[0], sizeof(UEngine::ParticleConstBuffer) * worldPos.size());
 		deferredContext->Unmap(render->constBufferParticleWorld, 0);
-
-		DirectX::XMMATRIX originalView = camera->GetOriginalView();
-		DirectX::XMVECTOR determinant = DirectX::XMMatrixDeterminant(originalView);
-		float aspectRatio = ((camera->GetViewport()->Width) / (camera->GetViewport()->Height));
-		camera->SetAspectRatio(aspectRatio);
-		SCENE sceneToShader;
-		sceneToShader.viewMat = DirectX::XMMatrixInverse(&determinant, originalView);
-		sceneToShader.viewMat = DirectX::XMMatrixTranspose(sceneToShader.viewMat);
-		sceneToShader.perspectivMat = DirectX::XMMatrixPerspectiveFovLH(camera->GetAngle(), aspectRatio, camera->GetNearZ(), camera->GetFarZ());
-		sceneToShader.perspectivMat = DirectX::XMMatrixTranspose(sceneToShader.perspectivMat);
-		camera->SetSceneToShader(sceneToShader);
 
 		// view matrix buffer
 		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
 		deferredContext->Map(render->constBufferScene, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
-		memcpy(mappedResource.pData, &sceneToShader, sizeof(SCENE));
+		memcpy(mappedResource.pData, &camera->GetSceneToShader(), sizeof(SCENE));
 		deferredContext->Unmap(render->constBufferScene, 0);
 
 		// set texture info
-		/*ID3D11ShaderResourceView *baseTexture[]{
+		ID3D11ShaderResourceView *baseTexture[]{
 			(ID3D11ShaderResourceView*)
 			m_pOffscreenSRV.Get()
-		};*/
-		//deferredContext->PSSetShaderResources(0, 1, baseTexture);
+		};
+		deferredContext->PSSetShaderResources(0, 1, baseTexture);
 		deferredContext->IASetVertexBuffers(0, 1, &gpu_side_buffer, &stride, &offset);
-		deferredContext->Draw(1, 0);
+		deferredContext->DrawInstanced(1, particles.size(), 0, 0);
 	}
 }
 

@@ -66,6 +66,9 @@ void ObjectManager::Render(CameraComponent * m_pCamera, Renderer * render) {
 
 void ObjectManager::DrawObj(CameraComponent * m_pCamera, Renderer * render, D3D11_VIEWPORT viewport, GameObject * obj) {
 	unsigned drawType = (unsigned)obj->GetRenderComponent()->GetType();
+	if (drawType == UEngine::DrawType_UI && ((Render_UI*)obj->GetRenderComponent())->GetCamera() != m_pCamera->GetParent()->GetReferenceNum())
+		return;
+
 	ID3D11DeviceContext * deferredContext = m_pCamera->GetDeferredContext(drawType);
 #pragma region RENDER_SET
 	switch (drawType)

@@ -11,6 +11,10 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView>	m_pOffscreenRenderTarget;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_pOffscreenSRV;
 	UEngine::TextFormat textFormat;
+
+	unsigned m_pCameraIndex;
+	DirectX::XMFLOAT4 RTPos;
+	DirectX::XMFLOAT4 RTSize;
 public:
 	Render_UI();
 	virtual ~Render_UI();
@@ -18,11 +22,14 @@ public:
 	inline UEngine::TextFormat GetTextFormat() { return textFormat; };
 	inline void SetTextFormat(UEngine::TextFormat _textFormat) { textFormat = _textFormat; };
 	inline const ID3D11ShaderResourceView * const GetShaderResourceView() { return m_pOffscreenSRV.Get(); };
+	inline unsigned GetCamera() { return m_pCameraIndex; }
+	inline void SetCamera(unsigned camera) { m_pCameraIndex = camera; }
 
 	void Init(ID3D11Device * m_pDevice, const WCHAR * textString, UINT32 textLength,
 		const WCHAR * msc_fontName, const FLOAT msc_fontSize,
 		UEngine::TextFormat textFormat = UEngine::TextFormat());
 	void Init(UEngine::pipeline_state_t * pipeline);
+	void Update(Transform * transform);
 	void DrawObj(Renderer * render, Transform * transform, Component * m_pCamera);
 	void ReadBin(const char * filename, ID3D11Device * m_pDevice,
 		ID3D11DeviceContext * m_pDeviceContext, DirectX::XMFLOAT4 color = DirectX::XMFLOAT4(1, 1, 1, 1));

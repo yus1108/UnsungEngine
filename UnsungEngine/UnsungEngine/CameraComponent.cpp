@@ -59,6 +59,20 @@ void CameraComponent::Init(Renderer * renderer, DirectX::XMFLOAT4 viewRatio)
 	sceneToShader.perspectivMat = DirectX::XMMatrixTranspose(sceneToShader.perspectivMat);
 }
 
+void CameraComponent::Update()
+{
+	DirectX::XMMATRIX originalView = GetOriginalView();
+	DirectX::XMVECTOR determinant = DirectX::XMMatrixDeterminant(originalView);
+	float aspectRatio = ((GetViewport()->Width) / (GetViewport()->Height));
+	SetAspectRatio(aspectRatio);
+	SCENE sceneToShader;
+	sceneToShader.viewMat = DirectX::XMMatrixInverse(&determinant, originalView);
+	sceneToShader.viewMat = DirectX::XMMatrixTranspose(sceneToShader.viewMat);
+	sceneToShader.perspectivMat = DirectX::XMMatrixPerspectiveFovLH(GetAngle(), aspectRatio, GetNearZ(), GetFarZ());
+	sceneToShader.perspectivMat = DirectX::XMMatrixTranspose(sceneToShader.perspectivMat);
+	SetSceneToShader(sceneToShader);
+}
+
 void CameraComponent::CreateNewDeferredContext(ID3D11Device * m_pDevice)
 {
 	m_pDevice->CreateDeferredContext(NULL, m_pDeferredContext[0].GetAddressOf());

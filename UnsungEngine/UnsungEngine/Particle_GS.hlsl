@@ -4,6 +4,7 @@ struct INPUT_VERTEX
 {
 	float4 projectedCoordinate	: SV_POSITION;
 	float4 color				: COLOR;
+	float2 tex					: TEXCOORD0;
 };
 
 // format of output verticies
@@ -13,8 +14,17 @@ struct GSOutput
 {
 	float4 posH					: SV_POSITION;
 	float4 colorOut				: COLOR;
+	float2 texOut				: TEXCOORD0;
 };
 
+struct Particle {
+	float4 worldMatrix;
+	float4 scale;
+};
+cbuffer WORLD : register(b0)
+{
+	Particle particles[1000];
+}
 cbuffer SCENE : register(b1)
 {
 	float4x4 viewMatrix;
@@ -23,15 +33,15 @@ cbuffer SCENE : register(b1)
 
 // convert each incoming world-space line segment into a projected triangle. 
 [maxvertexcount(MAXVERTS)] // max vertex data to be output (limit 1024 total scalars)
-void main(point INPUT_VERTEX input[1] : SV_POSITION, inout TriangleStream< GSOutput > output)
+void main(point INPUT_VERTEX input[1] : SV_POSITION, inout TriangleStream< GSOutput > output, uint instanceID : SV_GSInstanceID)
 {
 	// red green and blue vertex
 	GSOutput verts[MAXVERTS] =
 	{
-		float4(-0.01f,-0.01f,0,0), float4(0,0,0,1),
-		float4(0.01f,-0.01f,0,0), float4(0,0,0,1),
-		float4(-0.01f,0.01f,0,0), float4(0,0,0,1),
-		float4(0.01f,0.01f,0,0), float4(0,0,0,1)
+		float4(-particles[instanceID].scale.x,-particles[instanceID].scale.y,0,0), float4(0,0,0,1), float2(0,1),
+		float4(particles[instanceID].scale.x,-particles[instanceID].scale.y,0,0), float4(0,0,0,1), float2(1,1),
+		float4(-particles[instanceID].scale.x,particles[instanceID].scale.y,0,0), float4(0,0,0,1), float2(0,0),
+		float4(particles[instanceID].scale.x,particles[instanceID].scale.y,0,0), float4(0,0,0,1), float2(1,0)
 	};
 
 	verts[0].posH += input[0].projectedCoordinate;
@@ -48,7 +58,7 @@ void main(point INPUT_VERTEX input[1] : SV_POSITION, inout TriangleStream< GSOut
 	{
 		// send verts to the rasterizer
 		verts[i].posH = mul(verts[i].posH, projectionMatrix);
-		verts[i].posH.z = verts[i].posH.z / verts[i].posH.w;
+		verts[i].posH.xyz = verts[i].posH.xyz / verts[i].posH.w;
 		verts[i].posH.w = 1;
 		output.Append(verts[i]);
 	}

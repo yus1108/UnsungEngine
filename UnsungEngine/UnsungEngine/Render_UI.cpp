@@ -152,6 +152,16 @@ void Render_UI::Init(UEngine::pipeline_state_t * pipeline)
 	RenderComponent::Init(pipeline);
 }
 
+void Render_UI::Update(Transform * transform)
+{
+	if (loadingDone && isActive)
+	{
+		DirectX::XMFLOAT3 scale = transform->GetScale();
+		RTPos = transform->GetPosition4();
+		RTSize = DirectX::XMFLOAT4(-scale.x, -scale.y, scale.x, scale.y);
+	}
+}
+
 void Render_UI::DrawObj(Renderer * render, Transform * transform, Component * m_pCamera)
 {
 	if (loadingDone && isActive)
@@ -165,15 +175,12 @@ void Render_UI::DrawObj(Renderer * render, Transform * transform, Component * m_
 		deferredContext->VSSetConstantBuffers(0, 1, &render->constBufferRTTPos);
 		deferredContext->GSSetConstantBuffers(1, 1, &render->constBufferRTTSize);
 
-		DirectX::XMFLOAT4 RTPos = transform->GetPosition4();
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
 		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
 		deferredContext->Map(render->constBufferRTTPos, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
 		memcpy(mappedResource.pData, &RTPos, sizeof(DirectX::XMFLOAT4));
 		deferredContext->Unmap(render->constBufferRTTPos, 0);
 
-		DirectX::XMFLOAT3 scale = transform->GetScale();
-		DirectX::XMFLOAT4 RTSize = DirectX::XMFLOAT4(-scale.x, -scale.y, scale.x, scale.y);
 		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
 		deferredContext->Map(render->constBufferRTTSize, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
 		memcpy(mappedResource.pData, &RTSize, sizeof(DirectX::XMFLOAT4));

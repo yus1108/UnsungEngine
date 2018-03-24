@@ -36,6 +36,9 @@ void GameObject::Update()
 {
 	if (isActive)
 	{
-
+		if (renderComponent)
+			renderComponent->Update(&transform);
+		for (unsigned i = 0; i < components.size(); i++)
+			components[i]->Update();
 	}
 }
