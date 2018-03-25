@@ -2,7 +2,7 @@
 #include "Render_UI.h"
 
 
-Render_UI::Render_UI()
+Render_UI::Render_UI() : RenderComponent()
 {
 }
 
@@ -254,4 +254,8 @@ void Render_UI::ChangeText(ID3D11Device * m_pDevice, ID3D11DeviceContext * m_pIm
 		HRESULT hr = m_pRenderTarget->EndDraw();
 	}
 	loadingDone = true;
+}
+
+void Render_UI::CalculateCBox()
+{
 }

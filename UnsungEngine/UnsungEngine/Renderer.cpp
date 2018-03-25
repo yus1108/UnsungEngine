@@ -358,14 +358,6 @@ void Renderer::Update(ObjectManager * objManager)
 		m_pDeviceContext->Draw(1, 0);
 	}
 
-	// testing debug renderer
-	UEngine::DebugVertex verts[2];
-	verts[0].pos = DirectX::XMFLOAT3(0, 0, 0);
-	verts[0].color = DirectX::XMFLOAT4(1, 1, 1, 1);
-	verts[1].pos = DirectX::XMFLOAT3(10, 0, 0);
-	verts[1].color = DirectX::XMFLOAT4(1, 1, 1, 1);
-	debugRenderer->Add_line(verts[0], verts[1]);
-
 	// render verts in debug renderer
 	m_pDeviceContext->ClearDepthStencilView(default_RTT.depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	DebugSet(&m_pPipelines[UEngine::PipelineType_DebugRender], m_pCameras[0]);

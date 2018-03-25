@@ -2,6 +2,7 @@
 #include "Renderer.h"
 #include "Transform.h"
 #include "Component.h"
+#include "CBox.h"
 
 class Renderer;
 class RenderComponent
@@ -10,8 +11,10 @@ protected:
 	UEngine::pipeline_state_t * m_pPipeline;
 	UEngine::DrawType type;
 
+	CollisionBox * collisionBox;
 	bool loadingDone;
 	bool isActive;
+	bool isInFrustum;
 public:
 	RenderComponent();
 	virtual ~RenderComponent();
@@ -32,7 +35,7 @@ public:
 	virtual void DrawObj(Renderer * render, Transform * transform, Component * m_pCamera) = 0;
 	virtual void ReadBin(const char * filename, ID3D11Device * m_pDevice,
 		ID3D11DeviceContext * m_pDeviceContext, DirectX::XMFLOAT4 color = DirectX::XMFLOAT4(1, 1, 1, 1)) = 0;
-
+	virtual void CalculateCBox() = 0;
 
 };
 

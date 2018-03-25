@@ -49,6 +49,9 @@
     <Filter Include="Shaders\DebugRender_Shaders">
       <UniqueIdentifier>{c60bb3cd-7835-4944-a567-d7b54f21854f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Collision">
+      <UniqueIdentifier>{2fdbd88a-cf77-43dc-b851-c23ed8b4bfa7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -132,6 +135,12 @@
     <ClInclude Include="Render_World.h">
       <Filter>Render\RenderComponents</Filter>
     </ClInclude>
+    <ClInclude Include="CBox.h">
+      <Filter>Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="AABB.h">
+      <Filter>Collision</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -196,6 +205,12 @@
     </ClCompile>
     <ClCompile Include="Render_World.cpp">
       <Filter>Render\RenderComponents</Filter>
+    </ClCompile>
+    <ClCompile Include="CBox.cpp">
+      <Filter>Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="AABB.cpp">
+      <Filter>Collision</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -90,6 +90,7 @@ namespace UEngine {
 		DirectX::XMFLOAT4 worldmat;
 		DirectX::XMFLOAT4 scale;
 	};
+
 }
 
 

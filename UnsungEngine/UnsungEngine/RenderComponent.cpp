@@ -6,11 +6,15 @@ RenderComponent::RenderComponent()
 {
 	loadingDone = false;
 	isActive = true;
+	isInFrustum = false;
+	collisionBox = nullptr;
 }
 
 
 RenderComponent::~RenderComponent()
 {
+	if (collisionBox)
+		delete collisionBox;
 }
 
 void RenderComponent::Init(UEngine::pipeline_state_t * pipeline)

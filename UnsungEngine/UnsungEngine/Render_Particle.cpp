@@ -2,7 +2,7 @@
 #include "Render_Particle.h"
 
 
-Render_Particle::Render_Particle()
+Render_Particle::Render_Particle() : RenderComponent()
 {
 	gpu_side_buffer = nullptr;
 	creationCounter = 0;
@@ -198,4 +198,8 @@ void Render_Particle::ReadBin(const char * filename, ID3D11Device * m_pDevice, I
 	}
 	delete[] tempStr;
 	loadingDone = true;
+}
+
+void Render_Particle::CalculateCBox()
+{
 }

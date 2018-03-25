@@ -15,7 +15,7 @@ public:
 	~DebugRenderer();
 
 	void Add_line(UEngine::DebugVertex a, UEngine::DebugVertex b);
-	//void Add_aabb(AABB aabb, DirectX::XMFLOAT4 color);
+	void Add_AABB(AABB aabb, DirectX::XMFLOAT4 color);
 	//void Add_OBB(OBB obb, DirectX::XMFLOAT4 color);
 	//void Add_Frustum(Trapezoid obb, UCamera & myCam, DirectX::XMFLOAT4 color);
 	//void Add_Axis(UnitNode * node);

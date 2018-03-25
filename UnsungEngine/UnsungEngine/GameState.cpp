@@ -66,7 +66,7 @@ void GameState::Init()
 
 	// load object 2
 	renderer.LoadObject("Assets/WOS_CommandCenter.bin", gameObject);
-	gameObject->GetTransform()->SetMatrix(DirectX::XMMatrixMultiply(DirectX::XMMatrixIdentity(), DirectX::XMMatrixTranslation(0.5f, 0, 0)));
+	gameObject->GetTransform()->SetMatrix(DirectX::XMMatrixMultiply(DirectX::XMMatrixIdentity(), DirectX::XMMatrixTranslation(0, 0, 0)));
 	//gameObject->SetActive(false);
 	objManager.AddGameObject(gameObject);
 
@@ -124,11 +124,11 @@ void GameState::Update()
 		renderer.ChangeGUI(pch, numParticles);
 	}
 	
-	if (gameObject->GetActive())
-	{
-		DirectX::XMMATRIX worldMat = DirectX::XMMatrixMultiply(gameObject->GetTransform()->GetMatrix(), DirectX::XMMatrixRotationY((float)utime.DeltaTime() / 10.0f));
-		gameObject->GetTransform()->SetMatrix(worldMat);
-	}
+	//if (gameObject->GetActive())
+	//{
+	//	DirectX::XMMATRIX worldMat = DirectX::XMMatrixMultiply(gameObject->GetTransform()->GetMatrix(), DirectX::XMMatrixRotationY((float)utime.DeltaTime() / 10.0f));
+	//	gameObject->GetTransform()->SetMatrix(worldMat);
+	//}
 
 	// collision
 

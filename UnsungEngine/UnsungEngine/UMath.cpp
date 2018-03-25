@@ -33,3 +33,50 @@ DirectX::XMFLOAT2 UMath::ConvertPixelToNDC(POINT pos_in, HWND * window)
 
 	return pos;
 }
+
+void UMath::CalculateAABB(std::vector<SIMPLE_VERTEX> vertices, std::vector<unsigned int> indices,
+	DirectX::XMMATRIX worldmat, AABB &outAABB) {
+	// apply world matrix
+	DirectX::XMMATRIX transposed = XMMatrixTranspose(worldmat);
+
+	for (unsigned int i = 0; i < vertices.size(); i++)
+	{
+		DirectX::XMVECTOR temp = XMLoadFloat3(&vertices[i].pos);
+		temp.m128_f32[3] = 1;
+
+		DirectX::XMVECTOR pos = DirectX::XMVectorSet(0, 0, 0, 0);
+		pos.m128_f32[0] = DirectX::XMVector4Dot(
+			temp,
+			transposed.r[0]).m128_f32[0];
+		pos.m128_f32[1] = DirectX::XMVector4Dot(
+			temp,
+			transposed.r[1]).m128_f32[0];
+		pos.m128_f32[2] = DirectX::XMVector4Dot(
+			temp,
+			transposed.r[2]).m128_f32[0];
+
+		XMStoreFloat3(&vertices[i].pos, pos);
+	}
+
+	outAABB.SetXAxis(DirectX::XMFLOAT2(vertices[0].pos.x, vertices[0].pos.x));
+	outAABB.SetYAxis(DirectX::XMFLOAT2(vertices[0].pos.y, vertices[0].pos.y));
+	outAABB.SetZAxis(DirectX::XMFLOAT2(vertices[0].pos.z, vertices[0].pos.z));
+	for (unsigned int i = 1; i < indices.size(); i++)
+	{
+		// min
+		if (outAABB.GetXAxis().x > vertices[indices[i]].pos.x)
+			outAABB.SetXAxis(DirectX::XMFLOAT2(vertices[indices[i]].pos.x, outAABB.GetXAxis().y));
+		if (outAABB.GetYAxis().x > vertices[indices[i]].pos.y)
+			outAABB.SetYAxis(DirectX::XMFLOAT2(vertices[indices[i]].pos.y, outAABB.GetYAxis().y));
+		if (outAABB.GetZAxis().x > vertices[indices[i]].pos.z)
+			outAABB.SetZAxis(DirectX::XMFLOAT2(vertices[indices[i]].pos.z, outAABB.GetZAxis().y));
+
+		// max
+		if (outAABB.GetXAxis().y < vertices[indices[i]].pos.x)
+			outAABB.SetXAxis(DirectX::XMFLOAT2(outAABB.GetXAxis().x, vertices[indices[i]].pos.x));
+		if (outAABB.GetYAxis().y < vertices[indices[i]].pos.y)
+			outAABB.SetYAxis(DirectX::XMFLOAT2(outAABB.GetYAxis().x, vertices[indices[i]].pos.y));
+		if (outAABB.GetZAxis().y < vertices[indices[i]].pos.z)
+			outAABB.SetZAxis(DirectX::XMFLOAT2(outAABB.GetZAxis().x, vertices[indices[i]].pos.z));
+	}
+}

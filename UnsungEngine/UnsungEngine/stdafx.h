@@ -65,6 +65,8 @@
 #include "Input.h"
 #include "SystemDefinition.h"
 #include "Definition.h"
+#include "CBox.h"
+#include "AABB.h"
 
 // headers for Engine Architecture
 #include "GameState.h"

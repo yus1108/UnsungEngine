@@ -2,7 +2,7 @@
 #include "Render_World.h"
 
 
-Render_World::Render_World()
+Render_World::Render_World() : RenderComponent()
 {
 	geometryComponent = new Geometry;
 	materialComponent = new Material;
@@ -131,6 +131,7 @@ void Render_World::DrawObj(Renderer * render, Transform * transform, Component *
 			deferredContext->IASetVertexBuffers(0, 1, geometryComponent->vertexBuffer[i].GetAddressOf(), &stride, &offset);
 			deferredContext->IASetIndexBuffer(geometryComponent->indexBuffers[i].Get(), DXGI_FORMAT_R32_UINT, 0);
 			deferredContext->DrawIndexed(geometryComponent->countIndexBuffer[i], 0, 0);
+			render->debugRenderer->Add_AABB(*(AABB*)collisionBox, DirectX::XMFLOAT4(1, 0, 0, 0.8f));
 		}
 	}
 }
@@ -402,7 +403,14 @@ void Render_World::ReadBin(const char * filename, ID3D11Device * m_pDevice, ID3D
 			}
 		}
 
+		CalculateCBox();
 		std::cout << filename << " content is in memory" << std::endl;
 	}
 	else std::cout << "Unable to open file" << std::endl;
+}
+
+void Render_World::CalculateCBox()
+{
+	collisionBox = new AABB();
+	UMath::CalculateAABB(geometryComponent->vertices, geometryComponent->indices, DirectX::XMMatrixIdentity(), *(AABB*)collisionBox);
 }

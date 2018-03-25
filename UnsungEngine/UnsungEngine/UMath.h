@@ -1,12 +1,14 @@
 #pragma once
+#include "AABB.h"
 
+struct SIMPLE_VERTEX;
 class UMath {
 public:
 	static float Convert_DegreeToRad(float degree);
 	static double Convert_DegreeToRad(double degree);
 	static DirectX::XMFLOAT2 ConvertPixelToNDC(POINT mousePos, HWND * window);
-	//void CalculateAABB(std::vector<SIMPLE_VERTEX> vertices, std::vector<unsigned int> indices,
-	//	DirectX::XMMATRIX worldmat, AABB & outAABB);
+	static void CalculateAABB(std::vector<SIMPLE_VERTEX> vertices, std::vector<unsigned int> indices,
+		DirectX::XMMATRIX worldmat, AABB & outAABB);
 
 
 	//bool CollisionTest(Trapezoid trapzoid, AABB obb);

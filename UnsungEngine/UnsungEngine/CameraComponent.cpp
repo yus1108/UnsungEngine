@@ -2,7 +2,7 @@
 #include "CameraComponent.h"
 using namespace DirectX;
 
-CameraComponent::CameraComponent()
+CameraComponent::CameraComponent() : Component()
 {
 	m_pViewport = nullptr;
 	m_pRTTWorld = nullptr;
