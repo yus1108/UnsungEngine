@@ -64,7 +64,7 @@ void GameState::Init()
 	// load object 2
 	renderer.LoadObject("Assets/WOS_CommandCenter.bin", gameObject);
 	gameObject->GetTransform()->SetMatrix(DirectX::XMMatrixMultiply(DirectX::XMMatrixIdentity(), DirectX::XMMatrixTranslation(0.5f, 0, 0)));
-	//gameObject2->SetActive(false);
+	//gameObject->SetActive(false);
 	objManager.AddGameObject(gameObject);
 
 	// load logo
