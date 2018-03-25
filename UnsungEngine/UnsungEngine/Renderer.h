@@ -63,7 +63,7 @@ public:
 private:
 	void RenderSet(ID3D11DeviceContext * m_pDeviceContext, UEngine::pipeline_state_t & pipeline, UEngine::RenderToTexture & rtt,
 		D3D11_VIEWPORT & viewport, D3D11_PRIMITIVE_TOPOLOGY topology);
-	void DebugSet(UEngine::pipeline_state_t * pipeline);
+	void DebugSet(UEngine::pipeline_state_t * pipeline, Component * m_pCamera);
 
 	// initialization functions
 	void InitViewport(D3D11_VIEWPORT & _viewport, RECT clientSize);

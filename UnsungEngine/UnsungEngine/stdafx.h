@@ -89,3 +89,5 @@
 #include "Particle_VS.csh"
 #include "Particle_GS.csh"
 #include "Particle_PS.csh"
+#include "DebugRender_VS.csh"
+#include "DebugRender_PS.csh"

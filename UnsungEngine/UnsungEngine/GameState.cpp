@@ -43,7 +43,7 @@ void GameState::Init()
 	textFormat.height = 200;
 	renderer.LoadGUI(hello, textLength, txt_frameRate, 0, textFormat);
 	txt_frameRate->GetTransform()->SetMatrix(worldMat2);
-	//text->SetActive(false);
+	//txt_frameRate->SetActive(false);
 	objManager.AddGameObject(txt_frameRate);
 
 	// load secondary camera
@@ -73,7 +73,6 @@ void GameState::Init()
 	// load logo
 	renderer.LoadGUI("Assets/TempLogo.pnj", logo);
 	logo->GetTransform()->SetMatrix(worldMat);
-	//logo->SetActive(false);
 	objManager.AddGameObject(logo);
 	//objManager.RemoveGameObject(logo);
 
@@ -82,7 +81,7 @@ void GameState::Init()
 	renderer.LoadGUI(hello, textLength, numParticles, 0, textFormat);
 	worldMat2.r[3] = DirectX::XMVectorSet(-0.905f, 0.87f, 0, 1);
 	numParticles->GetTransform()->SetMatrix(worldMat2);
-	//text->SetActive(false);
+	//numParticles->SetActive(false);
 	objManager.AddGameObject(numParticles);
 
 	//renderer.Resize(true, 1920, 1024);

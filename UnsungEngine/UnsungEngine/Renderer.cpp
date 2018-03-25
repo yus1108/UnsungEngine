@@ -358,6 +358,19 @@ void Renderer::Update(ObjectManager * objManager)
 		m_pDeviceContext->Draw(1, 0);
 	}
 
+	// testing debug renderer
+	UEngine::DebugVertex verts[2];
+	verts[0].pos = DirectX::XMFLOAT3(0, 0, 0);
+	verts[0].color = DirectX::XMFLOAT4(1, 1, 1, 1);
+	verts[1].pos = DirectX::XMFLOAT3(10, 0, 0);
+	verts[1].color = DirectX::XMFLOAT4(1, 1, 1, 1);
+	debugRenderer->Add_line(verts[0], verts[1]);
+
+	// render verts in debug renderer
+	m_pDeviceContext->ClearDepthStencilView(default_RTT.depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+	DebugSet(&m_pPipelines[UEngine::PipelineType_DebugRender], m_pCameras[0]);
+	debugRenderer->Flush();
+
 	m_pSwapCahin->Present(0, 0);
 }
 
@@ -553,41 +566,30 @@ void Renderer::RenderSet(ID3D11DeviceContext * m_pDeviceContext, UEngine::pipeli
 	m_pDeviceContext->IASetInputLayout(pipeline.input_layout.Get());
 	m_pDeviceContext->IASetPrimitiveTopology(topology);
 }
-void Renderer::DebugSet(UEngine::pipeline_state_t * pipeline) {
-	//ID3D11SamplerState *sampler[]{ pipeline->samplerState.Get() };
-	//m_pDeviceContext->PSSetSamplers(0, 1, sampler);
+void Renderer::DebugSet(UEngine::pipeline_state_t * pipeline, Component * m_pCamera) {
+	m_pDeviceContext->OMSetBlendState(pipeline->blendingState.Get(), NULL, 0xffffffff);
+	m_pDeviceContext->RSSetState(pipeline->rasterState.Get());
+	ID3D11SamplerState *sampler[]{ pipeline->samplerState.Get() };
+	m_pDeviceContext->PSSetSamplers(0, 1, sampler);
 
-	//// transparent stuff
-	//DirectX::XMVECTOR determinant = DirectX::XMMatrixDeterminant(myCam.GetOriginalView());
-	//SCENE sceneToShader;
-	//sceneToShader.viewMat = DirectX::XMMatrixInverse(&determinant, myCam.GetOriginalView());
-	//sceneToShader.viewMat = DirectX::XMMatrixTranspose(sceneToShader.viewMat);
-	//myCam.SetAspectRatio(default_viewport.Width / default_viewport.Height);
-	//sceneToShader.perspectivMat = DirectX::XMMatrixPerspectiveFovLH(myCam.GetAngle(),
-	//	myCam.GetAspectRatio(), myCam.nearZ, myCam.farZ);
-	//sceneToShader.perspectivMat = DirectX::XMMatrixTranspose(sceneToShader.perspectivMat);
-	//myCam.SetSceneToShader(sceneToShader);
+	// transparent stuff
+	CameraComponent * camera = (CameraComponent*)m_pCamera;
+	DirectX::XMVECTOR determinant = DirectX::XMMatrixDeterminant(camera->GetOriginalView());
 
-	//// world matrix
-	//D3D11_MAPPED_SUBRESOURCE mappedResource;
-	//ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
-	//m_pDeviceContext->Map(constBufferWorld, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
-	//memcpy(mappedResource.pData, &DirectX::XMMatrixIdentity(), sizeof(DirectX::XMMATRIX));
-	//m_pDeviceContext->Unmap(constBufferWorld, 0);
+	// view matrix buffer
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
+	m_pDeviceContext->Map(constBufferScene, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
+	memcpy(mappedResource.pData, &camera->GetSceneToShader(), sizeof(SCENE));
+	m_pDeviceContext->Unmap(constBufferScene, 0);
 
-	//// view matrix buffer
-	//ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
-	//m_pDeviceContext->Map(constBufferScene, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
-	//memcpy(mappedResource.pData, &myCam.GetSceneToShader(), sizeof(SCENE));
-	//m_pDeviceContext->Unmap(constBufferScene, 0);
+	m_pDeviceContext->VSSetConstantBuffers(0, 1, &constBufferScene);
 
-	//m_pDeviceContext->VSSetConstantBuffers(0, 1, &constBufferWorld);
-	//m_pDeviceContext->VSSetConstantBuffers(1, 1, &constBufferScene);
-
-	//m_pDeviceContext->VSSetShader(pipeline->vertex_shader[VertexShaderType::EColorVShader].Get(), nullptr, 0);
-	//m_pDeviceContext->PSSetShader(pipeline->pixel_shader[PixelShaderType::EColorPShader].Get(), nullptr, 0);
-	//m_pDeviceContext->IASetInputLayout(pipeline->input_layout.Get());
-	//m_pDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+	m_pDeviceContext->VSSetShader(pipeline->vertex_shader.Get(), nullptr, 0);
+	m_pDeviceContext->PSSetShader(pipeline->pixel_shader.Get(), nullptr, 0);
+	m_pDeviceContext->GSSetShader(pipeline->geometry_shader.Get(), nullptr, 0);
+	m_pDeviceContext->IASetInputLayout(pipeline->input_layout.Get());
+	m_pDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
 }
 
 void Renderer::InitViewport(D3D11_VIEWPORT & _viewport, RECT clientSize)
@@ -891,6 +893,24 @@ void Renderer::AddBasicPipelines() {
 	uiPipeline.blendingState = default_pipeline.blendingState.Get();
 	uiPipeline.drawType = UEngine::DrawType_UI;
 	m_pPipelines[UEngine::PipelineType_UI] = uiPipeline;
+
+	// PipelineType_DebugRender
+	UEngine::pipeline_state_t debugRenderPipeline;
+	D3D11_INPUT_ELEMENT_DESC vLayoutDebugRender[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+	InitInputLayout(debugRenderPipeline,
+		DebugRender_VS, ARRAYSIZE(DebugRender_VS),
+		DebugRender_PS, ARRAYSIZE(DebugRender_PS),
+		nullptr, 0,
+		vLayoutDebugRender, ARRAYSIZE(vLayoutDebugRender));
+	debugRenderPipeline.rasterState = default_pipeline.rasterState.Get();
+	debugRenderPipeline.samplerState = default_pipeline.samplerState.Get();
+	debugRenderPipeline.blendingState = default_pipeline.blendingState.Get();
+	debugRenderPipeline.drawType = UEngine::DrawType_UI;
+	m_pPipelines[UEngine::PipelineType_DebugRender] = debugRenderPipeline;
 }
 
 HRESULT Renderer::CompileComputeShader(_In_ LPCWSTR srcFile, _In_ LPCSTR entryPoint,

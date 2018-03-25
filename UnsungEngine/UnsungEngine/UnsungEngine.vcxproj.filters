@@ -46,6 +46,9 @@
     <Filter Include="Render\RenderComponents">
       <UniqueIdentifier>{fe2b8e74-6d6a-456c-beae-6db97cc6c758}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\DebugRender_Shaders">
+      <UniqueIdentifier>{c60bb3cd-7835-4944-a567-d7b54f21854f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -235,6 +238,12 @@
     </FxCompile>
     <FxCompile Include="Particle_CS.hlsl">
       <Filter>Shaders\Particle_Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="DebugRender_VS.hlsl">
+      <Filter>Shaders\DebugRender_Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="DebugRender_PS.hlsl">
+      <Filter>Shaders\DebugRender_Shaders</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

@@ -9,7 +9,7 @@ DebugRenderer::DebugRenderer(ID3D11Device *_device, ID3D11DeviceContext *_immedi
 	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
 	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bufferDesc.ByteWidth = (UINT)(sizeof(SIMPLE_VERTEX) * MAX_VERTS);
+	bufferDesc.ByteWidth = (UINT)(sizeof(UEngine::DebugVertex) * MAX_VERTS);
 	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
 	device = _device;
@@ -25,7 +25,7 @@ DebugRenderer::~DebugRenderer()
 		gpu_side_buffer->Release();
 }
 
-void DebugRenderer::Add_line(SIMPLE_VERTEX a, SIMPLE_VERTEX b)
+void DebugRenderer::Add_line(UEngine::DebugVertex a, UEngine::DebugVertex b)
 {
 	cpu_side_buffer[vert_count++] = a;
 	cpu_side_buffer[vert_count++] = b;
@@ -46,10 +46,10 @@ void DebugRenderer::Flush()
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
 	m_pImmediateContext->Map(gpu_side_buffer, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
-	memcpy(mappedResource.pData, &cpu_side_buffer, sizeof(SIMPLE_VERTEX) * vert_count);
+	memcpy(mappedResource.pData, &cpu_side_buffer, sizeof(UEngine::DebugVertex) * vert_count);
 	m_pImmediateContext->Unmap(gpu_side_buffer, 0);
 
-	UINT stride = sizeof(SIMPLE_VERTEX);
+	UINT stride = sizeof(UEngine::DebugVertex);
 	UINT offset = 0;
 
 	m_pImmediateContext->IASetVertexBuffers(0, 1, &gpu_side_buffer, &stride, &offset);

@@ -29,6 +29,7 @@ namespace UEngine {
 		PipelineType_ANIMATION,
 		PipelineType_PARTICLE,
 		PipelineType_UI,
+		PipelineType_DebugRender,
 		PipelineType_COUNT
 	};
 
@@ -79,6 +80,11 @@ namespace UEngine {
 		DirectX::XMFLOAT3 pos;
 		DirectX::XMFLOAT4 color;
 		DirectX::XMFLOAT2 tex;
+	};
+	struct DebugVertex
+	{
+		DirectX::XMFLOAT3 pos;
+		DirectX::XMFLOAT4 color;
 	};
 	struct ParticleConstBuffer {
 		DirectX::XMFLOAT4 worldmat;
