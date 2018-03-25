@@ -8,8 +8,8 @@ GameState::GameState()
 	txt_frameRate = new GameObject();
 	mainCamera2 = new GameObject();
 	gameObject = new GameObject();
-	gameObject2 = new GameObject();
 	logo = new GameObject();
+	particle = new GameObject();
 	numParticles = new GameObject();
 }
 
@@ -58,16 +58,14 @@ void GameState::Init()
 	objManager.AddGameObject(mainCamera2);
 
 	// load particle
-	renderer.LoadParticle("Assets/acid-front.jpg", gameObject);
-	// load model
-	//renderer.LoadObject("Assets/WOS_CommandCenter.bin", gameObject);
-	objManager.AddGameObject(gameObject);
+	renderer.LoadParticle("Assets/acid-front.jpg", particle);
+	objManager.AddGameObject(particle);
 
 	// load object 2
-	renderer.LoadObject("Assets/WOS_CommandCenter.bin", gameObject2);
-	gameObject2->GetTransform()->SetMatrix(DirectX::XMMatrixMultiply(DirectX::XMMatrixIdentity(), DirectX::XMMatrixTranslation(0.5f, 0, 0)));
+	renderer.LoadObject("Assets/WOS_CommandCenter.bin", gameObject);
+	gameObject->GetTransform()->SetMatrix(DirectX::XMMatrixMultiply(DirectX::XMMatrixIdentity(), DirectX::XMMatrixTranslation(0.5f, 0, 0)));
 	//gameObject2->SetActive(false);
-	objManager.AddGameObject(gameObject2);
+	objManager.AddGameObject(gameObject);
 
 	// load logo
 	renderer.LoadGUI("Assets/TempLogo.pnj", logo);
@@ -119,16 +117,16 @@ void GameState::Update()
 	if (numParticles->GetActive())
 	{
 		std::stringstream stringBuilder;
-		stringBuilder << "Particles: " << (unsigned)((Render_Particle*)gameObject->GetRenderComponent())->GetNumParticles() << std::endl;
+		stringBuilder << "Particles: " << (unsigned)((Render_Particle*)particle->GetRenderComponent())->GetNumParticles() << std::endl;
 		char pch[20];
 		stringBuilder.getline(pch, 20);
 		renderer.ChangeGUI(pch, numParticles);
 	}
 	
-	if (gameObject2->GetActive())
+	if (gameObject->GetActive())
 	{
-		DirectX::XMMATRIX worldMat = DirectX::XMMatrixMultiply(gameObject2->GetTransform()->GetMatrix(), DirectX::XMMatrixRotationY((float)utime.DeltaTime() / 10.0f));
-		gameObject2->GetTransform()->SetMatrix(worldMat);
+		DirectX::XMMATRIX worldMat = DirectX::XMMatrixMultiply(gameObject->GetTransform()->GetMatrix(), DirectX::XMMatrixRotationY((float)utime.DeltaTime() / 10.0f));
+		gameObject->GetTransform()->SetMatrix(worldMat);
 	}
 
 	// collision

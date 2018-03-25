@@ -37,6 +37,8 @@ private:
 
 	bool loadingDone;
 public:
+	ID3D11ComputeShader* computeShader = nullptr;
+
 	Renderer();
 	~Renderer();
 
@@ -80,5 +82,7 @@ private:
 
 	// add more pipelines when it is necessary
 	void AddBasicPipelines();
+
+	static HRESULT CompileComputeShader(LPCWSTR srcFile, LPCSTR entryPoint, ID3D11Device * device, ID3DBlob ** blob);
 };
 

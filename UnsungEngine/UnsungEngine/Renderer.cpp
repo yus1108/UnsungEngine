@@ -29,6 +29,9 @@ Renderer::~Renderer()
 		constBufferParticleWorld->Release();
 	if (debugRenderer)
 		delete debugRenderer;
+
+	// Clean up
+	computeShader->Release();
 }
 
 void Renderer::AddCameras(CameraComponent * component, RECT clientSize)
@@ -187,6 +190,39 @@ void Renderer::Init()
 		thread.join();
 	}
 	threads.clear();
+
+	// Verify compute shader is supported
+	if (m_pDevice->GetFeatureLevel() < D3D_FEATURE_LEVEL_11_0)
+	{
+		D3D11_FEATURE_DATA_D3D10_X_HARDWARE_OPTIONS hwopts = { 0 };
+		(void)m_pDevice->CheckFeatureSupport(D3D11_FEATURE_D3D10_X_HARDWARE_OPTIONS, &hwopts, sizeof(hwopts));
+		if (!hwopts.ComputeShaders_Plus_RawAndStructuredBuffers_Via_Shader_4_x)
+		{
+			m_pDevice.ReleaseAndGetAddressOf();
+			printf("DirectCompute is not supported by this device\n");
+		}
+	}
+	// Compile shader
+	ID3DBlob *csBlob = nullptr;
+	HRESULT hr = CompileComputeShader(L"Particle_CS.hlsl", "main", m_pDevice.Get(), &csBlob);
+	if (FAILED(hr))
+	{
+		m_pDevice.ReleaseAndGetAddressOf();
+		printf("Failed compiling shader %08X\n", hr);
+	}
+	// Create shader
+	hr = m_pDevice->CreateComputeShader(csBlob->GetBufferPointer(), csBlob->GetBufferSize(), nullptr, &computeShader);
+
+	csBlob->Release();
+
+	if (FAILED(hr))
+	{
+		m_pDevice.ReleaseAndGetAddressOf();
+	}
+
+	printf("Success\n");
+	m_pDeviceContext->CSSetShader(computeShader, nullptr, 0);
+
 
 	// debugrenderer
 	debugRenderer = new DebugRenderer(m_pDevice.Get(), m_pDeviceContext.Get());
@@ -566,11 +602,9 @@ void Renderer::InitViewport(D3D11_VIEWPORT & _viewport, RECT clientSize)
 }
 void Renderer::InitDeviceContextSwapchain(RECT clientSize) {
 	// directX compatibility
-	D3D_FEATURE_LEVEL FeatureLevels[4];
-	FeatureLevels[0] = D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_10_0;
-	FeatureLevels[1] = D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_10_1;
-	FeatureLevels[2] = D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_11_0;
-	FeatureLevels[3] = D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_11_1;
+	D3D_FEATURE_LEVEL FeatureLevels[2];
+	FeatureLevels[0] = D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_11_0;
+	FeatureLevels[1] = D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_11_1;
 
 	// debugging directX
 	D3D_FEATURE_LEVEL FeatureLevel;
@@ -601,7 +635,7 @@ void Renderer::InitDeviceContextSwapchain(RECT clientSize) {
 		nullptr,
 		flag,
 		FeatureLevels,
-		4,
+		2,
 		D3D11_SDK_VERSION,
 		&m_pSwapchainDesc,
 		&m_pSwapCahin,
@@ -846,4 +880,49 @@ void Renderer::AddBasicPipelines() {
 	uiPipeline.blendingState = default_pipeline.blendingState.Get();
 	uiPipeline.drawType = UEngine::DrawType_UI;
 	m_pPipelines[UEngine::PipelineType_UI] = uiPipeline;
+}
+
+HRESULT Renderer::CompileComputeShader(_In_ LPCWSTR srcFile, _In_ LPCSTR entryPoint,
+	_In_ ID3D11Device* device, _Outptr_ ID3DBlob** blob)
+{
+	if (!srcFile || !entryPoint || !device || !blob)
+		return E_INVALIDARG;
+
+	*blob = nullptr;
+
+	UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
+#if defined( DEBUG ) || defined( _DEBUG )
+	flags |= D3DCOMPILE_DEBUG;
+#endif
+
+	// We generally prefer to use the higher CS shader profile when possible as CS 5.0 is better performance on 11-class hardware
+	LPCSTR profile = (device->GetFeatureLevel() >= D3D_FEATURE_LEVEL_11_0) ? "cs_5_0" : "cs_4_0";
+
+	const D3D_SHADER_MACRO defines[] =
+	{
+		NULL, NULL
+	};
+
+	ID3DBlob* shaderBlob = nullptr;
+	ID3DBlob* errorBlob = nullptr;
+	HRESULT hr = D3DCompileFromFile(srcFile, defines, D3D_COMPILE_STANDARD_FILE_INCLUDE,
+		entryPoint, profile,
+		flags, 0, &shaderBlob, &errorBlob);
+	if (FAILED(hr))
+	{
+		if (errorBlob)
+		{
+			OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+			errorBlob->Release();
+		}
+
+		if (shaderBlob)
+			shaderBlob->Release();
+
+		return hr;
+	}
+
+	*blob = shaderBlob;
+
+	return hr;
 }

@@ -13,9 +13,8 @@ private:
 	GameObject * txt_frameRate;
 	GameObject * mainCamera2;
 	GameObject * gameObject;
-
-	GameObject * gameObject2;
 	GameObject * logo;
+	GameObject * particle;
 	GameObject * numParticles;
 public:
 	GameState();

@@ -112,6 +112,8 @@ void Render_Particle::Update(Transform * transform)
 				worldPos.erase(i);
 				speed.erase(i);
 				duration.erase(i);
+				i--;
+				continue;
 			}
 			XMVECTOR tempPos = XMLoadFloat4(&particles[i].worldmat);
 			tempPos += transform->GetMatrix().r[3];

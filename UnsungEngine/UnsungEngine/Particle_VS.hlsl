@@ -16,6 +16,7 @@ struct Particle {
 	float4 worldMatrix;
 	float4 scale;
 };
+
 cbuffer WORLD : register(b0)
 {
 	Particle particles[1000];
