@@ -1,89 +1,41 @@
-////--------------------------------------------------------------------------------------
-//// File: BasicCompute11.hlsl
-////
-//// This file contains the Compute Shader to perform array A + array B
-//// 
-//// Copyright (c) Microsoft Corporation. All rights reserved.
-////--------------------------------------------------------------------------------------
-//
-//#ifdef USE_STRUCTURED_BUFFERS
-//
-//struct BufType
-//{
-//	int i;
-//	float f;
-//#ifdef TEST_DOUBLE
-//	double d;
-//#endif    
-//};
-//
-//StructuredBuffer<BufType> Buffer0 : register(t0);
-//StructuredBuffer<BufType> Buffer1 : register(t1);
-//RWStructuredBuffer<BufType> BufferOut : register(u0);
-//
-//[numthreads(1, 1, 1)]
-//void CSMain(uint3 DTid : SV_DispatchThreadID)
-//{
-//	BufferOut[DTid.x].i = Buffer0[DTid.x].i + Buffer1[DTid.x].i;
-//	BufferOut[DTid.x].f = Buffer0[DTid.x].f + Buffer1[DTid.x].f;
-//#ifdef TEST_DOUBLE
-//	BufferOut[DTid.x].d = Buffer0[DTid.x].d + Buffer1[DTid.x].d;
-//#endif 
-//}
-//
-//#else // The following code is for raw buffers
-//
-//ByteAddressBuffer Buffer0 : register(t0);
-//ByteAddressBuffer Buffer1 : register(t1);
-//RWByteAddressBuffer BufferOut : register(u0);
-//
-//[numthreads(1, 1, 1)]
-//void CSMain(uint3 DTid : SV_DispatchThreadID)
-//{
-//#ifdef TEST_DOUBLE
-//	int i0 = asint(Buffer0.Load(DTid.x * 16));
-//	float f0 = asfloat(Buffer0.Load(DTid.x * 16 + 4));
-//	double d0 = asdouble(Buffer0.Load(DTid.x * 16 + 8), Buffer0.Load(DTid.x * 16 + 12));
-//	int i1 = asint(Buffer1.Load(DTid.x * 16));
-//	float f1 = asfloat(Buffer1.Load(DTid.x * 16 + 4));
-//	double d1 = asdouble(Buffer1.Load(DTid.x * 16 + 8), Buffer1.Load(DTid.x * 16 + 12));
-//
-//	BufferOut.Store(DTid.x * 16, asuint(i0 + i1));
-//	BufferOut.Store(DTid.x * 16 + 4, asuint(f0 + f1));
-//
-//	uint dl, dh;
-//	asuint(d0 + d1, dl, dh);
-//
-//	BufferOut.Store(DTid.x * 16 + 8, dl);
-//	BufferOut.Store(DTid.x * 16 + 12, dh);
-//#else
-//	int i0 = asint(Buffer0.Load(DTid.x * 8));
-//	float f0 = asfloat(Buffer0.Load(DTid.x * 8 + 4));
-//	int i1 = asint(Buffer1.Load(DTid.x * 8));
-//	float f1 = asfloat(Buffer1.Load(DTid.x * 8 + 4));
-//
-//	BufferOut.Store(DTid.x * 8, asuint(i0 + i1));
-//	BufferOut.Store(DTid.x * 8 + 4, asuint(f0 + f1));
-//#endif // TEST_DOUBLE
-//}
-//
-//#endif // USE_STRUCTURED_BUFFERS
+struct GPUParticle
+{
+	float4 worldmat;
+	float4 scale;
+};
 
-Buffer<float4>		speed		: register(t0);
-Buffer<float4>		particles	: register(t1);
-RWBuffer<float4>	OutputBuf	: register(u0);
+Texture2D random : register(t0);
+RWStructuredBuffer<GPUParticle>	OutputBuf : register(u0);
 
 cbuffer PARAMETERS : register(b0)
 {
-	float4 transformPos;
-}
+	float4 setSpeed;
 
-[numthreads(10, 10, 10)]
-void main( uint DTid : SV_GroupIndex )
+	float4 transformPos;
+	float3 transformScale;
+	float deltaTime;
+	uint isOneDirection;
+}
+SamplerState filters : register(s0); // filter 0 using CLAMP, filter 1 using WRAP
+
+[numthreads(1024, 1, 1)]
+void main( uint DTid : SV_DispatchThreadID)
 {
-	float4 tempPos = particles.Load(DTid);
-	tempPos += transformPos;
-	tempPos += speed.Load(DTid);
-	tempPos.w = 0;
-	OutputBuf[DTid] = tempPos;
+	// Generate some random numbers from reading the random texture
+	float2 uv = float2(DTid.x / 1024.0, deltaTime);
+	float3 randomValues0 = random.SampleLevel(filters, uv, 0).xyz;
+
+	uv = float2(DTid.x + 1 / 1024.0, deltaTime);
+	float3 randomValues1 = random.SampleLevel(filters, uv, 0).xyz;
+
+	float x = (isOneDirection ? 1 : (randomValues0.x % 2 ? -1.0f : 1.0f)) * ((float)(randomValues0.y % 100000)) / 100000.0f;
+	float y = (isOneDirection ? 1 : (randomValues0.z % 2 ? -1.0f : 1.0f)) * ((float)(randomValues1.x % 100000)) / 100000.0f;
+	float z = (isOneDirection ? 1 : (randomValues1.y % 2 ? -1.0f : 1.0f)) * ((float)(randomValues1.z % 100000)) / 100000.0f;
+	float3 speed = float3(x, y, z);
+	//float4 tempPos = particles.Load(DTid);
+	//tempPos += transformPos;
+	//tempPos += speed.Load(DTid);
+	//tempPos.w = 0;
+	//OutputBuf[DTid].worldmat = tempPos;
+	//OutputBuf[DTid].scale = float4(transformScale.xy, 0, 0);
 }

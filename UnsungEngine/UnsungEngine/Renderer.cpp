@@ -858,8 +858,19 @@ void Renderer::AddBasicPipelines() {
 		Particle_GS, ARRAYSIZE(Particle_GS),
 		vLayoutParticle, ARRAYSIZE(vLayoutParticle));
 	m_pDevice->CreateRasterizerState(&rasterizerState, particlePipeline.rasterState.GetAddressOf());
+	D3D11_BLEND_DESC alphaBlending;
+	ZeroMemory(&alphaBlending, sizeof(D3D11_BLEND_DESC));
+	alphaBlending.AlphaToCoverageEnable = true;
+	alphaBlending.RenderTarget[0].BlendEnable = true;
+	alphaBlending.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+	alphaBlending.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	alphaBlending.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	alphaBlending.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	alphaBlending.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	alphaBlending.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	alphaBlending.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+	m_pDevice->CreateBlendState(&alphaBlending, &particlePipeline.blendingState);
 	particlePipeline.samplerState = default_pipeline.samplerState.Get();
-	particlePipeline.blendingState = default_pipeline.blendingState.Get();
 	particlePipeline.drawType = UEngine::DrawType_WORLD;
 	m_pPipelines[UEngine::PipelineType_PARTICLE] = particlePipeline;
 

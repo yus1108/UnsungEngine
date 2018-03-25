@@ -61,6 +61,7 @@ void GameState::Init()
 	renderer.LoadParticle("Assets/particle.png", particle);
 	DirectX::XMMATRIX worldMat = DirectX::XMMatrixScaling(0.1f, 0.1f, 0.1f);
 	particle->GetTransform()->SetMatrix(worldMat);
+	//particle->SetActive(false);
 	objManager.AddGameObject(particle);
 
 	// load object 2
