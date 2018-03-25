@@ -58,8 +58,8 @@ void GameState::Init()
 	objManager.AddGameObject(mainCamera2);
 
 	// load particle
-	renderer.LoadParticle("Assets/fireball.png", particle);
-	DirectX::XMMATRIX worldMat = DirectX::XMMatrixScaling(1, 1, 1);
+	renderer.LoadParticle("Assets/particle.png", particle);
+	DirectX::XMMATRIX worldMat = DirectX::XMMatrixScaling(0.1f, 0.1f, 0.1f);
 	particle->GetTransform()->SetMatrix(worldMat);
 	objManager.AddGameObject(particle);
 
