@@ -10,9 +10,25 @@ private:
 	ID3D11Buffer * gpu_side_buffer = nullptr;
 	UVector<UEngine::ParticleConstBuffer> particles;
 	UVector<UEngine::ParticleConstBuffer> worldPos;
+	UVector<DirectX::XMVECTOR> speed;
+	UVector<float> duration;
+	float creationCounter;
+	float creationTime;
+	float lifespan;
+	bool isOneDirection;
+	DirectX::XMVECTOR setSpeed;
+	DirectX::XMFLOAT3 setPosition;
 public:
 	Render_Particle();
 	virtual ~Render_Particle();
+
+	unsigned GetNumParticles() { return particles.size(); }
+	DirectX::XMVECTOR GetSpeed() { return setSpeed; }
+	void SetSpeed(float x, float y, float z);
+	DirectX::XMFLOAT3 GetPosition() { return setPosition; }
+	void SetPosition(float x, float y, float z);
+	bool GetIsOneDirection() { return isOneDirection; }
+	void SetIsOneDirection(bool _isOneDirection) { isOneDirection = _isOneDirection; }
 
 	void Init(ID3D11Device * m_pDevice, const WCHAR * textString, UINT32 textLength,
 		const WCHAR * msc_fontName, const FLOAT msc_fontSize,

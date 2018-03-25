@@ -16,7 +16,7 @@ private:
 
 	GameObject * gameObject2;
 	GameObject * logo;
-	GameObject * logo2;
+	GameObject * numParticles;
 public:
 	GameState();
 	~GameState();

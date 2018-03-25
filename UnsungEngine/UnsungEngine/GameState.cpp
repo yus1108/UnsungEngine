@@ -10,7 +10,7 @@ GameState::GameState()
 	gameObject = new GameObject();
 	gameObject2 = new GameObject();
 	logo = new GameObject();
-	logo2 = new GameObject();
+	numParticles = new GameObject();
 }
 
 GameState::~GameState()
@@ -35,7 +35,13 @@ void GameState::Init()
 	worldMat2.r[3] = DirectX::XMVectorSet(-0.92f, 0.95f, 0, 1);
 	const WCHAR hello[] = L"Welcome to Unsung Engine!";
 	unsigned textLength = ARRAYSIZE(hello) - 1;
-	renderer.LoadGUI(hello, textLength, txt_frameRate, 0);
+	UEngine::TextFormat textFormat;
+	textFormat.textColor = D2D1::ColorF::White;
+	textFormat.dpiX = 100;
+	textFormat.dpiY = 400;
+	textFormat.width = 400;
+	textFormat.height = 200;
+	renderer.LoadGUI(hello, textLength, txt_frameRate, 0, textFormat);
 	txt_frameRate->GetTransform()->SetMatrix(worldMat2);
 	//text->SetActive(false);
 	objManager.AddGameObject(txt_frameRate);
@@ -48,7 +54,7 @@ void GameState::Init()
 	camera2Pos.r[3] = DirectX::XMVectorSet(20, 5, 0, 1);
 	cameraComponent2->SetOriginalView(camera2Pos);
 	mainCamera2->AddComponent(cameraComponent2);
-	mainCamera2->SetActive(false);
+	//mainCamera2->SetActive(false);
 	objManager.AddGameObject(mainCamera2);
 
 	// load particle
@@ -60,24 +66,24 @@ void GameState::Init()
 	// load object 2
 	renderer.LoadObject("Assets/WOS_CommandCenter.bin", gameObject2);
 	gameObject2->GetTransform()->SetMatrix(DirectX::XMMatrixMultiply(DirectX::XMMatrixIdentity(), DirectX::XMMatrixTranslation(0.5f, 0, 0)));
-	gameObject2->SetActive(false);
+	//gameObject2->SetActive(false);
 	objManager.AddGameObject(gameObject2);
 
 	// load logo
 	renderer.LoadGUI("Assets/TempLogo.pnj", logo);
 	DirectX::XMMATRIX worldMat = DirectX::XMMatrixScaling(0.1f, 0.1f, 1);
 	logo->GetTransform()->SetMatrix(worldMat);
-	logo->SetActive(false);
+	//logo->SetActive(false);
 	objManager.AddGameObject(logo);
 	//objManager.RemoveGameObject(logo);
 
 	// load logo2
-	renderer.LoadGUI("Assets/TempLogo.pnj", logo2);
-	worldMat = DirectX::XMMatrixScaling(0.12f, 0.1f, 1);
-	logo2->GetTransform()->SetMatrix(worldMat);
-	logo2->SetActive(false);
-	objManager.AddGameObject(logo2);
-	//objManager.RemoveGameObject(logo);
+	textFormat.dpiX = 80;
+	renderer.LoadGUI(hello, textLength, numParticles, 0, textFormat);
+	worldMat2.r[3] = DirectX::XMVectorSet(-0.905f, 0.87f, 0, 1);
+	numParticles->GetTransform()->SetMatrix(worldMat2);
+	//text->SetActive(false);
+	objManager.AddGameObject(numParticles);
 
 	//renderer.Resize(true, 1920, 1024);
 	//renderer.Resize(false, 1280, 768);
@@ -108,6 +114,15 @@ void GameState::Update()
 		char pch[20];
 		stringBuilder.getline(pch, 20);
 		renderer.ChangeGUI(pch, txt_frameRate);
+	}
+
+	if (numParticles->GetActive())
+	{
+		std::stringstream stringBuilder;
+		stringBuilder << "Particles: " << (unsigned)((Render_Particle*)gameObject->GetRenderComponent())->GetNumParticles() << std::endl;
+		char pch[20];
+		stringBuilder.getline(pch, 20);
+		renderer.ChangeGUI(pch, numParticles);
 	}
 	
 	if (gameObject2->GetActive())

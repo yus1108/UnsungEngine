@@ -5,6 +5,12 @@
 Render_Particle::Render_Particle()
 {
 	gpu_side_buffer = nullptr;
+	creationCounter = 0;
+	creationTime = 0.02f;
+	lifespan = 1.0f;
+	SetIsOneDirection(false);
+	SetSpeed(0.1f, 0.1f, 0.1f);
+	SetPosition(0, 0, 0);
 }
 
 
@@ -14,14 +20,36 @@ Render_Particle::~Render_Particle()
 		gpu_side_buffer->Release();
 }
 
+void Render_Particle::SetSpeed(float x, float y, float z)
+{
+	setSpeed = DirectX::XMVectorSet(x, y, z, 0);
+}
+
+void Render_Particle::SetPosition(float x, float y, float z)
+{
+	setPosition = DirectX::XMFLOAT3(x, y, z);
+}
+
 void Render_Particle::Init(UEngine::pipeline_state_t * pipeline)
 {
 	RenderComponent::Init(pipeline);
-	particles.push_back(UEngine::ParticleConstBuffer());
-	particles.push_back(UEngine::ParticleConstBuffer());
-	particles[1].worldmat.x = 2;
-	worldPos.push_back(UEngine::ParticleConstBuffer());
-	worldPos.push_back(UEngine::ParticleConstBuffer());
+	using namespace DirectX;
+	for (unsigned i = 0; i < 10; i++)
+	{
+		particles.push_back(UEngine::ParticleConstBuffer());
+		worldPos.push_back(UEngine::ParticleConstBuffer());
+		duration.push_back(0.0f);
+		speed.push_back(DirectX::XMVectorSet(
+			(isOneDirection ? 1 : (rand() % 2 ? -1.0f : 1.0f)) * ((float)(rand() % 100000)) / 100000.0f,
+			(isOneDirection ? 1 : (rand() % 2 ? -1.0f : 1.0f)) * ((float)(rand() % 100000)) / 100000.0f,
+			(isOneDirection ? 1 : (rand() % 2 ? -1.0f : 1.0f)) * ((float)(rand() % 100000)) / 100000.0f, 0) * setSpeed);
+		float sign = rand() % 2 ? -1.0f : 1.0f;
+		particles[i].worldmat.x = sign * ((float)(rand() % 100000)) / 100000.0f * setPosition.x;
+		sign = rand() % 2 ? -1.0f : 1.0f;
+		particles[i].worldmat.y = sign * ((float)(rand() % 100000)) / 100000.0f * setPosition.y;
+		sign = rand() % 2 ? -1.0f : 1.0f;
+		particles[i].worldmat.z = sign * ((float)(rand() % 100000)) / 100000.0f * setPosition.z;
+	}
 
 	// Basic Model Loading
 	UEngine::ParticleVertex cpu_vertex;
@@ -47,20 +75,52 @@ void Render_Particle::Update(Transform * transform)
 {
 	if (loadingDone && isActive)
 	{
+		float deltaTime = (float)utime.DeltaTime();
+		creationCounter += deltaTime;
+		if (creationCounter >= creationTime)
+		{
+			using namespace DirectX;
+			for (unsigned i = 0; i < 10; i++)
+			{
+				unsigned index = particles.size();
+				if (index == 1000)
+					break;
+
+				particles.push_back(UEngine::ParticleConstBuffer());
+				worldPos.push_back(UEngine::ParticleConstBuffer());
+				duration.push_back(0.0f);
+				speed.push_back(DirectX::XMVectorSet(
+					(isOneDirection ? 1 : (rand() % 2 ? -1.0f : 1.0f)) * ((float)(rand() % 100000)) / 100000.0f,
+					(isOneDirection ? 1 : (rand() % 2 ? -1.0f : 1.0f)) * ((float)(rand() % 100000)) / 100000.0f,
+					(isOneDirection ? 1 : (rand() % 2 ? -1.0f : 1.0f)) * ((float)(rand() % 100000)) / 100000.0f, 0) * setSpeed);
+				float sign = rand() % 2 ? -1.0f : 1.0f;
+				particles[index].worldmat.x = sign * ((float)(rand() % 100000)) / 100000.0f * setPosition.x;
+				sign = rand() % 2 ? -1.0f : 1.0f;
+				particles[index].worldmat.y = sign * ((float)(rand() % 100000)) / 100000.0f * setPosition.y;
+				sign = rand() % 2 ? -1.0f : 1.0f;
+				particles[index].worldmat.z = sign * ((float)(rand() % 100000)) / 100000.0f * setPosition.z;
+			}
+			creationCounter = 0;
+		}
 		for (unsigned i = 0; i < particles.size(); i++)
 		{
 			using namespace DirectX;
-			float deltaTime = (float)utime.DeltaTime();
-			if (deltaTime < 1000)
+			duration[i] += deltaTime;
+			if (duration[i] >= lifespan)
 			{
-				particles[i].worldmat.y -= deltaTime;
-				XMVECTOR tempPos = XMLoadFloat4(&particles[i].worldmat);
-				tempPos += transform->GetMatrix().r[3];
-				worldPos[i] = UEngine::ParticleConstBuffer();
-				XMStoreFloat4(&worldPos[i].worldmat, tempPos);
-				worldPos[i].worldmat.w = 0;
-				worldPos[i].scale = DirectX::XMFLOAT4(1, 1, 0, 0);
+				particles.erase(i);
+				worldPos.erase(i);
+				speed.erase(i);
+				duration.erase(i);
 			}
+			XMVECTOR tempPos = XMLoadFloat4(&particles[i].worldmat);
+			tempPos += transform->GetMatrix().r[3];
+			tempPos += speed[i];
+			worldPos[i] = UEngine::ParticleConstBuffer();
+			XMStoreFloat4(&worldPos[i].worldmat, tempPos);
+			XMStoreFloat4(&particles[i].worldmat, tempPos);
+			worldPos[i].worldmat.w = 0;
+			worldPos[i].scale = DirectX::XMFLOAT4(1, 1, 0, 0);
 		}
 	}
 }

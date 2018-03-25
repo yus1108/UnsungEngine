@@ -51,6 +51,7 @@
 #include <sstream>
 #include <bitset>
 #include <unordered_map>
+#include <random>
 
 // utility headers
 #include "WICTextureLoader.h"

@@ -465,16 +465,10 @@ void Renderer::LoadGUI(const char * textureName, GameObject * gameObject) {
 	gameObject->SetRenderComponent(textModel);
 	gameObject->GetTransform()->SetMatrix(DirectX::XMMatrixIdentity());
 }
-void Renderer::LoadGUI(const WCHAR * inputString, unsigned length, GameObject * gameObject, unsigned cameraIndex) {
+void Renderer::LoadGUI(const WCHAR * inputString, unsigned length, GameObject * gameObject, unsigned cameraIndex, UEngine::TextFormat textFormat) {
 	// load texture
 	RenderComponent * textModel = new Render_UI();
 	Render_UI * ptr = (Render_UI*)textModel;
-	UEngine::TextFormat textFormat;
-	textFormat.textColor = D2D1::ColorF::White;
-	textFormat.dpiX = 100;
-	textFormat.dpiY = 400;
-	textFormat.width = 400;
-	textFormat.height = 200;
 	ptr->Init(&m_pPipelines[UEngine::PipelineType_UI]);
 	ptr->Init(m_pDevice.Get(), inputString, length, L"Verdana", 30, textFormat);
 	ptr->SetType(UEngine::DrawType_UI);

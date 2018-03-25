@@ -55,7 +55,7 @@ public:
 	void Resize(bool isFullScreen, int width, int height);
 	void LoadObject(const char * name, GameObject * gameObject);
 	void LoadGUI(const char * textureName, GameObject * gameObject);
-	void LoadGUI(const WCHAR * inputString, unsigned length, GameObject * gameObject, unsigned cameraIndex);
+	void LoadGUI(const WCHAR * inputString, unsigned length, GameObject * gameObject, unsigned cameraIndex, UEngine::TextFormat textFormat);
 	void LoadParticle(const char * name, GameObject * gameObject);
 	void ChangeGUI(const char * textStr, GameObject * gameObject, UEngine::TextFormat * textFormat = nullptr);
 private:

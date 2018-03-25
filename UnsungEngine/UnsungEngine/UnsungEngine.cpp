@@ -94,6 +94,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	//delete[] nstring;
 #pragma endregion
 	
+	srand((unsigned)time(nullptr));
 	isTerminate = false;
 	bool succeedTerminating = false;
 	std::thread mainThread;
