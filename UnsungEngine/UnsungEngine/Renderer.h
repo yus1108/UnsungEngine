@@ -3,7 +3,9 @@
 #include "ObjectManager.h"
 #include "CameraComponent.h"
 #include "RenderComponent.h"
+#ifdef _DEBUG
 #include "DebugRenderer.h"
+#endif
 
 class Renderer
 {
@@ -11,7 +13,9 @@ class Renderer
 	friend class Render_UI;
 	friend class Render_Particle;
 private:
+#ifdef _DEBUG
 	DebugRenderer * debugRenderer;
+#endif
 	Microsoft::WRL::ComPtr<ID3D11Buffer> default_vertexBuffer;
 	UEngine::RenderToTexture default_RTT;
 	UEngine::pipeline_state_t default_pipeline;

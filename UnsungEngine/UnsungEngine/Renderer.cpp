@@ -5,7 +5,9 @@
 Renderer::Renderer()
 {
 	loadingDone = false;
+#ifdef _DEBUG
 	debugRenderer = nullptr;
+#endif
 }
 Renderer::~Renderer()
 {
@@ -27,9 +29,10 @@ Renderer::~Renderer()
 		constBufferRTTSize->Release();
 	if (constBufferParticleWorld)
 		constBufferParticleWorld->Release();
+#ifdef _DEBUG
 	if (debugRenderer)
 		delete debugRenderer;
-
+#endif
 	// Clean up
 	computeShader->Release();
 }
@@ -224,8 +227,10 @@ void Renderer::Init()
 	m_pDeviceContext->CSSetShader(computeShader, nullptr, 0);
 
 
+#ifdef _DEBUG
 	// debugrenderer
 	debugRenderer = new DebugRenderer(m_pDevice.Get(), m_pDeviceContext.Get());
+#endif
 
 #pragma region Default_Vertex
 	// Basic Model Loading
@@ -358,10 +363,12 @@ void Renderer::Update(ObjectManager * objManager)
 		m_pDeviceContext->Draw(1, 0);
 	}
 
+#ifdef _DEBUG
 	// render verts in debug renderer
 	m_pDeviceContext->ClearDepthStencilView(default_RTT.depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	DebugSet(&m_pPipelines[UEngine::PipelineType_DebugRender], m_pCameras[0]);
 	debugRenderer->Flush();
+#endif
 
 	m_pSwapCahin->Present(0, 0);
 }
@@ -886,6 +893,7 @@ void Renderer::AddBasicPipelines() {
 	uiPipeline.drawType = UEngine::DrawType_UI;
 	m_pPipelines[UEngine::PipelineType_UI] = uiPipeline;
 
+#ifdef _DEBUG
 	// PipelineType_DebugRender
 	UEngine::pipeline_state_t debugRenderPipeline;
 	D3D11_INPUT_ELEMENT_DESC vLayoutDebugRender[] =
@@ -903,6 +911,7 @@ void Renderer::AddBasicPipelines() {
 	debugRenderPipeline.blendingState = default_pipeline.blendingState.Get();
 	debugRenderPipeline.drawType = UEngine::DrawType_UI;
 	m_pPipelines[UEngine::PipelineType_DebugRender] = debugRenderPipeline;
+#endif
 }
 
 HRESULT Renderer::CompileComputeShader(_In_ LPCWSTR srcFile, _In_ LPCSTR entryPoint,

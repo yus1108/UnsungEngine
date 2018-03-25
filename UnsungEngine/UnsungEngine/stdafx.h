@@ -72,7 +72,9 @@
 #include "GameState.h"
 #include "GameObject.h"
 #include "Renderer.h"
+#ifdef _DEBUG
 #include "DebugRenderer.h"
+#endif
 #include "Component.h"
 #include "CameraComponent.h"
 #include "RenderComponent.h"
@@ -91,5 +93,7 @@
 #include "Particle_VS.csh"
 #include "Particle_GS.csh"
 #include "Particle_PS.csh"
+#ifdef _DEBUG
 #include "DebugRender_VS.csh"
 #include "DebugRender_PS.csh"
+#endif

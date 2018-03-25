@@ -29,7 +29,9 @@ namespace UEngine {
 		PipelineType_ANIMATION,
 		PipelineType_PARTICLE,
 		PipelineType_UI,
+#ifdef _DEBUG
 		PipelineType_DebugRender,
+#endif
 		PipelineType_COUNT
 	};
 
