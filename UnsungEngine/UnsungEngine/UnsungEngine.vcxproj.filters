@@ -233,5 +233,8 @@
     <FxCompile Include="Particle_PS.hlsl">
       <Filter>Shaders\Particle_Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="Particle_CS.hlsl">
+      <Filter>Shaders\Particle_Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
