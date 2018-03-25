@@ -122,7 +122,8 @@ void Render_Particle::Update(Transform * transform)
 			XMStoreFloat4(&worldPos[i].worldmat, tempPos);
 			XMStoreFloat4(&particles[i].worldmat, tempPos);
 			worldPos[i].worldmat.w = 0;
-			worldPos[i].scale = DirectX::XMFLOAT4(1, 1, 0, 0);
+			XMFLOAT3 scale = transform->GetScale();
+			worldPos[i].scale = DirectX::XMFLOAT4(scale.x, scale.y, 0, 0);
 		}
 	}
 }

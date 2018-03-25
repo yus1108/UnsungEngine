@@ -59,6 +59,8 @@ void GameState::Init()
 
 	// load particle
 	renderer.LoadParticle("Assets/acid-front.jpg", particle);
+	DirectX::XMMATRIX worldMat = DirectX::XMMatrixScaling(0.1f, 0.1f, 1);
+	particle->GetTransform()->SetMatrix(worldMat);
 	objManager.AddGameObject(particle);
 
 	// load object 2
@@ -69,7 +71,6 @@ void GameState::Init()
 
 	// load logo
 	renderer.LoadGUI("Assets/TempLogo.pnj", logo);
-	DirectX::XMMATRIX worldMat = DirectX::XMMatrixScaling(0.1f, 0.1f, 1);
 	logo->GetTransform()->SetMatrix(worldMat);
 	//logo->SetActive(false);
 	objManager.AddGameObject(logo);
