@@ -141,6 +141,9 @@
     <ClInclude Include="AABB.h">
       <Filter>Collision</Filter>
     </ClInclude>
+    <ClInclude Include="OOBB.h">
+      <Filter>Collision</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -210,6 +213,9 @@
       <Filter>Collision</Filter>
     </ClCompile>
     <ClCompile Include="AABB.cpp">
+      <Filter>Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="OOBB.cpp">
       <Filter>Collision</Filter>
     </ClCompile>
   </ItemGroup>

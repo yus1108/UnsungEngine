@@ -153,6 +153,7 @@
     <ClInclude Include="GameState.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="ObjectManager.h" />
+    <ClInclude Include="OOBB.h" />
     <ClInclude Include="RenderComponent.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Render_Particle.h" />
@@ -182,6 +183,7 @@
     <ClCompile Include="GameState.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="ObjectManager.cpp" />
+    <ClCompile Include="OOBB.cpp" />
     <ClCompile Include="RenderComponent.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Render_Particle.cpp" />

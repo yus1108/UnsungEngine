@@ -5,9 +5,6 @@
 Renderer::Renderer()
 {
 	loadingDone = false;
-#ifdef _DEBUG
-	debugRenderer = nullptr;
-#endif
 }
 Renderer::~Renderer()
 {
@@ -29,10 +26,6 @@ Renderer::~Renderer()
 		constBufferRTTSize->Release();
 	if (constBufferParticleWorld)
 		constBufferParticleWorld->Release();
-#ifdef _DEBUG
-	if (debugRenderer)
-		delete debugRenderer;
-#endif
 	// Clean up
 	computeShader->Release();
 }
@@ -229,7 +222,7 @@ void Renderer::Init()
 
 #ifdef _DEBUG
 	// debugrenderer
-	debugRenderer = new DebugRenderer(m_pDevice.Get(), m_pDeviceContext.Get());
+	debugRenderer.Init(m_pDevice.Get(), m_pDeviceContext.Get());
 #endif
 
 #pragma region Default_Vertex
@@ -269,6 +262,17 @@ void Renderer::Update(ObjectManager * objManager)
 		threadPool.Join(threads[i]);
 	}
 	threads.clear();
+
+#ifdef _DEBUG
+	// render verts in debug renderer
+	CameraComponent * debugCamera = m_pCameras[0];
+	debugCamera->GetDeferredContext(UEngine::DrawType_WORLD)->OMSetDepthStencilState(debugCamera->GetRTTWorld()->depthStencilState.Get(), 1);
+	debugCamera->GetDeferredContext(UEngine::DrawType_WORLD)->OMSetRenderTargets(1, debugCamera->GetRTTWorld()->renderTargetViewMap.GetAddressOf(), debugCamera->GetRTTWorld()->depthStencilView.Get());
+	debugCamera->GetDeferredContext(UEngine::DrawType_WORLD)->ClearDepthStencilView(debugCamera->GetRTTWorld()->depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+	DebugSet(&m_pPipelines[UEngine::PipelineType_DebugRender], debugCamera);
+	debugRenderer.Flush(debugCamera->GetDeferredContext(UEngine::DrawType_WORLD));
+#endif
+
 	// finish deferred rendering
 	for (unsigned i = 0; i < m_pCameras.size(); i++)
 	{
@@ -293,6 +297,7 @@ void Renderer::Update(ObjectManager * objManager)
 		m_pCameras[i]->ReleaseCommandList(0);
 		m_pCameras[i]->ReleaseCommandList(1);
 	}
+
 	UINT stride = sizeof(UEngine::DefaultVertex);
 	UINT offset = 0;
 
@@ -362,13 +367,6 @@ void Renderer::Update(ObjectManager * objManager)
 		// Draw
 		m_pDeviceContext->Draw(1, 0);
 	}
-
-#ifdef _DEBUG
-	// render verts in debug renderer
-	m_pDeviceContext->ClearDepthStencilView(default_RTT.depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
-	DebugSet(&m_pPipelines[UEngine::PipelineType_DebugRender], m_pCameras[0]);
-	debugRenderer->Flush();
-#endif
 
 	m_pSwapCahin->Present(0, 0);
 }
@@ -497,7 +495,7 @@ void Renderer::Resize(bool isFullScreen, int width, int height) {
 }
 void Renderer::LoadObject(const char * name, GameObject * gameObject) {
 	RenderComponent * model = new Render_World();
-	model->Init(&m_pPipelines[UEngine::PipelineType_NO_ANIMATION]);
+	model->Init(&m_pPipelines[UEngine::PipelineType_NO_ANIMATION], gameObject);
 	model->ReadBin(name, m_pDevice.Get(), m_pDeviceContext.Get());
 	model->SetType(UEngine::DrawType_WORLD);
 	gameObject->SetRenderComponent(model);
@@ -507,7 +505,7 @@ void Renderer::LoadGUI(const char * textureName, GameObject * gameObject) {
 	// load texture
 	RenderComponent * textModel = new Render_UI();
 	Render_UI * ptr = (Render_UI*)textModel;
-	ptr->Init(&m_pPipelines[UEngine::PipelineType_UI]);
+	ptr->Init(&m_pPipelines[UEngine::PipelineType_UI], gameObject);
 	ptr->ReadBin(textureName, m_pDevice.Get(), m_pDeviceContext.Get());
 	ptr->SetType(UEngine::DrawType_UI);
 	gameObject->SetRenderComponent(textModel);
@@ -517,7 +515,7 @@ void Renderer::LoadGUI(const WCHAR * inputString, unsigned length, GameObject * 
 	// load texture
 	RenderComponent * textModel = new Render_UI();
 	Render_UI * ptr = (Render_UI*)textModel;
-	ptr->Init(&m_pPipelines[UEngine::PipelineType_UI]);
+	ptr->Init(&m_pPipelines[UEngine::PipelineType_UI], gameObject);
 	ptr->Init(m_pDevice.Get(), inputString, length, L"Verdana", 30, textFormat);
 	ptr->SetType(UEngine::DrawType_UI);
 	ptr->SetCamera(cameraIndex);
@@ -527,7 +525,7 @@ void Renderer::LoadGUI(const WCHAR * inputString, unsigned length, GameObject * 
 void Renderer::LoadParticle(const char * name, GameObject * gameObject) {
 	RenderComponent * particleModel = new Render_Particle();
 	Render_Particle * ptr = (Render_Particle*)particleModel;
-	ptr->Init(&m_pPipelines[UEngine::PipelineType_PARTICLE]);
+	ptr->Init(&m_pPipelines[UEngine::PipelineType_PARTICLE], gameObject);
 	ptr->Init(m_pDevice.Get());
 	ptr->ReadBin(name, m_pDevice.Get(), m_pDeviceContext.Get());
 	ptr->SetType(UEngine::DrawType_WORLD);
@@ -566,29 +564,29 @@ void Renderer::RenderSet(ID3D11DeviceContext * m_pDeviceContext, UEngine::pipeli
 	m_pDeviceContext->IASetPrimitiveTopology(topology);
 }
 void Renderer::DebugSet(UEngine::pipeline_state_t * pipeline, Component * m_pCamera) {
-	m_pDeviceContext->OMSetBlendState(pipeline->blendingState.Get(), NULL, 0xffffffff);
-	m_pDeviceContext->RSSetState(pipeline->rasterState.Get());
+	CameraComponent * camera = (CameraComponent*)m_pCamera;
+	camera->GetDeferredContext(UEngine::DrawType_WORLD)->OMSetBlendState(pipeline->blendingState.Get(), NULL, 0xffffffff);
+	camera->GetDeferredContext(UEngine::DrawType_WORLD)->RSSetState(pipeline->rasterState.Get());
 	ID3D11SamplerState *sampler[]{ pipeline->samplerState.Get() };
-	m_pDeviceContext->PSSetSamplers(0, 1, sampler);
+	camera->GetDeferredContext(UEngine::DrawType_WORLD)->PSSetSamplers(0, 1, sampler);
 
 	// transparent stuff
-	CameraComponent * camera = (CameraComponent*)m_pCamera;
 	DirectX::XMVECTOR determinant = DirectX::XMMatrixDeterminant(camera->GetOriginalView());
 
 	// view matrix buffer
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
-	m_pDeviceContext->Map(constBufferScene, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
+	camera->GetDeferredContext(UEngine::DrawType_WORLD)->Map(constBufferScene, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
 	memcpy(mappedResource.pData, &camera->GetSceneToShader(), sizeof(SCENE));
-	m_pDeviceContext->Unmap(constBufferScene, 0);
+	camera->GetDeferredContext(UEngine::DrawType_WORLD)->Unmap(constBufferScene, 0);
 
-	m_pDeviceContext->VSSetConstantBuffers(0, 1, &constBufferScene);
+	camera->GetDeferredContext(UEngine::DrawType_WORLD)->VSSetConstantBuffers(0, 1, &constBufferScene);
 
-	m_pDeviceContext->VSSetShader(pipeline->vertex_shader.Get(), nullptr, 0);
-	m_pDeviceContext->PSSetShader(pipeline->pixel_shader.Get(), nullptr, 0);
-	m_pDeviceContext->GSSetShader(pipeline->geometry_shader.Get(), nullptr, 0);
-	m_pDeviceContext->IASetInputLayout(pipeline->input_layout.Get());
-	m_pDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+	camera->GetDeferredContext(UEngine::DrawType_WORLD)->VSSetShader(pipeline->vertex_shader.Get(), nullptr, 0);
+	camera->GetDeferredContext(UEngine::DrawType_WORLD)->PSSetShader(pipeline->pixel_shader.Get(), nullptr, 0);
+	camera->GetDeferredContext(UEngine::DrawType_WORLD)->GSSetShader(pipeline->geometry_shader.Get(), nullptr, 0);
+	camera->GetDeferredContext(UEngine::DrawType_WORLD)->IASetInputLayout(pipeline->input_layout.Get());
+	camera->GetDeferredContext(UEngine::DrawType_WORLD)->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
 }
 
 void Renderer::InitViewport(D3D11_VIEWPORT & _viewport, RECT clientSize)
@@ -836,7 +834,19 @@ void Renderer::AddBasicPipelines() {
 	// PipelineType_NO_ANIMATION
 	m_pDevice->CreateRasterizerState(&rasterizerState, pipeline.rasterState.GetAddressOf());
 	pipeline.samplerState = default_pipeline.samplerState.Get();
-	pipeline.blendingState = default_pipeline.blendingState.Get();
+	D3D11_BLEND_DESC omDesc;
+	ZeroMemory(&omDesc, sizeof(D3D11_BLEND_DESC));
+	omDesc.AlphaToCoverageEnable = true;
+	omDesc.IndependentBlendEnable = false;
+	omDesc.RenderTarget[0].BlendEnable = true;
+	omDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+	omDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO;
+	omDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	omDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	omDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	omDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	omDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+	m_pDevice->CreateBlendState(&omDesc, &pipeline.blendingState);
 	pipeline.drawType = UEngine::DrawType_WORLD;
 	m_pPipelines[UEngine::PipelineType_NO_ANIMATION] = pipeline;
 
@@ -908,7 +918,18 @@ void Renderer::AddBasicPipelines() {
 		vLayoutDebugRender, ARRAYSIZE(vLayoutDebugRender));
 	debugRenderPipeline.rasterState = default_pipeline.rasterState.Get();
 	debugRenderPipeline.samplerState = default_pipeline.samplerState.Get();
-	debugRenderPipeline.blendingState = default_pipeline.blendingState.Get();
+	D3D11_BLEND_DESC additiveBlending;
+	ZeroMemory(&additiveBlending, sizeof(D3D11_BLEND_DESC));
+	additiveBlending.AlphaToCoverageEnable = true;
+	additiveBlending.RenderTarget[0].BlendEnable = true;
+	additiveBlending.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+	additiveBlending.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+	additiveBlending.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	additiveBlending.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	additiveBlending.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	additiveBlending.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	additiveBlending.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+	m_pDevice->CreateBlendState(&additiveBlending, &debugRenderPipeline.blendingState);
 	debugRenderPipeline.drawType = UEngine::DrawType_UI;
 	m_pPipelines[UEngine::PipelineType_DebugRender] = debugRenderPipeline;
 #endif

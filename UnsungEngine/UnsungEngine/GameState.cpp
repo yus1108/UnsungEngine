@@ -124,11 +124,11 @@ void GameState::Update()
 		renderer.ChangeGUI(pch, numParticles);
 	}
 	
-	//if (gameObject->GetActive())
-	//{
-	//	DirectX::XMMATRIX worldMat = DirectX::XMMatrixMultiply(gameObject->GetTransform()->GetMatrix(), DirectX::XMMatrixRotationY((float)utime.DeltaTime() / 10.0f));
-	//	gameObject->GetTransform()->SetMatrix(worldMat);
-	//}
+	if (gameObject->GetActive())
+	{
+		DirectX::XMMATRIX worldMat = DirectX::XMMatrixMultiply(gameObject->GetTransform()->GetMatrix(), DirectX::XMMatrixRotationY((float)utime.DeltaTime() / 10.0f));
+		gameObject->GetTransform()->SetMatrix(worldMat);
+	}
 
 	// collision
 

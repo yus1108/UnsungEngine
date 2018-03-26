@@ -30,9 +30,9 @@ void Render_Particle::SetPosition(float x, float y, float z)
 	setPosition = DirectX::XMFLOAT3(x, y, z);
 }
 
-void Render_Particle::Init(UEngine::pipeline_state_t * pipeline)
+void Render_Particle::Init(UEngine::pipeline_state_t * pipeline, GameObject * _parent)
 {
-	RenderComponent::Init(pipeline);
+	RenderComponent::Init(pipeline, _parent);
 	using namespace DirectX;
 	for (unsigned i = 0; i < 10; i++)
 	{
@@ -71,7 +71,7 @@ void Render_Particle::Init(ID3D11Device * device)
 	device->CreateBuffer(&bufferDesc, nullptr, &gpu_side_buffer);
 }
 
-void Render_Particle::Update(Transform * transform)
+void Render_Particle::Update()
 {
 	if (loadingDone && isActive)
 	{
@@ -116,19 +116,19 @@ void Render_Particle::Update(Transform * transform)
 				continue;
 			}
 			XMVECTOR tempPos = XMLoadFloat4(&particles[i].worldmat);
-			tempPos += transform->GetMatrix().r[3];
+			tempPos += parent->GetTransform()->GetMatrix().r[3];
 			tempPos += speed[i];
 			worldPos[i] = UEngine::ParticleConstBuffer();
 			XMStoreFloat4(&worldPos[i].worldmat, tempPos);
 			XMStoreFloat4(&particles[i].worldmat, tempPos);
 			worldPos[i].worldmat.w = 0;
-			XMFLOAT3 scale = transform->GetScale();
+			XMFLOAT3 scale = parent->GetTransform()->GetScale();
 			worldPos[i].scale = DirectX::XMFLOAT4(scale.x, scale.y, 0, 0);
 		}
 	}
 }
 
-void Render_Particle::DrawObj(Renderer * render, Transform * transform, Component * m_pCamera)
+void Render_Particle::DrawObj(Renderer * render, Component * m_pCamera)
 {
 	if (loadingDone && isActive)
 	{

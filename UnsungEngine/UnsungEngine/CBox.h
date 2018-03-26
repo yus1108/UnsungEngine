@@ -18,6 +18,7 @@ public:
 	DirectX::XMFLOAT2 GetZAxis() { return zaxis; }
 	void SetZAxis(DirectX::XMFLOAT2 z) { zaxis = z; }
 	DirectX::XMMATRIX GetWorldMat() { return *worldMat; }
+	DirectX::XMMATRIX * GetWorldMatAddr() { return worldMat; }
 	void SetWorldMat(DirectX::XMMATRIX * _worldMat) { worldMat = _worldMat; }
 };
 

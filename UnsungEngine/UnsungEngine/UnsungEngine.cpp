@@ -17,6 +17,9 @@ Input input;
 bool isTerminate;
 std::mutex mainMutex;
 ThreadPool threadPool;
+#ifdef _DEBUG
+DebugRenderer debugRenderer;
+#endif
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);

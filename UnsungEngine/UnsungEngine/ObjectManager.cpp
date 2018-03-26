@@ -114,7 +114,7 @@ void ObjectManager::DrawObj(CameraComponent * m_pCamera, Renderer * render, D3D1
 		break;
 	}
 #pragma endregion
-	obj->GetRenderComponent()->DrawObj(render, obj->GetTransform(), m_pCamera);
+	obj->GetRenderComponent()->DrawObj(render, m_pCamera);
 }
 
 void ObjectManager::Clear()

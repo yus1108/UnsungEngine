@@ -147,22 +147,22 @@ void Render_UI::Init(ID3D11Device * m_pDevice, const WCHAR * textString, UINT32 
 	this->textFormat = textFormat;
 	loadingDone = true;
 }
-void Render_UI::Init(UEngine::pipeline_state_t * pipeline)
+void Render_UI::Init(UEngine::pipeline_state_t * pipeline, GameObject * _parent)
 {
-	RenderComponent::Init(pipeline);
+	RenderComponent::Init(pipeline, _parent);
 }
 
-void Render_UI::Update(Transform * transform)
+void Render_UI::Update()
 {
 	if (loadingDone && isActive)
 	{
-		DirectX::XMFLOAT3 scale = transform->GetScale();
-		RTPos = transform->GetPosition4();
+		DirectX::XMFLOAT3 scale = parent->GetTransform()->GetScale();
+		RTPos = parent->GetTransform()->GetPosition4();
 		RTSize = DirectX::XMFLOAT4(-scale.x, -scale.y, scale.x, scale.y);
 	}
 }
 
-void Render_UI::DrawObj(Renderer * render, Transform * transform, Component * m_pCamera)
+void Render_UI::DrawObj(Renderer * render, Component * m_pCamera)
 {
 	if (loadingDone && isActive)
 	{

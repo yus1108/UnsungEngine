@@ -15,21 +15,27 @@ Render_World::~Render_World()
 	delete animationComponent;
 }
 
-void Render_World::Init(UEngine::pipeline_state_t * pipeline)
+void Render_World::Init(UEngine::pipeline_state_t * pipeline, GameObject * _parent)
 {
-	RenderComponent::Init(pipeline);
+	RenderComponent::Init(pipeline, _parent);
 }
 
-void Render_World::Update(Transform * transform)
+void Render_World::Update()
 {
 	if (loadingDone && isActive)
 	{
 		//AnimateModel(obj, 1);
-		worldMat = DirectX::XMMatrixTranspose(transform->GetMatrix());
+		worldMat = DirectX::XMMatrixTranspose(parent->GetTransform()->GetMatrix());
+#ifdef _DEBUG
+		if (collisionBox)
+		{
+			debugRenderer.Add_OOBB((OOBB*)collisionBox, DirectX::XMFLOAT4(1, 0, 0, 1));
+		}
+#endif
 	}
 }
 
-void Render_World::DrawObj(Renderer * render, Transform * transform, Component * m_pCamera)
+void Render_World::DrawObj(Renderer * render, Component * m_pCamera)
 {
 	if (loadingDone && isActive) {
 		UINT stride = sizeof(SIMPLE_VERTEX);
@@ -131,12 +137,6 @@ void Render_World::DrawObj(Renderer * render, Transform * transform, Component *
 			deferredContext->IASetVertexBuffers(0, 1, geometryComponent->vertexBuffer[i].GetAddressOf(), &stride, &offset);
 			deferredContext->IASetIndexBuffer(geometryComponent->indexBuffers[i].Get(), DXGI_FORMAT_R32_UINT, 0);
 			deferredContext->DrawIndexed(geometryComponent->countIndexBuffer[i], 0, 0);
-#ifdef _DEBUG
-			if (collisionBox)
-			{
-				render->debugRenderer->Add_AABB(*(AABB*)collisionBox, DirectX::XMFLOAT4(1, 0, 0, 1));
-			}
-#endif
 		}
 	}
 }
@@ -416,6 +416,7 @@ void Render_World::ReadBin(const char * filename, ID3D11Device * m_pDevice, ID3D
 
 void Render_World::CalculateCBox()
 {
-	collisionBox = new AABB();
-	UMath::CalculateAABB(geometryComponent->vertices, geometryComponent->indices, DirectX::XMMatrixIdentity(), *(AABB*)collisionBox);
+	AABB temp;
+	UMath::CalculateAABB(geometryComponent->vertices, geometryComponent->indices, DirectX::XMMatrixIdentity(), temp);
+	collisionBox = new OOBB(parent->GetTransform()->GetMatrixAddr(), temp.GetXAxis(), temp.GetYAxis(), temp.GetZAxis());
 }

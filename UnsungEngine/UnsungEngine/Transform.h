@@ -7,6 +7,7 @@ public:
 	~Transform();
 
 	DirectX::XMMATRIX GetMatrix() { return matrix; }
+	DirectX::XMMATRIX * GetMatrixAddr() { return &matrix; }
 	void SetMatrix(DirectX::XMMATRIX _matrix) { matrix = _matrix; }
 
 	DirectX::XMFLOAT3 GetPosition3();

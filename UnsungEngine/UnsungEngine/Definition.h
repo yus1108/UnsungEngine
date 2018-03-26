@@ -2,6 +2,12 @@
 #include "stdafx.h"
 #include "UTime.h"
 #include "Input.h"
+#include "SystemDefinition.h"
+
+#ifdef _DEBUG
+#include "DebugRenderer.h"
+extern DebugRenderer debugRenderer;
+#endif
 
 #define TURN_CONSOLE 1
 #define THROTTLE 200
@@ -12,6 +18,7 @@
 extern HWND hWnd;
 extern UTime utime;
 extern Input input;
+
 
 // structure definition
 
