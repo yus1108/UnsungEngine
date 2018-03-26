@@ -281,23 +281,23 @@
     <FxCompile Include="Shaders\Static_VS.hlsl">
       <Filter>Engine Architecture\Shaders\Static_Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Particle_VS.hlsl">
-      <Filter>Engine Architecture\Shaders\Particle_Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Particle_GS.hlsl">
-      <Filter>Engine Architecture\Shaders\Particle_Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Particle_PS.hlsl">
-      <Filter>Engine Architecture\Shaders\Particle_Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Particle_CS.hlsl">
-      <Filter>Engine Architecture\Shaders\Particle_Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="DebugRender_VS.hlsl">
+    <FxCompile Include="Shaders\DebugRender_PS.hlsl">
       <Filter>Engine Architecture\Shaders\DebugRender_Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="DebugRender_PS.hlsl">
+    <FxCompile Include="Shaders\DebugRender_VS.hlsl">
       <Filter>Engine Architecture\Shaders\DebugRender_Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Particle_CS.hlsl">
+      <Filter>Engine Architecture\Shaders\Particle_Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Particle_GS.hlsl">
+      <Filter>Engine Architecture\Shaders\Particle_Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Particle_PS.hlsl">
+      <Filter>Engine Architecture\Shaders\Particle_Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Particle_VS.hlsl">
+      <Filter>Engine Architecture\Shaders\Particle_Shaders</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

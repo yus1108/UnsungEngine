@@ -88,17 +88,17 @@
 #include "ObjectManager.h"
 
 // include shader headers
-#include "Default_VS.csh"
-#include "Default_PS.csh"
-#include "Default_GS.csh"
-#include "Static_VS.csh"
-#include "Static_PS.csh"
-#include "Particle_VS.csh"
-#include "Particle_GS.csh"
-#include "Particle_PS.csh"
+#include "Shaders/Default_VS.csh"
+#include "Shaders/Default_PS.csh"
+#include "Shaders/Default_GS.csh"
+#include "Shaders/Static_VS.csh"
+#include "Shaders/Static_PS.csh"
+#include "Shaders/Particle_VS.csh"
+#include "Shaders/Particle_GS.csh"
+#include "Shaders/Particle_PS.csh"
 #ifdef _DEBUG
-#include "DebugRender_VS.csh"
-#include "DebugRender_PS.csh"
+#include "Shaders/DebugRender_VS.csh"
+#include "Shaders/DebugRender_PS.csh"
 #endif
 
 // Gameplay

@@ -200,7 +200,7 @@ void Renderer::Init()
 	}
 	// Compile shader
 	ID3DBlob *csBlob = nullptr;
-	HRESULT hr = CompileComputeShader(L"Particle_CS.hlsl", "main", m_pDevice.Get(), &csBlob);
+	HRESULT hr = CompileComputeShader(L"Shaders/Particle_CS.hlsl", "main", m_pDevice.Get(), &csBlob);
 	if (FAILED(hr))
 	{
 		m_pDevice.ReleaseAndGetAddressOf();
