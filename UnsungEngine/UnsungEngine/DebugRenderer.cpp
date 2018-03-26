@@ -77,7 +77,6 @@ void DebugRenderer::Add_AABB(AABB aabb, DirectX::XMFLOAT4 color)
 		cpu_side_buffer[vert_count++].color = color;
 	}
 }
-
 void DebugRenderer::Add_OOBB(OOBB * oobb, DirectX::XMFLOAT4 color)
 {
 	DirectX::XMVECTOR vertices[24];

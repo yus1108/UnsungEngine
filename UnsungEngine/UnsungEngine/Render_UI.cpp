@@ -145,6 +145,7 @@ void Render_UI::Init(ID3D11Device * m_pDevice, const WCHAR * textString, UINT32 
 		}
 	}
 	this->textFormat = textFormat;
+
 	loadingDone = true;
 }
 void Render_UI::Init(UEngine::pipeline_state_t * pipeline, GameObject * _parent)
@@ -258,4 +259,5 @@ void Render_UI::ChangeText(ID3D11Device * m_pDevice, ID3D11DeviceContext * m_pIm
 
 void Render_UI::CalculateCBox()
 {
+
 }

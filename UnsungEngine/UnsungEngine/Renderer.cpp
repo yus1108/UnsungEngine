@@ -501,13 +501,14 @@ void Renderer::LoadObject(const char * name, GameObject * gameObject) {
 	gameObject->SetRenderComponent(model);
 	gameObject->GetTransform()->SetMatrix(DirectX::XMMatrixIdentity());
 }
-void Renderer::LoadGUI(const char * textureName, GameObject * gameObject) {
+void Renderer::LoadGUI(const char * textureName, GameObject * gameObject, unsigned cameraIndex) {
 	// load texture
 	RenderComponent * textModel = new Render_UI();
 	Render_UI * ptr = (Render_UI*)textModel;
 	ptr->Init(&m_pPipelines[UEngine::PipelineType_UI], gameObject);
 	ptr->ReadBin(textureName, m_pDevice.Get(), m_pDeviceContext.Get());
 	ptr->SetType(UEngine::DrawType_UI);
+	ptr->SetCamera(cameraIndex);
 	gameObject->SetRenderComponent(textModel);
 	gameObject->GetTransform()->SetMatrix(DirectX::XMMatrixIdentity());
 }

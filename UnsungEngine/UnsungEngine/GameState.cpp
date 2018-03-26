@@ -4,9 +4,8 @@
 
 GameState::GameState()
 {
-	mainCamera = new GameObject();
-	txt_frameRate = new GameObject();
 	mainCamera2 = new GameObject();
+	txt_frameRate = new GameObject();
 	gameObject = new GameObject();
 	logo = new GameObject();
 	particle = new GameObject();
@@ -23,17 +22,14 @@ void GameState::Init()
 	objManager.Init();
 
 	// load main camera
-	CameraComponent * cameraComponent = new CameraComponent();
-	cameraComponent->Init(UEngine::ComponentType_CAMERA, true, mainCamera);
-	cameraComponent->Init(&renderer, DirectX::XMFLOAT4(0, 0, 1, 1));
-	mainCamera->AddComponent(cameraComponent);
-	mainCamera->SetActive(true);
+	mainCamera = new GameObject();
+	AddCamera(mainCamera);
 	objManager.AddGameObject(mainCamera);
 
 	// load frame rate
 	DirectX::XMMATRIX worldMat2 = DirectX::XMMatrixScaling(0.1f, 0.1f, 1);
-	worldMat2.r[3] = DirectX::XMVectorSet(-0.92f, 0.95f, 0, 1);
-	const WCHAR hello[] = L"Welcome to Unsung Engine!";
+	worldMat2.r[3] = DirectX::XMVectorSet(-0.92f, 0.94f, 0, 1);
+	const WCHAR hello[] = L"Text";
 	unsigned textLength = ARRAYSIZE(hello) - 1;
 	UEngine::TextFormat textFormat;
 	textFormat.textColor = D2D1::ColorF::White;
@@ -71,12 +67,20 @@ void GameState::Init()
 	objManager.AddGameObject(gameObject);
 
 	// load logo
-	renderer.LoadGUI("Assets/TempLogo.pnj", logo);
+	renderer.LoadGUI("Assets/TempLogo.png", logo, 0);
+	float width = (882.0f * 2.0f) / (float)renderer.GetCameras(0)->GetViewport()->Width;
+	width *= 0.1f;
+	width /= 2.0f;
+	width -= 1.0f;
+	float height = 588.0f / (float)renderer.GetCameras(0)->GetViewport()->Height;
+	height /= -2.0f;
+	height += 1.0f;
+	worldMat.r[3] = DirectX::XMVectorSet(-0.9f, height, 0, 1);
 	logo->GetTransform()->SetMatrix(worldMat);
 	objManager.AddGameObject(logo);
-	//objManager.RemoveGameObject(logo);
+	objManager.RemoveGameObject(logo);
 
-	// load logo2
+	// load numParticles
 	textFormat.dpiX = 80;
 	renderer.LoadGUI(hello, textLength, numParticles, 0, textFormat);
 	worldMat2.r[3] = DirectX::XMVectorSet(-0.905f, 0.87f, 0, 1);
@@ -137,4 +141,13 @@ void GameState::Update()
 
 	// render
 	renderer.Update(&objManager);
+}
+
+void GameState::AddCamera(GameObject * cameraObject) {
+	// load main camera
+	CameraComponent * cameraComponent = new CameraComponent();
+	cameraComponent->Init(UEngine::ComponentType_CAMERA, true, cameraObject);
+	cameraComponent->Init(&renderer, DirectX::XMFLOAT4(0, 0, 1, 1));
+	cameraObject->AddComponent(cameraComponent);
+	cameraObject->SetActive(true);
 }

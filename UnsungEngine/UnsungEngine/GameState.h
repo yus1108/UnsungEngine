@@ -22,5 +22,6 @@ public:
 
 	void Init();
 	void Update();
+	void AddCamera(GameObject * cameraObject);
 };
 

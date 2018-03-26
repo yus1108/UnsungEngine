@@ -6,6 +6,7 @@ namespace UEngine {
 	// TODO: Add new component type
 	enum ComponentType {
 		ComponentType_CAMERA,
+		ComponentType_SCRIPT,
 		ComponentType_COUNT
 	};
 	enum MouseInputType {

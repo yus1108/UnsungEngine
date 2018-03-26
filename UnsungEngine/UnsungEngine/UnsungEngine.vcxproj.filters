@@ -13,44 +13,50 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Shaders">
-      <UniqueIdentifier>{ce2f73d9-005d-433f-8b0c-47c2f8cd6cac}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Shaders\Default_Shaders">
-      <UniqueIdentifier>{b05f539a-93ca-434f-aea0-58303973c9b8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Shaders\Static_Shaders">
-      <UniqueIdentifier>{c2dc28bb-3897-4004-80e4-a902cd7c7a1c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Render">
-      <UniqueIdentifier>{eb2255ca-4d8b-4693-b0a0-bfd8cd0c7d40}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Game">
-      <UniqueIdentifier>{6b5a07be-34ec-4488-b2d9-1a0e6ec192c7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Utility">
       <UniqueIdentifier>{2fb9b301-a841-43ae-8228-40e400a467e0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Definitions">
       <UniqueIdentifier>{4cb0e733-1cb8-4de7-b750-373726fe3a78}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Manager">
-      <UniqueIdentifier>{4ef6084e-823a-4d64-a8d1-80bf6ca96167}</UniqueIdentifier>
+    <Filter Include="GamePlay">
+      <UniqueIdentifier>{806af6aa-f9a2-4bb9-9df0-164a2e68f3a5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Game\Component">
+    <Filter Include="Engine Architecture">
+      <UniqueIdentifier>{9a2bbaed-9376-42bf-b350-6d7d8212c7df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Architecture\Collision">
+      <UniqueIdentifier>{2fdbd88a-cf77-43dc-b851-c23ed8b4bfa7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Architecture\Game Architecture">
+      <UniqueIdentifier>{6b5a07be-34ec-4488-b2d9-1a0e6ec192c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Architecture\Game Architecture\Component">
       <UniqueIdentifier>{184b3415-f315-472c-90a2-cac0a03f54ea}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Shaders\Particle_Shaders">
-      <UniqueIdentifier>{69fb9ab9-c082-438a-91be-fac37b98446d}</UniqueIdentifier>
+    <Filter Include="Engine Architecture\Manager">
+      <UniqueIdentifier>{4ef6084e-823a-4d64-a8d1-80bf6ca96167}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Render\RenderComponents">
+    <Filter Include="Engine Architecture\Render">
+      <UniqueIdentifier>{eb2255ca-4d8b-4693-b0a0-bfd8cd0c7d40}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Architecture\Render\RenderComponents">
       <UniqueIdentifier>{fe2b8e74-6d6a-456c-beae-6db97cc6c758}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Shaders\DebugRender_Shaders">
-      <UniqueIdentifier>{c60bb3cd-7835-4944-a567-d7b54f21854f}</UniqueIdentifier>
+    <Filter Include="Engine Architecture\Shaders">
+      <UniqueIdentifier>{ce2f73d9-005d-433f-8b0c-47c2f8cd6cac}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Collision">
-      <UniqueIdentifier>{2fdbd88a-cf77-43dc-b851-c23ed8b4bfa7}</UniqueIdentifier>
+    <Filter Include="Engine Architecture\Shaders\Default_Shaders">
+      <UniqueIdentifier>{b05f539a-93ca-434f-aea0-58303973c9b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Architecture\Shaders\Static_Shaders">
+      <UniqueIdentifier>{c2dc28bb-3897-4004-80e4-a902cd7c7a1c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Architecture\Shaders\Particle_Shaders">
+      <UniqueIdentifier>{69fb9ab9-c082-438a-91be-fac37b98446d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Architecture\Shaders\DebugRender_Shaders">
+      <UniqueIdentifier>{c60bb3cd-7835-4944-a567-d7b54f21854f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -63,23 +69,20 @@
     <ClInclude Include="Resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="UnsungEngine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="WICTextureLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RenderComponent.h">
-      <Filter>Render</Filter>
+      <Filter>Engine Architecture\Render</Filter>
     </ClInclude>
     <ClInclude Include="Renderer.h">
-      <Filter>Render</Filter>
+      <Filter>Engine Architecture\Render</Filter>
     </ClInclude>
     <ClInclude Include="GameObject.h">
-      <Filter>Game</Filter>
+      <Filter>Engine Architecture\Game Architecture</Filter>
     </ClInclude>
     <ClInclude Include="GameState.h">
-      <Filter>Game</Filter>
+      <Filter>Engine Architecture\Game Architecture</Filter>
     </ClInclude>
     <ClInclude Include="UVector.h">
       <Filter>Utility</Filter>
@@ -97,10 +100,10 @@
       <Filter>Definitions</Filter>
     </ClInclude>
     <ClInclude Include="ObjectManager.h">
-      <Filter>Manager</Filter>
+      <Filter>Engine Architecture\Manager</Filter>
     </ClInclude>
     <ClInclude Include="Transform.h">
-      <Filter>Game</Filter>
+      <Filter>Engine Architecture\Game Architecture</Filter>
     </ClInclude>
     <ClInclude Include="DDSTextureLoader.h">
       <Filter>Header Files</Filter>
@@ -112,13 +115,13 @@
       <Filter>Utility</Filter>
     </ClInclude>
     <ClInclude Include="DebugRenderer.h">
-      <Filter>Render</Filter>
+      <Filter>Engine Architecture\Render</Filter>
     </ClInclude>
     <ClInclude Include="Component.h">
-      <Filter>Game\Component</Filter>
+      <Filter>Engine Architecture\Game Architecture\Component</Filter>
     </ClInclude>
     <ClInclude Include="CameraComponent.h">
-      <Filter>Game\Component</Filter>
+      <Filter>Engine Architecture\Game Architecture\Component</Filter>
     </ClInclude>
     <ClInclude Include="ThreadPool.h">
       <Filter>Utility</Filter>
@@ -127,54 +130,57 @@
       <Filter>Utility</Filter>
     </ClInclude>
     <ClInclude Include="Render_Particle.h">
-      <Filter>Render\RenderComponents</Filter>
+      <Filter>Engine Architecture\Render\RenderComponents</Filter>
     </ClInclude>
     <ClInclude Include="Render_UI.h">
-      <Filter>Render\RenderComponents</Filter>
+      <Filter>Engine Architecture\Render\RenderComponents</Filter>
     </ClInclude>
     <ClInclude Include="Render_World.h">
-      <Filter>Render\RenderComponents</Filter>
+      <Filter>Engine Architecture\Render\RenderComponents</Filter>
     </ClInclude>
     <ClInclude Include="CBox.h">
-      <Filter>Collision</Filter>
+      <Filter>Engine Architecture\Collision</Filter>
     </ClInclude>
     <ClInclude Include="AABB.h">
-      <Filter>Collision</Filter>
+      <Filter>Engine Architecture\Collision</Filter>
     </ClInclude>
     <ClInclude Include="OOBB.h">
-      <Filter>Collision</Filter>
+      <Filter>Engine Architecture\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="ScriptComponent.h">
+      <Filter>Engine Architecture\Game Architecture\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="UnsungEngine.h">
+      <Filter>Engine Architecture\Game Architecture</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="UnsungEngine.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="WICTextureLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="RenderComponent.cpp">
-      <Filter>Render</Filter>
+      <Filter>Engine Architecture\Render</Filter>
     </ClCompile>
     <ClCompile Include="Renderer.cpp">
-      <Filter>Render</Filter>
+      <Filter>Engine Architecture\Render</Filter>
     </ClCompile>
     <ClCompile Include="GameObject.cpp">
-      <Filter>Game</Filter>
+      <Filter>Engine Architecture\Game Architecture</Filter>
     </ClCompile>
     <ClCompile Include="GameState.cpp">
-      <Filter>Game</Filter>
+      <Filter>Engine Architecture\Game Architecture</Filter>
     </ClCompile>
     <ClCompile Include="UTime.cpp">
       <Filter>Utility</Filter>
     </ClCompile>
     <ClCompile Include="ObjectManager.cpp">
-      <Filter>Manager</Filter>
+      <Filter>Engine Architecture\Manager</Filter>
     </ClCompile>
     <ClCompile Include="Transform.cpp">
-      <Filter>Game</Filter>
+      <Filter>Engine Architecture\Game Architecture</Filter>
     </ClCompile>
     <ClCompile Include="DDSTextureLoader.cpp">
       <Filter>Source Files</Filter>
@@ -186,13 +192,13 @@
       <Filter>Utility</Filter>
     </ClCompile>
     <ClCompile Include="DebugRenderer.cpp">
-      <Filter>Render</Filter>
+      <Filter>Engine Architecture\Render</Filter>
     </ClCompile>
     <ClCompile Include="Component.cpp">
-      <Filter>Game\Component</Filter>
+      <Filter>Engine Architecture\Game Architecture\Component</Filter>
     </ClCompile>
     <ClCompile Include="CameraComponent.cpp">
-      <Filter>Game\Component</Filter>
+      <Filter>Engine Architecture\Game Architecture\Component</Filter>
     </ClCompile>
     <ClCompile Include="ThreadPool.cpp">
       <Filter>Utility</Filter>
@@ -201,22 +207,28 @@
       <Filter>Utility</Filter>
     </ClCompile>
     <ClCompile Include="Render_Particle.cpp">
-      <Filter>Render\RenderComponents</Filter>
+      <Filter>Engine Architecture\Render\RenderComponents</Filter>
     </ClCompile>
     <ClCompile Include="Render_UI.cpp">
-      <Filter>Render\RenderComponents</Filter>
+      <Filter>Engine Architecture\Render\RenderComponents</Filter>
     </ClCompile>
     <ClCompile Include="Render_World.cpp">
-      <Filter>Render\RenderComponents</Filter>
+      <Filter>Engine Architecture\Render\RenderComponents</Filter>
     </ClCompile>
     <ClCompile Include="CBox.cpp">
-      <Filter>Collision</Filter>
+      <Filter>Engine Architecture\Collision</Filter>
     </ClCompile>
     <ClCompile Include="AABB.cpp">
-      <Filter>Collision</Filter>
+      <Filter>Engine Architecture\Collision</Filter>
     </ClCompile>
     <ClCompile Include="OOBB.cpp">
-      <Filter>Collision</Filter>
+      <Filter>Engine Architecture\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="ScriptComponent.cpp">
+      <Filter>Engine Architecture\Game Architecture\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="UnsungEngine.cpp">
+      <Filter>Engine Architecture\Game Architecture</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -234,37 +246,37 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\Default_VS.hlsl">
-      <Filter>Shaders\Default_Shaders</Filter>
+      <Filter>Engine Architecture\Shaders\Default_Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\Default_PS.hlsl">
-      <Filter>Shaders\Default_Shaders</Filter>
+      <Filter>Engine Architecture\Shaders\Default_Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\Default_GS.hlsl">
-      <Filter>Shaders\Default_Shaders</Filter>
+      <Filter>Engine Architecture\Shaders\Default_Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\Static_PS.hlsl">
-      <Filter>Shaders\Static_Shaders</Filter>
+      <Filter>Engine Architecture\Shaders\Static_Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\Static_VS.hlsl">
-      <Filter>Shaders\Static_Shaders</Filter>
+      <Filter>Engine Architecture\Shaders\Static_Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Particle_VS.hlsl">
-      <Filter>Shaders\Particle_Shaders</Filter>
+      <Filter>Engine Architecture\Shaders\Particle_Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Particle_GS.hlsl">
-      <Filter>Shaders\Particle_Shaders</Filter>
+      <Filter>Engine Architecture\Shaders\Particle_Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Particle_PS.hlsl">
-      <Filter>Shaders\Particle_Shaders</Filter>
+      <Filter>Engine Architecture\Shaders\Particle_Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Particle_CS.hlsl">
-      <Filter>Shaders\Particle_Shaders</Filter>
+      <Filter>Engine Architecture\Shaders\Particle_Shaders</Filter>
     </FxCompile>
     <FxCompile Include="DebugRender_VS.hlsl">
-      <Filter>Shaders\DebugRender_Shaders</Filter>
+      <Filter>Engine Architecture\Shaders\DebugRender_Shaders</Filter>
     </FxCompile>
     <FxCompile Include="DebugRender_PS.hlsl">
-      <Filter>Shaders\DebugRender_Shaders</Filter>
+      <Filter>Engine Architecture\Shaders\DebugRender_Shaders</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>
