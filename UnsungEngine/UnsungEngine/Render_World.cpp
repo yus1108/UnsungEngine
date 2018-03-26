@@ -131,9 +131,11 @@ void Render_World::DrawObj(Renderer * render, Transform * transform, Component *
 			deferredContext->IASetVertexBuffers(0, 1, geometryComponent->vertexBuffer[i].GetAddressOf(), &stride, &offset);
 			deferredContext->IASetIndexBuffer(geometryComponent->indexBuffers[i].Get(), DXGI_FORMAT_R32_UINT, 0);
 			deferredContext->DrawIndexed(geometryComponent->countIndexBuffer[i], 0, 0);
-
 #ifdef _DEBUG
-			render->debugRenderer->Add_AABB(*(AABB*)collisionBox, DirectX::XMFLOAT4(1, 0, 0, 0.8f));
+			if (collisionBox)
+			{
+				render->debugRenderer->Add_AABB(*(AABB*)collisionBox, DirectX::XMFLOAT4(1, 0, 0, 1));
+			}
 #endif
 		}
 	}

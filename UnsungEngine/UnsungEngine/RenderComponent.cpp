@@ -15,6 +15,7 @@ RenderComponent::~RenderComponent()
 {
 	if (collisionBox)
 		delete collisionBox;
+
 }
 
 void RenderComponent::Init(UEngine::pipeline_state_t * pipeline)

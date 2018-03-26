@@ -9,6 +9,7 @@
 
 class Renderer
 {
+	friend class RenderComponent;
 	friend class Render_World;
 	friend class Render_UI;
 	friend class Render_Particle;
