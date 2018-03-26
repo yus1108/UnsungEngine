@@ -1,6 +1,7 @@
 #pragma once
 #include "Renderer.h"
 #include "Component.h"
+#include "SystemDefinition.h"
 
 class CameraComponent : public Component
 {

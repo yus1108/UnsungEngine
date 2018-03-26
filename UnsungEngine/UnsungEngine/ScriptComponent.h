@@ -9,7 +9,7 @@ public:
 	ScriptComponent();
 	virtual ~ScriptComponent();
 
-	virtual void Init(UEngine::ComponentType _type, bool _active, GameObject * _parent);
+	void Init(UEngine::ComponentType _type, bool _active, GameObject * _parent);
 	void Update();
 
 	virtual void Init() {};

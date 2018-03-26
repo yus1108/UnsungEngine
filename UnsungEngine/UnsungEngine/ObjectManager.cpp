@@ -10,8 +10,20 @@ ObjectManager::~ObjectManager()
 	Clear();
 }
 
-void ObjectManager::Init() {
+void ObjectManager::Reset() {
+	Clear();
 	obj_reference_num = 0;
+}
+
+void ObjectManager::Init() {
+	for each (std::pair<int, GameObject*> obj in gameObjects)
+	{
+		if (obj.second && obj.second->GetActive())
+		{
+			// update
+			obj.second->Init();
+		}
+	}
 }
 
 void ObjectManager::Update() {

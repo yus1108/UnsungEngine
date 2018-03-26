@@ -3,6 +3,7 @@
 #include "ObjectManager.h"
 #include "CameraComponent.h"
 #include "RenderComponent.h"
+#include "SystemDefinition.h"
 
 class Renderer
 {

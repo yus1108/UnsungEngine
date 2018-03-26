@@ -1,10 +1,11 @@
 #pragma once
 #include "GameObject.h"
+#include "SystemDefinition.h"
 
 class GameObject;
 class Component
 {
-private:
+protected:
 	bool isActive;
 	UEngine::ComponentType type;
 	GameObject * parentObject;

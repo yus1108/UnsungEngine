@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "UTime.h"
 #include "Input.h"
+#include "GameState.h"
 #include "SystemDefinition.h"
 
 #ifdef _DEBUG
@@ -18,7 +19,7 @@ extern DebugRenderer debugRenderer;
 extern HWND hWnd;
 extern UTime utime;
 extern Input input;
-
+extern GameState gameState;
 
 // structure definition
 

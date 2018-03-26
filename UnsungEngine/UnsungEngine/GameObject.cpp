@@ -32,6 +32,18 @@ void GameObject::RemoveComponent(unsigned i)
 	components.erase(i);
 }
 
+void GameObject::Init()
+{
+	if (isActive)
+	{
+		for (unsigned i = 0; i < components.size(); i++)
+		{
+			if (components[i]->GetType() == UEngine::ComponentType_SCRIPT)
+				((ScriptComponent*)components[i])->Init();
+		}
+	}
+}
+
 void GameObject::Update()
 {
 	if (isActive)

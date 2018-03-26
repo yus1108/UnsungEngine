@@ -100,3 +100,7 @@
 #include "DebugRender_VS.csh"
 #include "DebugRender_PS.csh"
 #endif
+
+// Gameplay
+#include "BuildingScript.h"
+#include "FrameTextScript.h"

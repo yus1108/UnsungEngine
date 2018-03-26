@@ -143,15 +143,18 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AABB.h" />
+    <ClInclude Include="BuildingScript.h" />
     <ClInclude Include="CameraComponent.h" />
     <ClInclude Include="CBox.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="DDSTextureLoader.h" />
     <ClInclude Include="DebugRenderer.h" />
     <ClInclude Include="Definition.h" />
+    <ClInclude Include="FrameTextScript.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GameState.h" />
     <ClInclude Include="Input.h" />
+    <ClInclude Include="NumParticleScript.h" />
     <ClInclude Include="ObjectManager.h" />
     <ClInclude Include="OOBB.h" />
     <ClInclude Include="RenderComponent.h" />
@@ -175,14 +178,17 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AABB.cpp" />
+    <ClCompile Include="BuildingScript.cpp" />
     <ClCompile Include="CameraComponent.cpp" />
     <ClCompile Include="CBox.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="DDSTextureLoader.cpp" />
     <ClCompile Include="DebugRenderer.cpp" />
+    <ClCompile Include="FrameTextScript.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GameState.cpp" />
     <ClCompile Include="Input.cpp" />
+    <ClCompile Include="NumParticleScript.cpp" />
     <ClCompile Include="ObjectManager.cpp" />
     <ClCompile Include="OOBB.cpp" />
     <ClCompile Include="RenderComponent.cpp" />

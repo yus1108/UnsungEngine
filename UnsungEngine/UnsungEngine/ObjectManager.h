@@ -11,6 +11,7 @@ public:
 	ObjectManager();
 	~ObjectManager();
 
+	void Reset();
 	void Init();
 	void Update();
 	void Render(CameraComponent * m_pCamera, Renderer * render);

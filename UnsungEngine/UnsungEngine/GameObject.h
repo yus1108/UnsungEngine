@@ -31,6 +31,7 @@ public:
 	Component * GetComponent(unsigned i) { return components[i]; }
 	void RemoveComponent(unsigned i);
 
+	virtual void Init();
 	virtual void Update();
 };
 

@@ -58,6 +58,9 @@
     <Filter Include="Engine Architecture\Shaders\DebugRender_Shaders">
       <UniqueIdentifier>{c60bb3cd-7835-4944-a567-d7b54f21854f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GamePlay\Script">
+      <UniqueIdentifier>{48a1ccb7-79b4-4af1-be01-5e429873cb68}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -153,6 +156,15 @@
     <ClInclude Include="UnsungEngine.h">
       <Filter>Engine Architecture\Game Architecture</Filter>
     </ClInclude>
+    <ClInclude Include="BuildingScript.h">
+      <Filter>GamePlay\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameTextScript.h">
+      <Filter>GamePlay\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="NumParticleScript.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -229,6 +241,15 @@
     </ClCompile>
     <ClCompile Include="UnsungEngine.cpp">
       <Filter>Engine Architecture\Game Architecture</Filter>
+    </ClCompile>
+    <ClCompile Include="BuildingScript.cpp">
+      <Filter>GamePlay\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="FrameTextScript.cpp">
+      <Filter>GamePlay\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="NumParticleScript.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

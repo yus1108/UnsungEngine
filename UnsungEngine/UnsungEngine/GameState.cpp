@@ -27,8 +27,6 @@ void GameState::Init()
 	objManager.AddGameObject(mainCamera);
 
 	// load frame rate
-	DirectX::XMMATRIX worldMat2 = DirectX::XMMatrixScaling(0.1f, 0.1f, 1);
-	worldMat2.r[3] = DirectX::XMVectorSet(-0.92f, 0.94f, 0, 1);
 	const WCHAR hello[] = L"Text";
 	unsigned textLength = ARRAYSIZE(hello) - 1;
 	UEngine::TextFormat textFormat;
@@ -38,7 +36,12 @@ void GameState::Init()
 	textFormat.width = 400;
 	textFormat.height = 200;
 	renderer.LoadGUI(hello, textLength, txt_frameRate, 0, textFormat);
-	txt_frameRate->GetTransform()->SetMatrix(worldMat2);
+	DirectX::XMMATRIX textWorldmat = DirectX::XMMatrixScaling(0.1f, 0.1f, 1);
+	textWorldmat.r[3] = DirectX::XMVectorSet(-0.92f, 0.94f, 0, 1);
+	txt_frameRate->GetTransform()->SetMatrix(textWorldmat);
+	FrameTextScript * textScript = new FrameTextScript();
+	textScript->Init(UEngine::ComponentType_SCRIPT, true, txt_frameRate);
+	txt_frameRate->AddComponent(textScript);
 	//txt_frameRate->SetActive(false);
 	objManager.AddGameObject(txt_frameRate);
 
@@ -60,9 +63,12 @@ void GameState::Init()
 	//particle->SetActive(false);
 	objManager.AddGameObject(particle);
 
-	// load object 2
+	// load object
 	renderer.LoadObject("Assets/WOS_CommandCenter.bin", gameObject);
 	gameObject->GetTransform()->SetMatrix(DirectX::XMMatrixMultiply(DirectX::XMMatrixIdentity(), DirectX::XMMatrixTranslation(0, 0, 0)));
+	BuildingScript * buildScript = new BuildingScript();
+	buildScript->Init(UEngine::ComponentType_SCRIPT, true, gameObject);
+	gameObject->AddComponent(buildScript);
 	//gameObject->SetActive(false);
 	objManager.AddGameObject(gameObject);
 
@@ -83,8 +89,9 @@ void GameState::Init()
 	// load numParticles
 	textFormat.dpiX = 80;
 	renderer.LoadGUI(hello, textLength, numParticles, 0, textFormat);
-	worldMat2.r[3] = DirectX::XMVectorSet(-0.905f, 0.87f, 0, 1);
-	numParticles->GetTransform()->SetMatrix(worldMat2);
+	DirectX::XMMATRIX prticleTextWorldmat = DirectX::XMMatrixScaling(0.1f, 0.1f, 1);
+	prticleTextWorldmat.r[3] = DirectX::XMVectorSet(-0.905f, 0.87f, 0, 1);
+	numParticles->GetTransform()->SetMatrix(prticleTextWorldmat);
 	//numParticles->SetActive(false);
 	objManager.AddGameObject(numParticles);
 
@@ -110,30 +117,6 @@ void GameState::Update()
 		std::cout << "mouse pos: " << ndcPos.x << ", " << ndcPos.y << std::endl;
 	}
 
-	if (txt_frameRate->GetActive())
-	{
-		std::stringstream stringBuilder;
-		stringBuilder << "FPS: " << (unsigned)utime.FramePerSecond() << std::endl;
-		char pch[20];
-		stringBuilder.getline(pch, 20);
-		renderer.ChangeGUI(pch, txt_frameRate);
-	}
-
-	if (numParticles->GetActive())
-	{
-		std::stringstream stringBuilder;
-		stringBuilder << "Particles: " << (unsigned)((Render_Particle*)particle->GetRenderComponent())->GetNumParticles() << std::endl;
-		char pch[20];
-		stringBuilder.getline(pch, 20);
-		renderer.ChangeGUI(pch, numParticles);
-	}
-	
-	if (gameObject->GetActive())
-	{
-		DirectX::XMMATRIX worldMat = DirectX::XMMatrixMultiply(gameObject->GetTransform()->GetMatrix(), DirectX::XMMatrixRotationY((float)utime.DeltaTime() / 10.0f));
-		gameObject->GetTransform()->SetMatrix(worldMat);
-	}
-
 	// collision
 
 	// update
@@ -149,5 +132,4 @@ void GameState::AddCamera(GameObject * cameraObject) {
 	cameraComponent->Init(UEngine::ComponentType_CAMERA, true, cameraObject);
 	cameraComponent->Init(&renderer, DirectX::XMFLOAT4(0, 0, 1, 1));
 	cameraObject->AddComponent(cameraComponent);
-	cameraObject->SetActive(true);
 }
