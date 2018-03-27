@@ -163,7 +163,10 @@
       <Filter>GamePlay\Script</Filter>
     </ClInclude>
     <ClInclude Include="NumParticleScript.h">
-      <Filter>Header Files</Filter>
+      <Filter>GamePlay\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraScript.h">
+      <Filter>GamePlay\Script</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -249,7 +252,10 @@
       <Filter>GamePlay\Script</Filter>
     </ClCompile>
     <ClCompile Include="NumParticleScript.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>GamePlay\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraScript.cpp">
+      <Filter>GamePlay\Script</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -145,6 +145,7 @@
     <ClInclude Include="AABB.h" />
     <ClInclude Include="BuildingScript.h" />
     <ClInclude Include="CameraComponent.h" />
+    <ClInclude Include="CameraScript.h" />
     <ClInclude Include="CBox.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="DDSTextureLoader.h" />
@@ -180,6 +181,7 @@
     <ClCompile Include="AABB.cpp" />
     <ClCompile Include="BuildingScript.cpp" />
     <ClCompile Include="CameraComponent.cpp" />
+    <ClCompile Include="CameraScript.cpp" />
     <ClCompile Include="CBox.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="DDSTextureLoader.cpp" />

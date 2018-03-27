@@ -1,6 +1,11 @@
 #include "stdafx.h"
 #include "GameState.h"
 
+// include script created
+#include "BuildingScript.h"
+#include "FrameTextScript.h"
+#include "NumParticleScript.h"
+#include "CameraScript.h"
 
 GameState::GameState()
 {
@@ -21,12 +26,18 @@ void GameState::Init()
 	renderer.Init();
 	objManager.Init();
 
-	// load main camera
+	// load main camera 0
 	mainCamera = new GameObject();
+	DirectX::XMMATRIX cameraPos = DirectX::XMMatrixIdentity();
+	cameraPos.r[3] = DirectX::XMVectorSet(0, 5, -20, 1);
+	mainCamera->GetTransform()->SetMatrix(cameraPos);
+	Component * cameraScript = new CameraScript();
 	AddCamera(mainCamera);
+	cameraScript->Init(UEngine::ComponentType_SCRIPT, true, mainCamera);
+	mainCamera->AddComponent(cameraScript);
 	objManager.AddGameObject(mainCamera);
 
-	// load frame rate
+	// load frame rate 1
 	const WCHAR hello[] = L"Text";
 	unsigned textLength = ARRAYSIZE(hello) - 1;
 	UEngine::TextFormat textFormat;
@@ -39,59 +50,55 @@ void GameState::Init()
 	DirectX::XMMATRIX textWorldmat = DirectX::XMMatrixScaling(0.1f, 0.1f, 1);
 	textWorldmat.r[3] = DirectX::XMVectorSet(-0.92f, 0.94f, 0, 1);
 	txt_frameRate->GetTransform()->SetMatrix(textWorldmat);
-	FrameTextScript * textScript = new FrameTextScript();
+	Component * textScript = new FrameTextScript();
 	textScript->Init(UEngine::ComponentType_SCRIPT, true, txt_frameRate);
 	txt_frameRate->AddComponent(textScript);
 	//txt_frameRate->SetActive(false);
 	objManager.AddGameObject(txt_frameRate);
 
-	// load secondary camera
+	// load secondary camera 2
+	DirectX::XMMATRIX camera2Pos = DirectX::XMMatrixRotationY(UMath::Convert_DegreeToRad(-90.0f));
+	camera2Pos.r[3] = DirectX::XMVectorSet(20, 5, 0, 1);
+	mainCamera2->GetTransform()->SetMatrix(camera2Pos);
 	CameraComponent * cameraComponent2 = new CameraComponent();
 	cameraComponent2->Init(UEngine::ComponentType_CAMERA, true, mainCamera2);
 	cameraComponent2->Init(&renderer, DirectX::XMFLOAT4(0.78f, 0.05f, 0.98f, 0.25f));
-	DirectX::XMMATRIX camera2Pos = DirectX::XMMatrixRotationY(UMath::Convert_DegreeToRad(-90.0f));
-	camera2Pos.r[3] = DirectX::XMVectorSet(20, 5, 0, 1);
-	cameraComponent2->SetOriginalView(camera2Pos);
 	mainCamera2->AddComponent(cameraComponent2);
 	//mainCamera2->SetActive(false);
 	objManager.AddGameObject(mainCamera2);
 
-	// load particle
+	// load particle 3
 	renderer.LoadParticle("Assets/particle.png", particle);
 	DirectX::XMMATRIX worldMat = DirectX::XMMatrixScaling(0.1f, 0.1f, 0.1f);
 	particle->GetTransform()->SetMatrix(worldMat);
 	//particle->SetActive(false);
 	objManager.AddGameObject(particle);
 
-	// load object
+	// load object 4
 	renderer.LoadObject("Assets/WOS_CommandCenter.bin", gameObject);
 	gameObject->GetTransform()->SetMatrix(DirectX::XMMatrixMultiply(DirectX::XMMatrixIdentity(), DirectX::XMMatrixTranslation(0, 0, 0)));
-	BuildingScript * buildScript = new BuildingScript();
+	Component * buildScript = new BuildingScript();
 	buildScript->Init(UEngine::ComponentType_SCRIPT, true, gameObject);
 	gameObject->AddComponent(buildScript);
 	//gameObject->SetActive(false);
 	objManager.AddGameObject(gameObject);
 
-	// load logo
+	// load logo 5
 	renderer.LoadGUI("Assets/TempLogo.png", logo, 0);
-	float width = (882.0f * 2.0f) / (float)renderer.GetCameras(0)->GetViewport()->Width;
-	width *= 0.1f;
-	width /= 2.0f;
-	width -= 1.0f;
-	float height = 588.0f / (float)renderer.GetCameras(0)->GetViewport()->Height;
-	height /= -2.0f;
-	height += 1.0f;
-	worldMat.r[3] = DirectX::XMVectorSet(-0.9f, height, 0, 1);
+	worldMat.r[3] = DirectX::XMVectorSet(0, 0, 0, 1);
 	logo->GetTransform()->SetMatrix(worldMat);
 	objManager.AddGameObject(logo);
 	objManager.RemoveGameObject(logo);
 
-	// load numParticles
+	// load numParticles 6
 	textFormat.dpiX = 80;
 	renderer.LoadGUI(hello, textLength, numParticles, 0, textFormat);
 	DirectX::XMMATRIX prticleTextWorldmat = DirectX::XMMatrixScaling(0.1f, 0.1f, 1);
 	prticleTextWorldmat.r[3] = DirectX::XMVectorSet(-0.905f, 0.87f, 0, 1);
 	numParticles->GetTransform()->SetMatrix(prticleTextWorldmat);
+	Component * numParticleScript = new NumParticleScript();
+	numParticleScript->Init(UEngine::ComponentType_SCRIPT, true, numParticles);
+	numParticles->AddComponent(numParticleScript);
 	//numParticles->SetActive(false);
 	objManager.AddGameObject(numParticles);
 

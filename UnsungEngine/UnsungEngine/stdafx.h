@@ -100,7 +100,3 @@
 #include "Shaders/DebugRender_VS.csh"
 #include "Shaders/DebugRender_PS.csh"
 #endif
-
-// Gameplay
-#include "BuildingScript.h"
-#include "FrameTextScript.h"

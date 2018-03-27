@@ -7,6 +7,8 @@ CameraComponent::CameraComponent() : Component()
 	m_pViewport = nullptr;
 	m_pRTTWorld = nullptr;
 	m_pRTTUI = nullptr;
+	forwardRotation = DirectX::XMMatrixIdentity();
+	SetOriginalView(DirectX::XMMatrixIdentity());
 }
 CameraComponent::~CameraComponent()
 {
@@ -46,10 +48,7 @@ void CameraComponent::Init(Renderer * renderer, DirectX::XMFLOAT4 viewRatio)
 	SetAngle(60 / 180.0f * 3.14159f);
 	nearZ = 0.1f;
 	farZ = 100;
-	DirectX::XMMATRIX originalView = DirectX::XMMatrixIdentity();
-	originalView.r[3] = DirectX::XMVectorSet(0, 5, -20, 1); //
-	forwardRotation = DirectX::XMMatrixIdentity();
-	SetOriginalView(originalView);
+	SetOriginalView(parentObject->GetTransform()->GetMatrix());
 
 	aspectRatio = ((m_pViewport->Width) / (m_pViewport->Height));
 	DirectX::XMVECTOR determinant = DirectX::XMMatrixDeterminant(originalView);
