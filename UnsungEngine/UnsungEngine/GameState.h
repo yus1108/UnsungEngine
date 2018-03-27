@@ -11,15 +11,7 @@ class GameState
 public:
 	Renderer renderer;
 	ObjectManager objManager;
-private:
-	GameObject * mainCamera;
-	GameObject * txt_frameRate;
-	GameObject * mainCamera2;
-	GameObject * gameObject;
-	GameObject * logo;
-	GameObject * particle;
-	GameObject * numParticles;
-public:
+
 	GameState();
 	~GameState();
 

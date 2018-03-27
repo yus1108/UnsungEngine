@@ -9,12 +9,6 @@
 
 GameState::GameState()
 {
-	mainCamera2 = new GameObject();
-	txt_frameRate = new GameObject();
-	gameObject = new GameObject();
-	logo = new GameObject();
-	particle = new GameObject();
-	numParticles = new GameObject();
 }
 
 GameState::~GameState()
@@ -24,10 +18,10 @@ GameState::~GameState()
 void GameState::Init()
 {
 	renderer.Init();
-	objManager.Init();
+	objManager.Reset();
 
 	// load main camera 0
-	mainCamera = new GameObject();
+	GameObject * mainCamera = new GameObject();
 	DirectX::XMMATRIX cameraPos = DirectX::XMMatrixIdentity();
 	cameraPos.r[3] = DirectX::XMVectorSet(0, 5, -20, 1);
 	mainCamera->GetTransform()->SetMatrix(cameraPos);
@@ -38,6 +32,7 @@ void GameState::Init()
 	objManager.AddGameObject(mainCamera);
 
 	// load frame rate 1
+	GameObject * txt_frameRate = new GameObject();
 	const WCHAR hello[] = L"Text";
 	unsigned textLength = ARRAYSIZE(hello) - 1;
 	UEngine::TextFormat textFormat;
@@ -57,6 +52,7 @@ void GameState::Init()
 	objManager.AddGameObject(txt_frameRate);
 
 	// load secondary camera 2
+	GameObject * mainCamera2 = new GameObject();
 	DirectX::XMMATRIX camera2Pos = DirectX::XMMatrixRotationY(UMath::Convert_DegreeToRad(-90.0f));
 	camera2Pos.r[3] = DirectX::XMVectorSet(20, 5, 0, 1);
 	mainCamera2->GetTransform()->SetMatrix(camera2Pos);
@@ -68,6 +64,7 @@ void GameState::Init()
 	objManager.AddGameObject(mainCamera2);
 
 	// load particle 3
+	GameObject * particle = new GameObject();
 	renderer.LoadParticle("Assets/particle.png", particle);
 	DirectX::XMMATRIX worldMat = DirectX::XMMatrixScaling(0.1f, 0.1f, 0.1f);
 	particle->GetTransform()->SetMatrix(worldMat);
@@ -75,6 +72,7 @@ void GameState::Init()
 	objManager.AddGameObject(particle);
 
 	// load object 4
+	GameObject * gameObject = new GameObject();
 	renderer.LoadObject("Assets/WOS_CommandCenter.bin", gameObject);
 	gameObject->GetTransform()->SetMatrix(DirectX::XMMatrixMultiply(DirectX::XMMatrixIdentity(), DirectX::XMMatrixTranslation(0, 0, 0)));
 	Component * buildScript = new BuildingScript();
@@ -84,6 +82,7 @@ void GameState::Init()
 	objManager.AddGameObject(gameObject);
 
 	// load logo 5
+	GameObject * logo = new GameObject();
 	renderer.LoadGUI("Assets/TempLogo.png", logo, 0);
 	worldMat.r[3] = DirectX::XMVectorSet(0, 0, 0, 1);
 	logo->GetTransform()->SetMatrix(worldMat);
@@ -91,6 +90,7 @@ void GameState::Init()
 	objManager.RemoveGameObject(logo);
 
 	// load numParticles 6
+	GameObject * numParticles = new GameObject();
 	textFormat.dpiX = 80;
 	renderer.LoadGUI(hello, textLength, numParticles, 0, textFormat);
 	DirectX::XMMATRIX prticleTextWorldmat = DirectX::XMMatrixScaling(0.1f, 0.1f, 1);
@@ -104,6 +104,8 @@ void GameState::Init()
 
 	//renderer.Resize(true, 1920, 1024);
 	//renderer.Resize(false, 1280, 768);
+
+	objManager.Init();
 }
 
 void GameState::Update()
