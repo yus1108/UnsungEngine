@@ -105,6 +105,10 @@ void CollisionManager::Init(AABB _boundary, int levels)
 }
 
 void CollisionManager::Update(CollisionComponent * component) {
+#ifdef _DEBUG
+	AABB tempAABB = root->grid;
+	debugRenderer.Add_AABB(tempAABB, DirectX::XMFLOAT4(1, 1, 0, 1));
+#endif // DEBUG
 	Traverse(component, root);
 }
 
@@ -186,10 +190,10 @@ void CollisionManager::Traverse(CollisionComponent * component, UEngine::Collisi
 		//currNode->objs.push_back(currObj);
 	if (currNode->children.size() == 0)
 	{
-#ifdef _DEBUG
-		AABB tempAABB = currNode->grid;
-		debugRenderer.Add_AABB(tempAABB, DirectX::XMFLOAT4(1, 1, 0, 1));
-#endif // DEBUG
+//#ifdef _DEBUG
+//		AABB tempAABB = currNode->grid;
+//		debugRenderer.Add_AABB(tempAABB, DirectX::XMFLOAT4(1, 1, 0, 1));
+//#endif // DEBUG
 	}
 
 		for (size_t i = 0; i < currNode->children.size(); i++)

@@ -97,7 +97,7 @@ bool UMath::CollisionTest(AABB a, AABB b) {
 bool UMath::CollisionTest(AABB a, OOBB b) {
 	DirectX::XMMATRIX tempMatrix = DirectX::XMMatrixIdentity();
 	OOBB aOOBB = OOBB(&tempMatrix, a.GetXAxis(), a.GetYAxis(), a.GetZAxis());
-	CollisionTest(aOOBB, b);
+	return CollisionTest(aOOBB, b);
 }
 bool UMath::CollisionTest(OOBB obb1, OOBB obb2) {
 	try

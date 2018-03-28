@@ -572,13 +572,22 @@ void Renderer::DebugSet(UEngine::pipeline_state_t * pipeline, Component * m_pCam
 	camera->GetDeferredContext(UEngine::DrawType_WORLD)->PSSetSamplers(0, 1, sampler);
 
 	// transparent stuff
-	DirectX::XMVECTOR determinant = DirectX::XMMatrixDeterminant(camera->GetOriginalView());
+	DirectX::XMMATRIX originalView = camera->GetOriginalView();
+	DirectX::XMVECTOR determinant = DirectX::XMMatrixDeterminant(originalView);
+	float aspectRatio = ((camera->GetViewport()->Width) / (camera->GetViewport()->Height));
+	camera->SetAspectRatio(aspectRatio);
+
+	SCENE sceneToShader;
+	sceneToShader.viewMat = DirectX::XMMatrixInverse(&determinant, originalView);
+	sceneToShader.viewMat = DirectX::XMMatrixTranspose(sceneToShader.viewMat);
+	sceneToShader.perspectivMat = DirectX::XMMatrixPerspectiveFovLH(camera->GetAngle(), aspectRatio, camera->GetNearZ(), DEBUG_RENDER_FAR_VIEW);
+	sceneToShader.perspectivMat = DirectX::XMMatrixTranspose(sceneToShader.perspectivMat);
 
 	// view matrix buffer
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
 	camera->GetDeferredContext(UEngine::DrawType_WORLD)->Map(constBufferScene, 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedResource);
-	memcpy(mappedResource.pData, &camera->GetSceneToShader(), sizeof(SCENE));
+	memcpy(mappedResource.pData, &sceneToShader, sizeof(SCENE));
 	camera->GetDeferredContext(UEngine::DrawType_WORLD)->Unmap(constBufferScene, 0);
 
 	camera->GetDeferredContext(UEngine::DrawType_WORLD)->VSSetConstantBuffers(0, 1, &constBufferScene);

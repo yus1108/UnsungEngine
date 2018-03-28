@@ -68,8 +68,9 @@ void GameState::Init()
 	// load particle 3
 	GameObject * particle = new GameObject();
 	renderer.LoadParticle("Assets/particle.png", particle);
-	DirectX::XMMATRIX worldMat = DirectX::XMMatrixScaling(0.1f, 0.1f, 0.1f);
-	particle->GetTransform()->SetMatrix(worldMat);
+	DirectX::XMMATRIX particleWorldmat = DirectX::XMMatrixScaling(0.1f, 0.1f, 0.1f);
+	particleWorldmat.r[3] = DirectX::XMVectorSet(5, 5, 5, 1);
+	particle->GetTransform()->SetMatrix(particleWorldmat);
 	//particle->SetActive(false);
 	objManager.AddGameObject(particle);
 
@@ -86,6 +87,7 @@ void GameState::Init()
 	// load logo 5
 	GameObject * logo = new GameObject();
 	renderer.LoadGUI("Assets/TempLogo.png", logo, 0);
+	DirectX::XMMATRIX worldMat = DirectX::XMMatrixScaling(0.1f, 0.1f, 0.1f);
 	worldMat.r[3] = DirectX::XMVectorSet(0, 0, 0, 1);
 	logo->GetTransform()->SetMatrix(worldMat);
 	objManager.AddGameObject(logo);

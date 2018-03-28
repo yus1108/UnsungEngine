@@ -116,11 +116,11 @@ void Render_Particle::Update()
 				continue;
 			}
 			XMVECTOR tempPos = XMLoadFloat4(&particles[i].worldmat);
-			tempPos += parent->GetTransform()->GetMatrix().r[3];
 			tempPos += speed[i] * deltaTime;
+			XMStoreFloat4(&particles[i].worldmat, tempPos);
+			tempPos += parent->GetTransform()->GetMatrix().r[3];
 			worldPos[i] = UEngine::ParticleConstBuffer();
 			XMStoreFloat4(&worldPos[i].worldmat, tempPos);
-			XMStoreFloat4(&particles[i].worldmat, tempPos);
 			worldPos[i].worldmat.w = 0;
 			XMFLOAT3 scale = parent->GetTransform()->GetScale();
 			worldPos[i].scale = DirectX::XMFLOAT4(scale.x, scale.y, 0, 0);
