@@ -2,6 +2,7 @@
 #include "Renderer.h"
 #include "Component.h"
 #include "SystemDefinition.h"
+#include "Frustum.h"
 
 class CameraComponent : public Component
 {
@@ -13,7 +14,7 @@ private:
 	SCENE sceneToShader;
 	float nearZ;
 	float farZ;
-	//Trapezoid frustum;
+	Frustum frustum;
 
 	D3D11_VIEWPORT * m_pViewport;
 	UEngine::RenderToTexture * m_pRTTWorld;
@@ -52,6 +53,8 @@ public:
 	DirectX::XMMATRIX * GetAddrOriginalView() { return &originalView; };
 	SCENE GetSceneToShader() { return sceneToShader; };
 	void SetSceneToShader(SCENE s) { sceneToShader = s; };
+
+	Frustum GetFrustum() { return frustum; }
 
 	void Init(UEngine::ComponentType _type, bool _active, GameObject * _parent);
 	/*

@@ -56,6 +56,14 @@ void CameraComponent::Init(Renderer * renderer, DirectX::XMFLOAT4 viewRatio)
 	sceneToShader.viewMat = DirectX::XMMatrixTranspose(sceneToShader.viewMat);
 	sceneToShader.perspectivMat = DirectX::XMMatrixPerspectiveFovLH(GetAngle(), aspectRatio, GetNearZ(), GetFarZ());
 	sceneToShader.perspectivMat = DirectX::XMMatrixTranspose(sceneToShader.perspectivMat);
+
+	DirectX::XMVECTOR temp = DirectX::XMVectorSet(1, 1, 1, 0);
+	XMMATRIX perspective = DirectX::XMMatrixPerspectiveFovLH(GetAngle(), aspectRatio, nearZ, farZ);
+	perspective = XMMatrixInverse(&XMMatrixDeterminant(perspective), perspective);
+	temp = XMVector3Transform(temp, perspective);
+
+	frustum = Frustum(GetAddrOriginalView(), XMFLOAT2(-temp.m128_f32[0], temp.m128_f32[0]), XMFLOAT2(-temp.m128_f32[1], temp.m128_f32[1]), nearZ,
+		XMFLOAT2(-temp.m128_f32[0] * farZ, temp.m128_f32[0] * farZ), XMFLOAT2(-temp.m128_f32[1] * farZ, temp.m128_f32[1] * farZ), farZ);
 }
 
 void CameraComponent::Update()
@@ -64,6 +72,14 @@ void CameraComponent::Update()
 	DirectX::XMVECTOR determinant = DirectX::XMMatrixDeterminant(originalView);
 	float aspectRatio = ((GetViewport()->Width) / (GetViewport()->Height));
 	SetAspectRatio(aspectRatio);
+
+	DirectX::XMVECTOR temp = DirectX::XMVectorSet(1, 1, 1, 0);
+	XMMATRIX perspective = DirectX::XMMatrixPerspectiveFovLH(GetAngle(), aspectRatio, nearZ, farZ);
+	perspective = XMMatrixInverse(&XMMatrixDeterminant(perspective), perspective);
+	temp = XMVector3Transform(temp, perspective);
+
+	frustum = Frustum(GetAddrOriginalView(), XMFLOAT2(-temp.m128_f32[0], temp.m128_f32[0]), XMFLOAT2(-temp.m128_f32[1], temp.m128_f32[1]), nearZ,
+		XMFLOAT2(-temp.m128_f32[0] * farZ, temp.m128_f32[0] * farZ), XMFLOAT2(-temp.m128_f32[1] * farZ, temp.m128_f32[1] * farZ), farZ);
 	SCENE sceneToShader;
 	sceneToShader.viewMat = DirectX::XMMatrixInverse(&determinant, originalView);
 	sceneToShader.viewMat = DirectX::XMMatrixTranspose(sceneToShader.viewMat);

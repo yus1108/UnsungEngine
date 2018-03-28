@@ -168,6 +168,9 @@
     <ClInclude Include="CollisionBox.h">
       <Filter>Engine Architecture\Collision</Filter>
     </ClInclude>
+    <ClInclude Include="Frustum.h">
+      <Filter>Engine Architecture\Collision</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -255,6 +258,9 @@
       <Filter>GamePlay\Script</Filter>
     </ClCompile>
     <ClCompile Include="CollisionBox.cpp">
+      <Filter>Engine Architecture\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="Frustum.cpp">
       <Filter>Engine Architecture\Collision</Filter>
     </ClCompile>
   </ItemGroup>

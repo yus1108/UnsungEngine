@@ -70,6 +70,7 @@
 #include "CollisionBox.h"
 #include "AABB.h"
 #include "OOBB.h"
+#include "Frustum.h"
 
 // headers for Engine Architecture
 #include "GameState.h"

@@ -123,6 +123,78 @@ void DebugRenderer::Add_OOBB(OOBB * oobb, DirectX::XMFLOAT4 color)
 		cpu_side_buffer[vert_count++].color = color;
 	}
 }
+void DebugRenderer::Add_Frustum(Frustum frustum, DirectX::XMFLOAT4 color) {
+	DirectX::XMVECTOR vertices[8];
+
+	using namespace DirectX;
+	XMMATRIX normalizedMat = frustum.GetWorldMat();
+	normalizedMat.r[0] = XMVector3Normalize(normalizedMat.r[0]);
+	normalizedMat.r[1] = XMVector3Normalize(normalizedMat.r[1]);
+	normalizedMat.r[2] = XMVector3Normalize(normalizedMat.r[2]);
+	for (unsigned int i = 0; i < 8; i++) {
+		vertices[i] = DirectX::XMVector4Transform(frustum.GetVertex(i), normalizedMat);
+	}
+
+	DirectX::XMStoreFloat3(&cpu_side_buffer[vert_count].pos, vertices[0]);
+	cpu_side_buffer[vert_count++].color = color;
+	DirectX::XMStoreFloat3(&cpu_side_buffer[vert_count].pos, vertices[1]);
+	cpu_side_buffer[vert_count++].color = color;
+
+	DirectX::XMStoreFloat3(&cpu_side_buffer[vert_count].pos, vertices[0]);
+	cpu_side_buffer[vert_count++].color = color;
+	DirectX::XMStoreFloat3(&cpu_side_buffer[vert_count].pos, vertices[2]);
+	cpu_side_buffer[vert_count++].color = color;
+
+	DirectX::XMStoreFloat3(&cpu_side_buffer[vert_count].pos, vertices[1]);
+	cpu_side_buffer[vert_count++].color = color;
+	DirectX::XMStoreFloat3(&cpu_side_buffer[vert_count].pos, vertices[3]);
+	cpu_side_buffer[vert_count++].color = color;
+
+	DirectX::XMStoreFloat3(&cpu_side_buffer[vert_count].pos, vertices[2]);
+	cpu_side_buffer[vert_count++].color = color;
+	DirectX::XMStoreFloat3(&cpu_side_buffer[vert_count].pos, vertices[3]);
+	cpu_side_buffer[vert_count++].color = color;
+
+	DirectX::XMStoreFloat3(&cpu_side_buffer[vert_count].pos, vertices[0]);
+	cpu_side_buffer[vert_count++].color = color;
+	DirectX::XMStoreFloat3(&cpu_side_buffer[vert_count].pos, vertices[4]);
+	cpu_side_buffer[vert_count++].color = color;
+
+	DirectX::XMStoreFloat3(&cpu_side_buffer[vert_count].pos, vertices[1]);
+	cpu_side_buffer[vert_count++].color = color;
+	DirectX::XMStoreFloat3(&cpu_side_buffer[vert_count].pos, vertices[5]);
+	cpu_side_buffer[vert_count++].color = color;
+
+	DirectX::XMStoreFloat3(&cpu_side_buffer[vert_count].pos, vertices[4]);
+	cpu_side_buffer[vert_count++].color = color;
+	DirectX::XMStoreFloat3(&cpu_side_buffer[vert_count].pos, vertices[5]);
+	cpu_side_buffer[vert_count++].color = color;
+
+	DirectX::XMStoreFloat3(&cpu_side_buffer[vert_count].pos, vertices[2]);
+	cpu_side_buffer[vert_count++].color = color;
+	DirectX::XMStoreFloat3(&cpu_side_buffer[vert_count].pos, vertices[6]);
+	cpu_side_buffer[vert_count++].color = color;
+
+	DirectX::XMStoreFloat3(&cpu_side_buffer[vert_count].pos, vertices[3]);
+	cpu_side_buffer[vert_count++].color = color;
+	DirectX::XMStoreFloat3(&cpu_side_buffer[vert_count].pos, vertices[7]);
+	cpu_side_buffer[vert_count++].color = color;
+
+	DirectX::XMStoreFloat3(&cpu_side_buffer[vert_count].pos, vertices[6]);
+	cpu_side_buffer[vert_count++].color = color;
+	DirectX::XMStoreFloat3(&cpu_side_buffer[vert_count].pos, vertices[7]);
+	cpu_side_buffer[vert_count++].color = color;
+
+	DirectX::XMStoreFloat3(&cpu_side_buffer[vert_count].pos, vertices[4]);
+	cpu_side_buffer[vert_count++].color = color;
+	DirectX::XMStoreFloat3(&cpu_side_buffer[vert_count].pos, vertices[6]);
+	cpu_side_buffer[vert_count++].color = color;
+
+	DirectX::XMStoreFloat3(&cpu_side_buffer[vert_count].pos, vertices[5]);
+	cpu_side_buffer[vert_count++].color = color;
+	DirectX::XMStoreFloat3(&cpu_side_buffer[vert_count].pos, vertices[7]);
+	cpu_side_buffer[vert_count++].color = color;
+}
 
 void DebugRenderer::Flush(ID3D11DeviceContext * m_pDeviceContext)
 {

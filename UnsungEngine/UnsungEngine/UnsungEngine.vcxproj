@@ -152,6 +152,7 @@
     <ClInclude Include="DebugRenderer.h" />
     <ClInclude Include="Definition.h" />
     <ClInclude Include="FrameTextScript.h" />
+    <ClInclude Include="Frustum.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GameState.h" />
     <ClInclude Include="Input.h" />
@@ -187,6 +188,7 @@
     <ClCompile Include="DDSTextureLoader.cpp" />
     <ClCompile Include="DebugRenderer.cpp" />
     <ClCompile Include="FrameTextScript.cpp" />
+    <ClCompile Include="Frustum.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GameState.cpp" />
     <ClCompile Include="Input.cpp" />

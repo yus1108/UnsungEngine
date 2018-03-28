@@ -9,7 +9,7 @@ Render_Particle::Render_Particle() : RenderComponent()
 	creationTime = 0.02f;
 	lifespan = 1.0f;
 	SetIsOneDirection(false);
-	SetSpeed(0.1f, 0.1f, 0.1f);
+	SetSpeed(10, 10, 10);
 	SetPosition(0, 0, 0);
 }
 
@@ -53,7 +53,7 @@ void Render_Particle::Init(UEngine::pipeline_state_t * pipeline, GameObject * _p
 
 	// Basic Model Loading
 	UEngine::ParticleVertex cpu_vertex;
-	cpu_vertex.pos = DirectX::XMFLOAT3(0, 5, 0);
+	cpu_vertex.pos = DirectX::XMFLOAT3(0, 0, 0);
 	cpu_vertex.color = DirectX::XMFLOAT4(1, 1, 1, 1);
 	cpu_side_buffer.push_back(cpu_vertex);
 }
@@ -117,7 +117,7 @@ void Render_Particle::Update()
 			}
 			XMVECTOR tempPos = XMLoadFloat4(&particles[i].worldmat);
 			tempPos += parent->GetTransform()->GetMatrix().r[3];
-			tempPos += speed[i];
+			tempPos += speed[i] * deltaTime;
 			worldPos[i] = UEngine::ParticleConstBuffer();
 			XMStoreFloat4(&worldPos[i].worldmat, tempPos);
 			XMStoreFloat4(&particles[i].worldmat, tempPos);

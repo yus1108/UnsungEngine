@@ -23,10 +23,10 @@ void GameState::Init()
 	// load main camera 0
 	GameObject * mainCamera = new GameObject();
 	DirectX::XMMATRIX cameraPos = DirectX::XMMatrixIdentity();
-	cameraPos.r[3] = DirectX::XMVectorSet(0, 5, -20, 1);
+	cameraPos.r[3] = DirectX::XMVectorSet(0, 0, -10, 1);
 	mainCamera->GetTransform()->SetMatrix(cameraPos);
-	Component * cameraScript = new CameraScript();
 	AddCamera(mainCamera);
+	Component * cameraScript = new CameraScript();
 	cameraScript->Init(UEngine::ComponentType_SCRIPT, true, mainCamera);
 	mainCamera->AddComponent(cameraScript);
 	objManager.AddGameObject(mainCamera);
@@ -54,7 +54,7 @@ void GameState::Init()
 	// load secondary camera 2
 	GameObject * mainCamera2 = new GameObject();
 	DirectX::XMMATRIX camera2Pos = DirectX::XMMatrixRotationY(UMath::Convert_DegreeToRad(-90.0f));
-	camera2Pos.r[3] = DirectX::XMVectorSet(20, 5, 0, 1);
+	camera2Pos.r[3] = DirectX::XMVectorSet(20, 0, 0, 1);
 	mainCamera2->GetTransform()->SetMatrix(camera2Pos);
 	CameraComponent * cameraComponent2 = new CameraComponent();
 	cameraComponent2->Init(UEngine::ComponentType_CAMERA, true, mainCamera2);
@@ -89,7 +89,7 @@ void GameState::Init()
 	objManager.AddGameObject(logo);
 	objManager.RemoveGameObject(logo);
 
-	// load numParticles 6
+	// load numParticles 5/6
 	GameObject * numParticles = new GameObject();
 	textFormat.dpiX = 80;
 	renderer.LoadGUI(hello, textLength, numParticles, 0, textFormat);
@@ -125,6 +125,10 @@ void GameState::Update()
 		DirectX::XMFLOAT2 ndcPos = input.GetMousePos();
 		std::cout << "mouse pos: " << ndcPos.x << ", " << ndcPos.y << std::endl;
 	}
+
+#ifdef _DEBUG
+	debugRenderer.Add_Frustum(((CameraComponent*)objManager.GetGameObject(2)->GetComponent(0))->GetFrustum(), DirectX::XMFLOAT4(0, 1, 0, 1));
+#endif
 
 	// collision
 
