@@ -73,7 +73,7 @@ void GameState::Init()
 
 	// load object 4
 	GameObject * gameObject = new GameObject();
-	renderer.LoadObject("Assets/WOS_CommandCenter.bin", gameObject);
+	renderer.LoadObject("Assets/GreenCube.bin", gameObject);
 	gameObject->GetTransform()->SetMatrix(DirectX::XMMatrixMultiply(DirectX::XMMatrixIdentity(), DirectX::XMMatrixTranslation(0, 0, 0)));
 	Component * buildScript = new BuildingScript();
 	buildScript->Init(UEngine::ComponentType_SCRIPT, true, gameObject);
