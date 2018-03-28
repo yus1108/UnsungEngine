@@ -1,5 +1,6 @@
 #pragma once
 #include "Renderer.h"
+#include "CollisionManager.h"
 #include "ObjectManager.h"
 #include "ThreadPool.h"
 
@@ -10,6 +11,7 @@ class GameState
 {
 public:
 	Renderer renderer;
+	CollisionManager collision;
 	ObjectManager objManager;
 
 	GameState();

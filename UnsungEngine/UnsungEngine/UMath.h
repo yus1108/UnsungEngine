@@ -1,20 +1,25 @@
 #pragma once
 #include "AABB.h"
+#include "OOBB.h"
 
 struct SIMPLE_VERTEX;
 class UMath {
 public:
 	static float Convert_DegreeToRad(float degree);
 	static double Convert_DegreeToRad(double degree);
+
 	static DirectX::XMFLOAT2 ConvertPixelToNDC(POINT mousePos, HWND * window);
+
 	static void CalculateAABB(std::vector<SIMPLE_VERTEX> vertices, std::vector<unsigned int> indices,
 		DirectX::XMMATRIX worldmat, AABB & outAABB);
+
+	static bool CollisionTest(AABB a, AABB b);
+	static bool CollisionTest(AABB a, OOBB b);
+	static bool CollisionTest(OOBB a, OOBB b);
 
 
 	//bool CollisionTest(Trapezoid trapzoid, AABB obb);
 	//bool CollisionTest(Trapezoid trapzoid, OBB obb);
-	//bool CollisionTest(AABB a, AABB b);
-	//bool CollisionTest(OBB a, OBB b);
 	//bool CollisionTest(SIMPLE_VERTEX startRay, SIMPLE_VERTEX endRay, AABB b);
 
 	//void RayCasting(DirectX::XMMATRIX & worldMat, AABB & lineSeg);

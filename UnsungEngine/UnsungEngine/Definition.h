@@ -14,6 +14,10 @@ extern DebugRenderer debugRenderer;
 #define THROTTLE 200
 // max 5 threads per camera
 #define NUM_THREADS 100
+#define XBOUNDARY DirectX::XMFLOAT2(-10, 10)
+#define YBOUNDARY DirectX::XMFLOAT2(-10, 10)
+#define ZBOUNDARY DirectX::XMFLOAT2(-10, 10)
+#define COLLISION_LEVEL 2
 
 // external variables
 extern HWND hWnd;

@@ -7,10 +7,10 @@ private:
 	ID3D11Device *device;
 	ID3D11DeviceContext *m_pImmediateContext;
 
-	static const int MAX_VERTS = 100000;
+	static const unsigned MAX_VERTS = 100000;
 	ID3D11Buffer *gpu_side_buffer = nullptr;
 	UEngine::DebugVertex cpu_side_buffer[MAX_VERTS];
-	int vert_count = 0;
+	unsigned vert_count = 0;
 public:
 	DebugRenderer();
 	~DebugRenderer();

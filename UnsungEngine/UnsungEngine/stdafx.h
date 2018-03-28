@@ -84,6 +84,7 @@
 #include "Component.h"
 #include "CameraComponent.h"
 #include "ScriptComponent.h"
+#include "CollisionComponent.h"
 
 // render components
 #include "RenderComponent.h"
@@ -91,7 +92,10 @@
 #include "Render_UI.h"
 #include "Render_Particle.h"
 #include "Transform.h"
+
+// Managers
 #include "ObjectManager.h"
+#include "CollisionManager.h"
 
 // include shader headers
 #include "Shaders/Default_VS.csh"

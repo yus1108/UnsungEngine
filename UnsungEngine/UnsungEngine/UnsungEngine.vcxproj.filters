@@ -171,6 +171,12 @@
     <ClInclude Include="Frustum.h">
       <Filter>Engine Architecture\Collision</Filter>
     </ClInclude>
+    <ClInclude Include="CollisionManager.h">
+      <Filter>Engine Architecture\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="CollisionComponent.h">
+      <Filter>Engine Architecture\Game Architecture\Component</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -262,6 +268,12 @@
     </ClCompile>
     <ClCompile Include="Frustum.cpp">
       <Filter>Engine Architecture\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="CollisionManager.cpp">
+      <Filter>Engine Architecture\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="CollisionComponent.cpp">
+      <Filter>Engine Architecture\Game Architecture\Component</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

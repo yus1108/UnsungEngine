@@ -18,6 +18,8 @@ GameState::~GameState()
 void GameState::Init()
 {
 	renderer.Init();
+	AABB map = AABB(XBOUNDARY, YBOUNDARY, ZBOUNDARY);
+	collision.Init(map, COLLISION_LEVEL);
 	objManager.Reset();
 
 	// load main camera 0
@@ -131,6 +133,8 @@ void GameState::Update()
 #endif
 
 	// collision
+	collision.Clear(collision.GetRoot());
+	collision.Update(nullptr);
 
 	// update
 	objManager.Update();

@@ -20,6 +20,7 @@ public:
 	void clear();
 	void push_back(T& item);
 	void push_back(const T& item);
+	void resize(const unsigned int & newCap = 0);
 	void reserve(const unsigned int & newCap = 0);
 
 	void insert(const T val, const unsigned int index);
@@ -208,9 +209,42 @@ void UVector<T>::push_back(const T & item)
 }
 
 /////////////////////////////////////////////////////////////////////////////
+// Function : resize
+// Parameters : newCap - the new capacity
+// Notes : 	- default parameter - resize more space in the array, based on 
+//		the expansion rate (100%, 1 minimum).
+//		- non-default parameter, expand to the specified capacity
+//		- if newCap is LESS than the current capacity, do nothing. 
+//		This function should NOT make the array smaller.
+/////////////////////////////////////////////////////////////////////////////
+template<typename T>
+void UVector<T>::resize(const unsigned int & newCap)
+{
+	if (newCap > Capacity || newCap == 0) {
+		if (newCap == 0) {
+			if (Capacity == 0)
+				Capacity = 1;
+			else
+				Capacity *= 2;
+		}
+		else
+			Capacity = newCap;
+
+		T *temp = arr;
+
+		arr = new T[Capacity];
+		Size = Capacity;
+		for (decltype(Size) i = 0; i < Size; i++)
+			arr[i] = temp[i];
+		delete[] temp;
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////
 // Function : reserve
 // Parameters : newCap - the new capacity
-// Notes : 	- default parameter - reserve more space in the array, based on //		the expansion rate (100%, 1 minimum).
+// Notes : 	- default parameter - reserve more space in the array, based on 
+//		the expansion rate (100%, 1 minimum).
 //		- non-default parameter, expand to the specified capacity
 //		- if newCap is LESS than the current capacity, do nothing. 
 //		This function should NOT make the array smaller.

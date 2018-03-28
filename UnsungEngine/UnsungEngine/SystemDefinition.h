@@ -1,5 +1,7 @@
 #pragma once
 #include "stdafx.h"
+#include "Component.h"
+class Component;
 
 // enum definition
 namespace UEngine {
@@ -7,6 +9,7 @@ namespace UEngine {
 	enum ComponentType {
 		ComponentType_CAMERA,
 		ComponentType_SCRIPT,
+		ComponentType_COLLISION,
 		ComponentType_COUNT
 	};
 	enum MouseInputType {
@@ -94,6 +97,11 @@ namespace UEngine {
 		DirectX::XMFLOAT4 scale;
 	};
 
+	struct CollisionTree {
+		UVector<CollisionTree*> children;
+		UVector<Component*> objs;
+		AABB grid;
+	};
 }
 
 
