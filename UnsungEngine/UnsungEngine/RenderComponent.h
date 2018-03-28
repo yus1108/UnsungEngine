@@ -2,7 +2,7 @@
 #include "Renderer.h"
 #include "Transform.h"
 #include "Component.h"
-#include "CBox.h"
+#include "CollisionBox.h"
 
 class Renderer;
 class RenderComponent

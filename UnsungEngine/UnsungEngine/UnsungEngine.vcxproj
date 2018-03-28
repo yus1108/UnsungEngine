@@ -146,7 +146,7 @@
     <ClInclude Include="BuildingScript.h" />
     <ClInclude Include="CameraComponent.h" />
     <ClInclude Include="CameraScript.h" />
-    <ClInclude Include="CBox.h" />
+    <ClInclude Include="CollisionBox.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="DDSTextureLoader.h" />
     <ClInclude Include="DebugRenderer.h" />
@@ -182,7 +182,7 @@
     <ClCompile Include="BuildingScript.cpp" />
     <ClCompile Include="CameraComponent.cpp" />
     <ClCompile Include="CameraScript.cpp" />
-    <ClCompile Include="CBox.cpp" />
+    <ClCompile Include="CollisionBox.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="DDSTextureLoader.cpp" />
     <ClCompile Include="DebugRenderer.cpp" />

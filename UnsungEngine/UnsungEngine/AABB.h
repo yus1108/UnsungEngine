@@ -1,5 +1,5 @@
 #pragma once
-#include "CBox.h"
+#include "CollisionBox.h"
 class AABB :
 	public CollisionBox
 {

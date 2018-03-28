@@ -141,9 +141,6 @@
     <ClInclude Include="Render_World.h">
       <Filter>Engine Architecture\Render\RenderComponents</Filter>
     </ClInclude>
-    <ClInclude Include="CBox.h">
-      <Filter>Engine Architecture\Collision</Filter>
-    </ClInclude>
     <ClInclude Include="AABB.h">
       <Filter>Engine Architecture\Collision</Filter>
     </ClInclude>
@@ -167,6 +164,9 @@
     </ClInclude>
     <ClInclude Include="CameraScript.h">
       <Filter>GamePlay\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="CollisionBox.h">
+      <Filter>Engine Architecture\Collision</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -230,9 +230,6 @@
     <ClCompile Include="Render_World.cpp">
       <Filter>Engine Architecture\Render\RenderComponents</Filter>
     </ClCompile>
-    <ClCompile Include="CBox.cpp">
-      <Filter>Engine Architecture\Collision</Filter>
-    </ClCompile>
     <ClCompile Include="AABB.cpp">
       <Filter>Engine Architecture\Collision</Filter>
     </ClCompile>
@@ -256,6 +253,9 @@
     </ClCompile>
     <ClCompile Include="CameraScript.cpp">
       <Filter>GamePlay\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="CollisionBox.cpp">
+      <Filter>Engine Architecture\Collision</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

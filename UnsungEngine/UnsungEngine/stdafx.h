@@ -67,7 +67,7 @@
 #include "Definition.h"
 
 // collision
-#include "CBox.h"
+#include "CollisionBox.h"
 #include "AABB.h"
 #include "OOBB.h"
 
@@ -78,8 +78,13 @@
 #ifdef _DEBUG
 #include "DebugRenderer.h"
 #endif
+
+// components
 #include "Component.h"
 #include "CameraComponent.h"
+#include "ScriptComponent.h"
+
+// render components
 #include "RenderComponent.h"
 #include "Render_World.h"
 #include "Render_UI.h"
@@ -100,3 +105,4 @@
 #include "Shaders/DebugRender_VS.csh"
 #include "Shaders/DebugRender_PS.csh"
 #endif
+
