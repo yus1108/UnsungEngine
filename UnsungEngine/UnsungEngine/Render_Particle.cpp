@@ -5,12 +5,14 @@
 Render_Particle::Render_Particle() : RenderComponent()
 {
 	gpu_side_buffer = nullptr;
+	SetNumEmit(10);
 	creationCounter = 0;
 	creationTime = 0.02f;
-	lifespan = 1.0f;
+	lifespan = 1;
 	SetIsOneDirection(false);
-	SetSpeed(10, 10, 10);
+	SetSpeed(50, 50, 50);
 	SetPosition(0, 0, 0);
+	SetScale(0, 0, 0);
 }
 
 
@@ -30,11 +32,16 @@ void Render_Particle::SetPosition(float x, float y, float z)
 	setPosition = DirectX::XMFLOAT3(x, y, z);
 }
 
+void Render_Particle::SetScale(float x, float y, float z)
+{
+	setScale = DirectX::XMFLOAT3(x, y, z);
+}
+
 void Render_Particle::Init(UEngine::pipeline_state_t * pipeline, GameObject * _parent)
 {
 	RenderComponent::Init(pipeline, _parent);
 	using namespace DirectX;
-	for (unsigned i = 0; i < 10; i++)
+	for (unsigned i = 0; i < numEmit; i++)
 	{
 		particles.push_back(UEngine::ParticleConstBuffer());
 		worldPos.push_back(UEngine::ParticleConstBuffer());
@@ -49,6 +56,9 @@ void Render_Particle::Init(UEngine::pipeline_state_t * pipeline, GameObject * _p
 		particles[i].worldmat.y = sign * ((float)(rand() % 100000)) / 100000.0f * setPosition.y;
 		sign = rand() % 2 ? -1.0f : 1.0f;
 		particles[i].worldmat.z = sign * ((float)(rand() % 100000)) / 100000.0f * setPosition.z;
+
+		XMFLOAT3 scale = parent->GetTransform()->GetScale();
+		particles[i].scale = DirectX::XMFLOAT4(scale.x, scale.y, 0, 0);
 	}
 
 	// Basic Model Loading
@@ -80,7 +90,7 @@ void Render_Particle::Update()
 		if (creationCounter >= creationTime)
 		{
 			using namespace DirectX;
-			for (unsigned i = 0; i < 10; i++)
+			for (unsigned i = 0; i < numEmit; i++)
 			{
 				unsigned index = particles.size();
 				if (index == 1000)
@@ -99,6 +109,9 @@ void Render_Particle::Update()
 				particles[index].worldmat.y = sign * ((float)(rand() % 100000)) / 100000.0f * setPosition.y;
 				sign = rand() % 2 ? -1.0f : 1.0f;
 				particles[index].worldmat.z = sign * ((float)(rand() % 100000)) / 100000.0f * setPosition.z;
+
+				XMFLOAT3 scale = parent->GetTransform()->GetScale();
+				particles[index].scale = DirectX::XMFLOAT4(scale.x, scale.y, 0, 0);
 			}
 			creationCounter = 0;
 		}
@@ -123,7 +136,9 @@ void Render_Particle::Update()
 			XMStoreFloat4(&worldPos[i].worldmat, tempPos);
 			worldPos[i].worldmat.w = 0;
 			XMFLOAT3 scale = parent->GetTransform()->GetScale();
-			worldPos[i].scale = DirectX::XMFLOAT4(scale.x, scale.y, 0, 0);
+			particles[i].scale.x += setScale.x * deltaTime;
+			particles[i].scale.y += setScale.y * deltaTime;
+			worldPos[i].scale = DirectX::XMFLOAT4(scale.x + particles[i].scale.x, scale.y + particles[i].scale.y, 0, 0);
 		}
 	}
 }

@@ -15,18 +15,24 @@ private:
 	float creationCounter;
 	float creationTime;
 	float lifespan;
+	float numEmit;
 	bool isOneDirection;
 	DirectX::XMVECTOR setSpeed;
 	DirectX::XMFLOAT3 setPosition;
+	DirectX::XMFLOAT3 setScale;
 public:
 	Render_Particle();
 	virtual ~Render_Particle();
 
 	unsigned GetNumParticles() { return particles.size(); }
+	float GetNumEmit() { return numEmit; }
+	void SetNumEmit(float _numEmit) { numEmit = _numEmit; }
 	DirectX::XMVECTOR GetSpeed() { return setSpeed; }
 	void SetSpeed(float x, float y, float z);
 	DirectX::XMFLOAT3 GetPosition() { return setPosition; }
 	void SetPosition(float x, float y, float z);
+	DirectX::XMFLOAT3 GetScale() { return setScale; }
+	void SetScale(float x, float y, float z);
 	bool GetIsOneDirection() { return isOneDirection; }
 	void SetIsOneDirection(bool _isOneDirection) { isOneDirection = _isOneDirection; }
 
