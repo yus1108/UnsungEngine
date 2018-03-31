@@ -81,6 +81,10 @@ void GameState::Init()
 	Component * buildScript = new BuildingScript();
 	buildScript->Init(UEngine::ComponentType_SCRIPT, true, gameObject);
 	gameObject->AddComponent(buildScript);
+	CollisionComponent * collisionComp = new CollisionComponent();
+	collisionComp->Init(UEngine::ComponentType_COLLISION, true, gameObject);
+	collisionComp->SetCollisionBox(gameObject->GetRenderComponent()->GetCollisionBox());
+	gameObject->AddComponent(collisionComp);
 	//gameObject->SetActive(false);
 	objManager.AddGameObject(gameObject);
 

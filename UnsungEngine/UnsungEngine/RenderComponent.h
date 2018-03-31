@@ -24,6 +24,7 @@ public:
 	void SetActive(bool _active) { isActive = _active; }
 	UEngine::DrawType GetType() { return type; }
 	void SetType(UEngine::DrawType _type) { type = _type; }
+	CollisionBox * GetCollisionBox() { return collisionBox; }
 
 	UEngine::pipeline_state_t * GetPipeline() { return m_pPipeline; }
 	void SetPipeline(UEngine::pipeline_state_t * _pipeline) { m_pPipeline = _pipeline; }

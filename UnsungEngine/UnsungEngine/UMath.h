@@ -15,7 +15,7 @@ public:
 
 	static bool CollisionTest(AABB a, AABB b);
 	static bool CollisionTest(AABB a, OOBB b);
-	static bool CollisionTest(OOBB a, OOBB b);
+	static bool CollisionTest(OOBB * a, OOBB * b);
 
 
 	//bool CollisionTest(Trapezoid trapzoid, AABB obb);

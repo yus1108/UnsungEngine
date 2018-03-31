@@ -97,148 +97,140 @@ bool UMath::CollisionTest(AABB a, AABB b) {
 bool UMath::CollisionTest(AABB a, OOBB b) {
 	DirectX::XMMATRIX tempMatrix = DirectX::XMMatrixIdentity();
 	OOBB aOOBB = OOBB(&tempMatrix, a.GetXAxis(), a.GetYAxis(), a.GetZAxis());
-	return CollisionTest(aOOBB, b);
+	return CollisionTest(&aOOBB, &b);
 }
-bool UMath::CollisionTest(OOBB obb1, OOBB obb2) {
-	try
+bool UMath::CollisionTest(OOBB * obb1, OOBB * obb2) {
+	using namespace DirectX;
+	XMVECTOR vertices1[8], vertices2[8];
+	float min1, min2, max1, max2;
+	// xaxis
+	min1 = min2 = FLT_MAX;
+	max1 = max2 = -FLT_MAX;
+	for (int i = 0; i < 8; i++)
 	{
-		using namespace DirectX;
-		XMVECTOR vertices1[8], vertices2[8];
-		float min1, min2, max1, max2;
-		// xaxis
-		min1 = min2 = FLT_MAX;
-		max1 = max2 = -FLT_MAX;
-		for (int i = 0; i < 8; i++)
-		{
-			vertices1[i] = XMVector4Transform(obb1.GetVertex(i), obb1.GetWorldMat());
-			vertices2[i] = XMVector4Transform(obb2.GetVertex(i), obb2.GetWorldMat());
+		vertices1[i] = XMVector4Transform(obb1->GetVertex(i), obb1->GetWorldMat());
+		vertices2[i] = XMVector4Transform(obb2->GetVertex(i), obb2->GetWorldMat());
 
-			XMVECTOR dist1 = XMVector3Dot(XMVector3Normalize(obb1.GetWorldMatAddr()->r[0]), vertices1[i]);
-			XMVECTOR dist2 = XMVector3Dot(XMVector3Normalize(obb1.GetWorldMatAddr()->r[0]), vertices2[i]);
-			if (min1 > dist1.m128_f32[0])
-				min1 = dist1.m128_f32[0];
-			if (min2 > dist2.m128_f32[0])
-				min2 = dist2.m128_f32[0];
-			if (max1 < dist1.m128_f32[0])
-				max1 = dist1.m128_f32[0];
-			if (max2 < dist2.m128_f32[0])
-				max2 = dist2.m128_f32[0];
-		}
-		float center1 = (max1 + min1) / 2.0f;
-		float center2 = (max2 + min2) / 2.0f;
-		if ((max2 - center2) + (max1 - center1) < abs(center2 - center1))
-			return false;
-
-		// yaxis
-		min1 = max1 = XMVector3Dot(XMVector3Normalize(obb1.GetWorldMatAddr()->r[1]), vertices1[0]).m128_f32[0];
-		min2 = max2 = XMVector3Dot(XMVector3Normalize(obb1.GetWorldMatAddr()->r[1]), vertices2[0]).m128_f32[0];
-		for (int i = 1; i < 8; i++)
-		{
-			XMVECTOR dist1 = XMVector3Dot(XMVector3Normalize(obb1.GetWorldMatAddr()->r[1]), vertices1[i]);
-			XMVECTOR dist2 = XMVector3Dot(XMVector3Normalize(obb1.GetWorldMatAddr()->r[1]), vertices2[i]);
-			if (min1 > dist1.m128_f32[0])
-				min1 = dist1.m128_f32[0];
-			if (min2 > dist2.m128_f32[0])
-				min2 = dist2.m128_f32[0];
-			if (max1 < dist1.m128_f32[0])
-				max1 = dist1.m128_f32[0];
-			if (max2 < dist2.m128_f32[0])
-				max2 = dist2.m128_f32[0];
-		}
-		center1 = (max1 + min1) / 2.0f;
-		center2 = (max2 + min2) / 2.0f;
-		if ((max2 - center2) + (max1 - center1) < abs(center2 - center1))
-			return false;
-
-		// zaxis
-		min1 = max1 = XMVector3Dot(XMVector3Normalize(obb1.GetWorldMatAddr()->r[2]), vertices1[0]).m128_f32[0];
-		min2 = max2 = XMVector3Dot(XMVector3Normalize(obb1.GetWorldMatAddr()->r[2]), vertices2[0]).m128_f32[0];
-		for (int i = 1; i < 8; i++)
-		{
-			XMVECTOR dist1 = XMVector3Dot(XMVector3Normalize(obb1.GetWorldMatAddr()->r[2]), vertices1[i]);
-			XMVECTOR dist2 = XMVector3Dot(XMVector3Normalize(obb1.GetWorldMatAddr()->r[2]), vertices2[i]);
-			if (min1 > dist1.m128_f32[0])
-				min1 = dist1.m128_f32[0];
-			if (min2 > dist2.m128_f32[0])
-				min2 = dist2.m128_f32[0];
-			if (max1 < dist1.m128_f32[0])
-				max1 = dist1.m128_f32[0];
-			if (max2 < dist2.m128_f32[0])
-				max2 = dist2.m128_f32[0];
-		}
-		center1 = (max1 + min1) / 2.0f;
-		center2 = (max2 + min2) / 2.0f;
-		if ((max2 - center2) + (max1 - center1) < abs(center2 - center1))
-			return false;
-
-		// xaxis
-		min1 = max1 = XMVector3Dot(XMVector3Normalize(obb2.GetWorldMatAddr()->r[0]), vertices1[0]).m128_f32[0];
-		min2 = max2 = XMVector3Dot(XMVector3Normalize(obb2.GetWorldMatAddr()->r[0]), vertices2[0]).m128_f32[0];
-		for (int i = 1; i < 8; i++)
-		{
-			XMVECTOR dist1 = XMVector3Dot(XMVector3Normalize(obb2.GetWorldMatAddr()->r[0]), vertices1[i]);
-			XMVECTOR dist2 = XMVector3Dot(XMVector3Normalize(obb2.GetWorldMatAddr()->r[0]), vertices2[i]);
-			if (min1 > dist1.m128_f32[0])
-				min1 = dist1.m128_f32[0];
-			if (min2 > dist2.m128_f32[0])
-				min2 = dist2.m128_f32[0];
-			if (max1 < dist1.m128_f32[0])
-				max1 = dist1.m128_f32[0];
-			if (max2 < dist2.m128_f32[0])
-				max2 = dist2.m128_f32[0];
-		}
-		center1 = (max1 + min1) / 2.0f;
-		center2 = (max2 + min2) / 2.0f;
-		if ((max2 - center2) + (max1 - center1) < abs(center2 - center1))
-			return false;
-
-		// yaxis
-		min1 = max1 = XMVector3Dot(XMVector3Normalize(obb2.GetWorldMatAddr()->r[1]), vertices1[0]).m128_f32[0];
-		min2 = max2 = XMVector3Dot(XMVector3Normalize(obb2.GetWorldMatAddr()->r[1]), vertices2[0]).m128_f32[0];
-		for (int i = 1; i < 8; i++)
-		{
-			XMVECTOR dist1 = XMVector3Dot(XMVector3Normalize(obb2.GetWorldMatAddr()->r[1]), vertices1[i]);
-			XMVECTOR dist2 = XMVector3Dot(XMVector3Normalize(obb2.GetWorldMatAddr()->r[1]), vertices2[i]);
-			if (min1 > dist1.m128_f32[0])
-				min1 = dist1.m128_f32[0];
-			if (min2 > dist2.m128_f32[0])
-				min2 = dist2.m128_f32[0];
-			if (max1 < dist1.m128_f32[0])
-				max1 = dist1.m128_f32[0];
-			if (max2 < dist2.m128_f32[0])
-				max2 = dist2.m128_f32[0];
-		}
-		center1 = (max1 + min1) / 2.0f;
-		center2 = (max2 + min2) / 2.0f;
-		if ((max2 - center2) + (max1 - center1) < abs(center2 - center1))
-			return false;
-
-		// zaxis
-		min1 = max1 = XMVector3Dot(XMVector3Normalize(obb2.GetWorldMatAddr()->r[2]), vertices1[0]).m128_f32[0];
-		min2 = max2 = XMVector3Dot(XMVector3Normalize(obb2.GetWorldMatAddr()->r[2]), vertices2[0]).m128_f32[0];
-		for (int i = 1; i < 8; i++)
-		{
-			XMVECTOR dist1 = XMVector3Dot(XMVector3Normalize(obb2.GetWorldMatAddr()->r[2]), vertices1[i]);
-			XMVECTOR dist2 = XMVector3Dot(XMVector3Normalize(obb2.GetWorldMatAddr()->r[2]), vertices2[i]);
-			if (min1 > dist1.m128_f32[0])
-				min1 = dist1.m128_f32[0];
-			if (min2 > dist2.m128_f32[0])
-				min2 = dist2.m128_f32[0];
-			if (max1 < dist1.m128_f32[0])
-				max1 = dist1.m128_f32[0];
-			if (max2 < dist2.m128_f32[0])
-				max2 = dist2.m128_f32[0];
-		}
-		center1 = (max1 + min1) / 2.0f;
-		center2 = (max2 + min2) / 2.0f;
-		if ((max2 - center2) + (max1 - center1) < abs(center2 - center1))
-			return false;
-
-		return true;
+		XMVECTOR dist1 = XMVector3Dot(XMVector3Normalize(obb1->GetWorldMatAddr()->r[0]), vertices1[i]);
+		XMVECTOR dist2 = XMVector3Dot(XMVector3Normalize(obb1->GetWorldMatAddr()->r[0]), vertices2[i]);
+		if (min1 > dist1.m128_f32[0])
+			min1 = dist1.m128_f32[0];
+		if (min2 > dist2.m128_f32[0])
+			min2 = dist2.m128_f32[0];
+		if (max1 < dist1.m128_f32[0])
+			max1 = dist1.m128_f32[0];
+		if (max2 < dist2.m128_f32[0])
+			max2 = dist2.m128_f32[0];
 	}
-	catch (const std::exception&)
-	{
+	float center1 = (max1 + min1) / 2.0f;
+	float center2 = (max2 + min2) / 2.0f;
+	if ((max2 - center2) + (max1 - center1) < abs(center2 - center1))
 		return false;
-	}
 
+	// yaxis
+	min1 = max1 = XMVector3Dot(XMVector3Normalize(obb1->GetWorldMatAddr()->r[1]), vertices1[0]).m128_f32[0];
+	min2 = max2 = XMVector3Dot(XMVector3Normalize(obb1->GetWorldMatAddr()->r[1]), vertices2[0]).m128_f32[0];
+	for (int i = 1; i < 8; i++)
+	{
+		XMVECTOR dist1 = XMVector3Dot(XMVector3Normalize(obb1->GetWorldMatAddr()->r[1]), vertices1[i]);
+		XMVECTOR dist2 = XMVector3Dot(XMVector3Normalize(obb1->GetWorldMatAddr()->r[1]), vertices2[i]);
+		if (min1 > dist1.m128_f32[0])
+			min1 = dist1.m128_f32[0];
+		if (min2 > dist2.m128_f32[0])
+			min2 = dist2.m128_f32[0];
+		if (max1 < dist1.m128_f32[0])
+			max1 = dist1.m128_f32[0];
+		if (max2 < dist2.m128_f32[0])
+			max2 = dist2.m128_f32[0];
+	}
+	center1 = (max1 + min1) / 2.0f;
+	center2 = (max2 + min2) / 2.0f;
+	if ((max2 - center2) + (max1 - center1) < abs(center2 - center1))
+		return false;
+
+	// zaxis
+	min1 = max1 = XMVector3Dot(XMVector3Normalize(obb1->GetWorldMatAddr()->r[2]), vertices1[0]).m128_f32[0];
+	min2 = max2 = XMVector3Dot(XMVector3Normalize(obb1->GetWorldMatAddr()->r[2]), vertices2[0]).m128_f32[0];
+	for (int i = 1; i < 8; i++)
+	{
+		XMVECTOR dist1 = XMVector3Dot(XMVector3Normalize(obb1->GetWorldMatAddr()->r[2]), vertices1[i]);
+		XMVECTOR dist2 = XMVector3Dot(XMVector3Normalize(obb1->GetWorldMatAddr()->r[2]), vertices2[i]);
+		if (min1 > dist1.m128_f32[0])
+			min1 = dist1.m128_f32[0];
+		if (min2 > dist2.m128_f32[0])
+			min2 = dist2.m128_f32[0];
+		if (max1 < dist1.m128_f32[0])
+			max1 = dist1.m128_f32[0];
+		if (max2 < dist2.m128_f32[0])
+			max2 = dist2.m128_f32[0];
+	}
+	center1 = (max1 + min1) / 2.0f;
+	center2 = (max2 + min2) / 2.0f;
+	if ((max2 - center2) + (max1 - center1) < abs(center2 - center1))
+		return false;
+
+	// xaxis
+	min1 = max1 = XMVector3Dot(XMVector3Normalize(obb2->GetWorldMatAddr()->r[0]), vertices1[0]).m128_f32[0];
+	min2 = max2 = XMVector3Dot(XMVector3Normalize(obb2->GetWorldMatAddr()->r[0]), vertices2[0]).m128_f32[0];
+	for (int i = 1; i < 8; i++)
+	{
+		XMVECTOR dist1 = XMVector3Dot(XMVector3Normalize(obb2->GetWorldMatAddr()->r[0]), vertices1[i]);
+		XMVECTOR dist2 = XMVector3Dot(XMVector3Normalize(obb2->GetWorldMatAddr()->r[0]), vertices2[i]);
+		if (min1 > dist1.m128_f32[0])
+			min1 = dist1.m128_f32[0];
+		if (min2 > dist2.m128_f32[0])
+			min2 = dist2.m128_f32[0];
+		if (max1 < dist1.m128_f32[0])
+			max1 = dist1.m128_f32[0];
+		if (max2 < dist2.m128_f32[0])
+			max2 = dist2.m128_f32[0];
+	}
+	center1 = (max1 + min1) / 2.0f;
+	center2 = (max2 + min2) / 2.0f;
+	if ((max2 - center2) + (max1 - center1) < abs(center2 - center1))
+		return false;
+
+	// yaxis
+	min1 = max1 = XMVector3Dot(XMVector3Normalize(obb2->GetWorldMatAddr()->r[1]), vertices1[0]).m128_f32[0];
+	min2 = max2 = XMVector3Dot(XMVector3Normalize(obb2->GetWorldMatAddr()->r[1]), vertices2[0]).m128_f32[0];
+	for (int i = 1; i < 8; i++)
+	{
+		XMVECTOR dist1 = XMVector3Dot(XMVector3Normalize(obb2->GetWorldMatAddr()->r[1]), vertices1[i]);
+		XMVECTOR dist2 = XMVector3Dot(XMVector3Normalize(obb2->GetWorldMatAddr()->r[1]), vertices2[i]);
+		if (min1 > dist1.m128_f32[0])
+			min1 = dist1.m128_f32[0];
+		if (min2 > dist2.m128_f32[0])
+			min2 = dist2.m128_f32[0];
+		if (max1 < dist1.m128_f32[0])
+			max1 = dist1.m128_f32[0];
+		if (max2 < dist2.m128_f32[0])
+			max2 = dist2.m128_f32[0];
+	}
+	center1 = (max1 + min1) / 2.0f;
+	center2 = (max2 + min2) / 2.0f;
+	if ((max2 - center2) + (max1 - center1) < abs(center2 - center1))
+		return false;
+
+	// zaxis
+	min1 = max1 = XMVector3Dot(XMVector3Normalize(obb2->GetWorldMatAddr()->r[2]), vertices1[0]).m128_f32[0];
+	min2 = max2 = XMVector3Dot(XMVector3Normalize(obb2->GetWorldMatAddr()->r[2]), vertices2[0]).m128_f32[0];
+	for (int i = 1; i < 8; i++)
+	{
+		XMVECTOR dist1 = XMVector3Dot(XMVector3Normalize(obb2->GetWorldMatAddr()->r[2]), vertices1[i]);
+		XMVECTOR dist2 = XMVector3Dot(XMVector3Normalize(obb2->GetWorldMatAddr()->r[2]), vertices2[i]);
+		if (min1 > dist1.m128_f32[0])
+			min1 = dist1.m128_f32[0];
+		if (min2 > dist2.m128_f32[0])
+			min2 = dist2.m128_f32[0];
+		if (max1 < dist1.m128_f32[0])
+			max1 = dist1.m128_f32[0];
+		if (max2 < dist2.m128_f32[0])
+			max2 = dist2.m128_f32[0];
+	}
+	center1 = (max1 + min1) / 2.0f;
+	center2 = (max2 + min2) / 2.0f;
+	if ((max2 - center2) + (max1 - center1) < abs(center2 - center1))
+		return false;
+
+	return true;
 }

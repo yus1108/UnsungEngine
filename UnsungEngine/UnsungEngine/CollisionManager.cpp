@@ -104,22 +104,47 @@ void CollisionManager::Init(AABB _boundary, int levels)
 }
 
 void CollisionManager::Update(CollisionComponent * component) {
-#ifdef _DEBUG
-	AABB tempAABB = root->grid;
-	debugRenderer.Add_AABB(tempAABB, DirectX::XMFLOAT4(1, 1, 0, 1));
-#endif // DEBUG
+
 	Traverse(component, root);
 }
 
 void CollisionManager::Clear(UEngine::CollisionTree * currNode) {
-	for (unsigned i = 0; i < currNode->children.size(); i++)
-		Clear(currNode->children[i]);
-	currNode->objs.clear();
+	if (currNode->objs.size() > 0)
+	{
+		for (unsigned i = 0; i < currNode->children.size(); i++)
+			Clear(currNode->children[i]);
+		currNode->objs.clear();
+	}
 }
 
 void CollisionManager::Traverse(CollisionComponent * component, UEngine::CollisionTree * currNode) {
 	if (UMath::CollisionTest(currNode->grid, *((OOBB*)component->GetCollisionBox())))
 	{
+		if (currNode->children.size() == 0)
+		{
+			for (unsigned i = 0; i < currNode->objs.size(); i++)
+			{
+				CollisionComponent * otherObj = (CollisionComponent*)currNode->objs[i];
+				if (component->GetCollisionBox()->GetCollisionType() == UEngine::Collision_OOBB
+					&& otherObj->GetCollisionBox()->GetCollisionType() == UEngine::Collision_OOBB)
+				{
+					OOBB * currOOBB = (OOBB*)component->GetCollisionBox();
+					OOBB * otherOOBB = (OOBB*)otherObj->GetCollisionBox();
+					if (UMath::CollisionTest(currOOBB, otherOOBB))
+					{
+						std::cout << "colliding" << std::endl;
+					}
+				}
+			}
+		}
+
+#ifdef _DEBUG
+		AABB tempAABB = currNode->grid;
+		debugRenderer.Add_AABB(tempAABB, DirectX::XMFLOAT4(1, 1, 0, 1));
+#endif // DEBUG
+
+		currNode->objs.push_back(component);
+		
 		for (unsigned i = 0; i < currNode->children.size(); i++)
 			Traverse(component, currNode->children[i]);
 	}
