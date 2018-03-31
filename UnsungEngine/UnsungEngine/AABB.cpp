@@ -6,7 +6,7 @@ AABB::AABB() : CollisionBox()
 {
 }
 
-AABB::AABB(DirectX::XMFLOAT2 x, DirectX::XMFLOAT2 y, DirectX::XMFLOAT2 z) : CollisionBox(nullptr, x, y, z)
+AABB::AABB(DirectX::XMFLOAT2 x, DirectX::XMFLOAT2 y, DirectX::XMFLOAT2 z) : CollisionBox(nullptr, x, y, z, UEngine::Collision_AABB)
 {
 }
 

@@ -13,6 +13,7 @@ public:
 
 	void Reset();
 	void Init();
+	void CollisionUpdate(CollisionManager * collision);
 	void Update();
 	void Render(CameraComponent * m_pCamera, Renderer * render);
 	void DrawObj(CameraComponent * m_pCamera, Renderer * render, D3D11_VIEWPORT viewport, GameObject * obj);

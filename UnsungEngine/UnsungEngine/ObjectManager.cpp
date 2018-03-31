@@ -26,6 +26,27 @@ void ObjectManager::Init() {
 	}
 }
 
+void ObjectManager::CollisionUpdate(CollisionManager * collision)
+{
+	collision->Clear(collision->GetRoot());
+	for each (std::pair<int, GameObject*> obj in gameObjects)
+	{
+		if (obj.second && obj.second->GetActive())
+		{
+			// collision update
+			for (unsigned i = 0; i < obj.second->GetSizeComponents(); i++)
+			{
+				Component * component = obj.second->GetComponent(i);
+				if (component->GetType() == UEngine::ComponentType_COLLISION)
+				{
+					collision->Update((CollisionComponent*)component);
+				}
+			}
+		}
+	}
+	
+}
+
 void ObjectManager::Update() {
 	for each (std::pair<int, GameObject*> obj in gameObjects)
 	{

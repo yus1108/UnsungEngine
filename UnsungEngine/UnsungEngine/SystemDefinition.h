@@ -5,6 +5,7 @@ class Component;
 
 // enum definition
 namespace UEngine {
+	
 	// TODO: Add new component type
 	enum ComponentType {
 		ComponentType_CAMERA,
@@ -19,14 +20,12 @@ namespace UEngine {
 		MouseInputType_SCROLL,
 		MouseInputType_COUNT
 	};
-
 	enum DrawType
 	{
 		DrawType_WORLD,
 		DrawType_UI,
 		DrawType_COUNT
 	};
-
 	// TODO: Add new pipeline enum
 	enum PipelineType {
 		PipelineType_NO_ANIMATION,

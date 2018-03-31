@@ -7,7 +7,7 @@ Frustum::Frustum()
 }
 
 Frustum::Frustum(DirectX::XMMATRIX * _worldMat, DirectX::XMFLOAT2 xNear, DirectX::XMFLOAT2 yNear, 
-	float zNear, DirectX::XMFLOAT2 xFar, DirectX::XMFLOAT2 yFar, float zFar) : CollisionBox(_worldMat, xNear, yNear, DirectX::XMFLOAT2(zNear, zFar))
+	float zNear, DirectX::XMFLOAT2 xFar, DirectX::XMFLOAT2 yFar, float zFar) : CollisionBox(_worldMat, xNear, yNear, DirectX::XMFLOAT2(zNear, zFar), UEngine::Collision_Frustum)
 {
 	xaxisFar = xFar;
 	yaxisFar = yFar;

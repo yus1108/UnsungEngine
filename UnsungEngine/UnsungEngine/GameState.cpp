@@ -135,8 +135,7 @@ void GameState::Update()
 #endif
 
 	// collision
-	collision.Clear(collision.GetRoot());
-	collision.Update(nullptr);
+	objManager.CollisionUpdate(&collision);
 
 	// update
 	objManager.Update();

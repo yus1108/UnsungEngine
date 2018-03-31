@@ -6,7 +6,7 @@ OOBB::OOBB() : CollisionBox()
 {
 }
 
-OOBB::OOBB(DirectX::XMMATRIX * _worldMat, DirectX::XMFLOAT2 x, DirectX::XMFLOAT2 y, DirectX::XMFLOAT2 z) : CollisionBox(_worldMat, x, y, z)
+OOBB::OOBB(DirectX::XMMATRIX * _worldMat, DirectX::XMFLOAT2 x, DirectX::XMFLOAT2 y, DirectX::XMFLOAT2 z) : CollisionBox(_worldMat, x, y, z, UEngine::Collision_OOBB)
 {
 	vertices[0] = DirectX::XMVectorSet(xaxis.x, yaxis.x, zaxis.x, 1);
 	vertices[1] = DirectX::XMVectorSet(xaxis.x, yaxis.x, zaxis.y, 1);
