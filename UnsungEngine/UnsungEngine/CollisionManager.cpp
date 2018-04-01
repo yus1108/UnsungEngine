@@ -141,14 +141,11 @@ void CollisionManager::Traverse(CollisionComponent * component, UEngine::Collisi
 				if (component->GetCollisionBox()->GetCollisionType() == UEngine::Collision_OOBB
 					&& otherObj->GetCollisionBox()->GetCollisionType() == UEngine::Collision_OOBB)
 				{
-					if (component->GetTrigger() || otherObj->GetTrigger())
+					OOBB * currOOBB = (OOBB*)component->GetCollisionBox();
+					OOBB * otherOOBB = (OOBB*)otherObj->GetCollisionBox();
+					if (UMath::CollisionTest(currOOBB, otherOOBB))
 					{
-
-					}
-					else {
-						OOBB * currOOBB = (OOBB*)component->GetCollisionBox();
-						OOBB * otherOOBB = (OOBB*)otherObj->GetCollisionBox();
-						if (UMath::CollisionTest(currOOBB, otherOOBB))
+						if (!(component->GetTrigger() || otherObj->GetTrigger()))
 						{
 							using namespace DirectX;
 							DirectX::XMVECTOR otherPos = otherOOBB->GetWorldMat().r[3];
@@ -178,8 +175,8 @@ void CollisionManager::Traverse(CollisionComponent * component, UEngine::Collisi
 							currPos.m128_f32[0] = currPos.m128_f32[0] / delta;
 							currPos.m128_f32[1] = currPos.m128_f32[1] / delta;
 							currPos.m128_f32[2] = currPos.m128_f32[2] / delta;
+							currPos = XMVector3Length(currPos).m128_f32[0] >= XMVector3Length(otherPos).m128_f32[0] ? currPos : otherPos;
 							if (!component->GetStatic()) {
-								
 								DirectX::XMFLOAT3 pos = component->GetParent()->GetTransform()->GetPosition3();
 								component->GetParent()->GetTransform()->SetPosition(
 									DirectX::XMFLOAT3(pos.x - diff.m128_f32[0] * delta * currPos.m128_f32[0],
@@ -189,12 +186,13 @@ void CollisionManager::Traverse(CollisionComponent * component, UEngine::Collisi
 							if (!otherObj->GetStatic()) {
 								DirectX::XMFLOAT3 pos = otherObj->GetParent()->GetTransform()->GetPosition3();
 								otherObj->GetParent()->GetTransform()->SetPosition(
-									DirectX::XMFLOAT3(pos.x + diff.m128_f32[0] * delta * otherPos.m128_f32[0],
-										pos.y + diff.m128_f32[1] * delta * otherPos.m128_f32[1]
-										, pos.z + diff.m128_f32[2] * delta * otherPos.m128_f32[2]));
+									DirectX::XMFLOAT3(pos.x + diff.m128_f32[0] * delta * currPos.m128_f32[0],
+										pos.y + diff.m128_f32[1] * delta * currPos.m128_f32[1]
+										, pos.z + diff.m128_f32[2] * delta * currPos.m128_f32[2]));
 							}
 						}
 					}
+					
 				}
 			}
 		}

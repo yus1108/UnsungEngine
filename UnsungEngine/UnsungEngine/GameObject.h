@@ -2,6 +2,7 @@
 #include "Component.h"
 #include "Transform.h"
 #include "RenderComponent.h"
+#include "CollisionComponent.h"
 
 class GameObject
 {
@@ -9,6 +10,7 @@ private:
 	Transform transform;
 	RenderComponent * renderComponent;
 	UVector<Component*> components;
+	UVector<CollisionComponent*> onCollision;
 	unsigned referenceNum;
 	bool isActive;
 public:

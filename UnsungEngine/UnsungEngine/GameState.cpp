@@ -134,7 +134,7 @@ void GameState::Init()
 	CollisionComponent * collisionComp2 = new CollisionComponent();
 	collisionComp2->Init(UEngine::ComponentType_COLLISION, true, gameObject2);
 	collisionComp2->SetCollisionBox(gameObject2->GetRenderComponent()->GetCollisionBox());
-	collisionComp2->SetStatic(true);
+	collisionComp2->SetStatic(false);
 	gameObject2->AddComponent(collisionComp2);
 	//gameObject2->SetActive(false);
 	objManager->AddGameObject(gameObject2);

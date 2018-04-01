@@ -116,12 +116,8 @@ void DebugRenderer::Add_OOBB(OOBB * oobb, DirectX::XMFLOAT4 color)
 	vertices[22] = DirectX::XMVectorSet(xaxis.y, yaxis.y, zaxis.x, 1);
 	vertices[23] = DirectX::XMVectorSet(xaxis.y, yaxis.y, zaxis.y, 1);
 
-	DirectX::XMMATRIX temp = DirectX::XMMATRIX(DirectX::XMVector3Normalize(oobb->GetWorldMat().r[0]),
-		DirectX::XMVector3Normalize(oobb->GetWorldMat().r[1]),
-		DirectX::XMVector3Normalize(oobb->GetWorldMat().r[2]),
-		oobb->GetWorldMat().r[3]);
 	for (unsigned int i = 0; i < 24; i++) {
-		vertices[i] = DirectX::XMVector4Transform(vertices[i], temp);
+		vertices[i] = DirectX::XMVector4Transform(vertices[i], oobb->GetWorldMat());
 		DirectX::XMStoreFloat3(&cpu_side_buffer[vert_count].pos, vertices[i]);
 		cpu_side_buffer[vert_count++].color = color;
 	}

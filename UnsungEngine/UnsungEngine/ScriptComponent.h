@@ -16,5 +16,7 @@ public:
 	virtual void FrameUpdate() {};
 	virtual void FixedUpdate() {};
 	virtual void LateUpdate() {};
+	virtual void OnCollision() {};
+	virtual void OnTrigger() {};
 };
 
