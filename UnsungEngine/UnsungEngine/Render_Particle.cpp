@@ -40,26 +40,6 @@ void Render_Particle::SetScale(float x, float y, float z)
 void Render_Particle::Init(UEngine::pipeline_state_t * pipeline, GameObject * _parent)
 {
 	RenderComponent::Init(pipeline, _parent);
-	using namespace DirectX;
-	for (unsigned i = 0; i < numEmit; i++)
-	{
-		particles.push_back(UEngine::ParticleConstBuffer());
-		worldPos.push_back(UEngine::ParticleConstBuffer());
-		duration.push_back(0.0f);
-		speed.push_back(DirectX::XMVectorSet(
-			(isOneDirection ? 1 : (rand() % 2 ? -1.0f : 1.0f)) * ((float)(rand() % 100000)) / 100000.0f,
-			(isOneDirection ? 1 : (rand() % 2 ? -1.0f : 1.0f)) * ((float)(rand() % 100000)) / 100000.0f,
-			(isOneDirection ? 1 : (rand() % 2 ? -1.0f : 1.0f)) * ((float)(rand() % 100000)) / 100000.0f, 0) * setSpeed);
-		float sign = rand() % 2 ? -1.0f : 1.0f;
-		particles[i].worldmat.x = sign * ((float)(rand() % 100000)) / 100000.0f * setPosition.x;
-		sign = rand() % 2 ? -1.0f : 1.0f;
-		particles[i].worldmat.y = sign * ((float)(rand() % 100000)) / 100000.0f * setPosition.y;
-		sign = rand() % 2 ? -1.0f : 1.0f;
-		particles[i].worldmat.z = sign * ((float)(rand() % 100000)) / 100000.0f * setPosition.z;
-
-		XMFLOAT3 scale = parent->GetTransform()->GetScale();
-		particles[i].scale = DirectX::XMFLOAT4(scale.x, scale.y, 0, 0);
-	}
 
 	// Basic Model Loading
 	UEngine::ParticleVertex cpu_vertex;

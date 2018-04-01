@@ -12,6 +12,11 @@ Transform::~Transform()
 {
 }
 
+void Transform::SetMatrix(DirectX::XMMATRIX _matrix)
+{
+	matrix = _matrix;
+}
+
 DirectX::XMFLOAT3 Transform::GetPosition3()
 {
 	DirectX::XMFLOAT3 pos;
@@ -28,7 +33,7 @@ DirectX::XMFLOAT4 Transform::GetPosition4()
 
 void Transform::SetPosition(DirectX::XMVECTOR _position)
 {
-	matrix.r[3] = _position; 
+	matrix.r[3] = _position;
 	matrix.r[3].m128_f32[3] = 1;
 }
 

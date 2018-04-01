@@ -102,7 +102,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	bool succeedTerminating = false;
 	std::thread mainThread;
 	gameState.Init();
-	UVector<void*> args;
 
 	mainThread = std::thread([&]() {
 		while (!isTerminate)

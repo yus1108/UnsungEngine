@@ -12,6 +12,8 @@ public:
 	CollisionManager();
 	~CollisionManager();
 
+	void Reset();
+
 	UEngine::CollisionTree * GetRoot() { return root; };
 	AABB GetMap() { return boundary; };
 

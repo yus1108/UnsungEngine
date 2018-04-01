@@ -90,8 +90,11 @@ void CameraComponent::Update()
 
 void CameraComponent::CreateNewDeferredContext(ID3D11Device * m_pDevice)
 {
-	m_pDevice->CreateDeferredContext(NULL, m_pDeferredContext[0].GetAddressOf());
-	m_pDevice->CreateDeferredContext(NULL, m_pDeferredContext[1].GetAddressOf());
+	if (m_pDevice)
+	{
+		m_pDevice->CreateDeferredContext(NULL, m_pDeferredContext[0].GetAddressOf());
+		m_pDevice->CreateDeferredContext(NULL, m_pDeferredContext[1].GetAddressOf());
+	}
 }
 void CameraComponent::Clear() {
 	if (m_pViewport)

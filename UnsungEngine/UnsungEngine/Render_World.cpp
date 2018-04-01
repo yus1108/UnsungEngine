@@ -60,7 +60,7 @@ void Render_World::DrawObj(Renderer * render, Component * m_pCamera)
 		DLIGHT dLight;
 		dLight.lightColor = DirectX::XMFLOAT4(1, 1, 1, 1);
 		dLight.lightDirection = DirectX::XMFLOAT3(0, 0, 1);
-		dLight.ambient = 0;
+		dLight.ambient = 0.05f;
 		PLIGHT pLight;
 		ZeroMemory(&pLight, sizeof(pLight));
 		SLIGHT sLight;

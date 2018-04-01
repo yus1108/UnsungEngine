@@ -11,6 +11,7 @@ class Renderer
 	friend class Render_World;
 	friend class Render_UI;
 	friend class Render_Particle;
+	friend class GameState;
 private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> default_vertexBuffer;
 	UEngine::RenderToTexture default_RTT;

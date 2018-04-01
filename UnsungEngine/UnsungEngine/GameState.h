@@ -9,10 +9,12 @@ extern ThreadPool threadPool;
 
 class GameState
 {
+private:
+	bool firstRun = false;
 public:
-	Renderer renderer;
-	CollisionManager collision;
-	ObjectManager objManager;
+	Renderer * renderer;
+	CollisionManager * collision;
+	ObjectManager * objManager;
 
 	GameState();
 	~GameState();
@@ -20,5 +22,6 @@ public:
 	void Init();
 	void Update();
 	void AddCamera(GameObject * cameraObject);
+	void Restart(const char * sceneName);
 };
 

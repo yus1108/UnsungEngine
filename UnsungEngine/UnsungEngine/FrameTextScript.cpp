@@ -19,6 +19,6 @@ void FrameTextScript::FrameUpdate()
 		stringBuilder << "FPS: " << (unsigned)utime.FramePerSecond() << std::endl;
 		char pch[20];
 		stringBuilder.getline(pch, 20);
-		gameState.renderer.ChangeGUI(pch, parentObject);
+		gameState.renderer->ChangeGUI(pch, parentObject);
 	}
 }

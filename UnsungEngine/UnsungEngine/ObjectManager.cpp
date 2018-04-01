@@ -4,15 +4,11 @@
 
 ObjectManager::ObjectManager()
 {
+	obj_reference_num = 0;
 }
 ObjectManager::~ObjectManager()
 {
 	Clear();
-}
-
-void ObjectManager::Reset() {
-	Clear();
-	obj_reference_num = 0;
 }
 
 void ObjectManager::Init() {
@@ -53,6 +49,7 @@ void ObjectManager::Update() {
 		if (obj.second && obj.second->GetActive())
 		{
 			// update
+			obj.second->GetTransform()->SetPrevPos();
 			obj.second->Update();
 		}
 	}

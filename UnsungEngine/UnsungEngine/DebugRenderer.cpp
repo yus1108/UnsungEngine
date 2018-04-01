@@ -16,6 +16,9 @@ DebugRenderer::~DebugRenderer()
 
 void DebugRenderer::Init(ID3D11Device * _device, ID3D11DeviceContext * _immediateContext)
 {
+	if (gpu_side_buffer)
+		gpu_side_buffer->Release();
+
 	// create all buffers
 	D3D11_BUFFER_DESC bufferDesc;
 	ZeroMemory(&bufferDesc, sizeof(bufferDesc));

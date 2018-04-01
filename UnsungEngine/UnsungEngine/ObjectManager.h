@@ -11,7 +11,6 @@ public:
 	ObjectManager();
 	~ObjectManager();
 
-	void Reset();
 	void Init();
 	void CollisionUpdate(CollisionManager * collision);
 	void Update();
