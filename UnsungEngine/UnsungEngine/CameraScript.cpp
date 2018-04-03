@@ -53,7 +53,7 @@ void CameraScript::FrameUpdate()
 		view = DirectX::XMMatrixMultiply(DirectX::XMMatrixTranslation(0, (float)-utime.DeltaTime() * 20, 0), view);
 		camera->SetOriginalView(view);
 	}
-	if (input.GetMouseInput(UEngine::MouseInputType_MIDDLE))
+	if (input.GetMouseInput(UEngine::MouseInputType_RIGHT))
 		camera->MouseLook(input.PrevMousePos, 0.005f);
 	GetCursorPos(&input.PrevMousePos);
 }

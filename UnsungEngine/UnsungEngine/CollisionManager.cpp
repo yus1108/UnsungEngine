@@ -5,6 +5,7 @@
 CollisionManager::CollisionManager()
 {
 	root = new UEngine::CollisionTree;
+	uiComponentOnMouse = nullptr;
 }
 
 
@@ -32,6 +33,7 @@ void CollisionManager::Reset() {
 		delete currNode;
 	}
 	root = new UEngine::CollisionTree;
+	uiComponentOnMouse = nullptr;
 }
 
 void CollisionManager::TreeConstruction(UEngine::CollisionTree * currNode, int levels) {
@@ -117,8 +119,17 @@ void CollisionManager::Init(AABB _boundary, int levels)
 }
 
 void CollisionManager::Update(CollisionComponent * component) {
-
-	Traverse(component, root);
+	switch (component->GetParent()->GetRenderComponent()->GetType())
+	{
+	case UEngine::DrawType_WORLD:
+		Traverse(component, root);
+		break;
+	case UEngine::DrawType_UI:
+		uiComponentOnMouse = UMath::CollisionTest(input.GetMousePos(), (AABB*)component->GetCollisionBox()) ? component : uiComponentOnMouse;
+		break;
+	default:
+		break;
+	}
 }
 
 void CollisionManager::Clear(UEngine::CollisionTree * currNode) {
@@ -128,6 +139,7 @@ void CollisionManager::Clear(UEngine::CollisionTree * currNode) {
 			Clear(currNode->children[i]);
 		currNode->objs.clear();
 	}
+	uiComponentOnMouse = nullptr;
 }
 
 void CollisionManager::Traverse(CollisionComponent * component, UEngine::CollisionTree * currNode) {

@@ -4,6 +4,7 @@
 class CollisionManager
 {
 private:
+	CollisionComponent * uiComponentOnMouse;
 	UEngine::CollisionTree * root;
 	AABB boundary;
 

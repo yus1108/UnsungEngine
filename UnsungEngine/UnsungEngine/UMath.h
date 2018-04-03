@@ -13,6 +13,7 @@ public:
 	static void CalculateAABB(std::vector<SIMPLE_VERTEX> vertices, std::vector<unsigned int> indices,
 		DirectX::XMMATRIX worldmat, AABB & outAABB);
 
+	static bool CollisionTest(DirectX::XMFLOAT2 mousePos, AABB * b);
 	static bool CollisionTest(AABB a, AABB b);
 	static bool CollisionTest(AABB a, OOBB b);
 	static bool CollisionTest(OOBB * a, OOBB * b);

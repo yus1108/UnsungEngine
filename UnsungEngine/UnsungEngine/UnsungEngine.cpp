@@ -244,6 +244,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		input.SetMousePress(true, UEngine::MouseInputType_SCROLL);
 		input.scroll = (int)wParam;
 		break;
+	case WM_TOUCH:
+		break;
 	case WM_MBUTTONDOWN:
 		input.SetMousePress(true, UEngine::MouseInputType_MIDDLE);
 		break;
@@ -251,7 +253,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		input.SetMousePress(false, UEngine::MouseInputType_MIDDLE);
 		break;
 	case WM_SIZE:
-		//gameState.SetClientSize();
+		//gameState.renderer->Resize(false, )
 		break;
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);

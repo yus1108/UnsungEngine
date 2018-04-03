@@ -80,6 +80,15 @@ void UMath::CalculateAABB(std::vector<SIMPLE_VERTEX> vertices, std::vector<unsig
 	}
 }
 
+bool UMath::CollisionTest(DirectX::XMFLOAT2 mousePos, AABB * b) {
+	DirectX::XMFLOAT2 bX = b->GetXAxis();
+	DirectX::XMFLOAT2 bY = b->GetYAxis();
+
+	if (mousePos.y < bX.x || mousePos.x > bX.y) return false;
+	if (mousePos.y < bY.x || mousePos.x > bY.y) return false;
+
+	return true;
+}
 bool UMath::CollisionTest(AABB a, AABB b) {
 	DirectX::XMFLOAT2 aX = a.GetXAxis();
 	DirectX::XMFLOAT2 aY = a.GetYAxis();
