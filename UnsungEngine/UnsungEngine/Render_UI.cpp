@@ -147,6 +147,11 @@ void Render_UI::Init(ID3D11Device * m_pDevice, const WCHAR * textString, UINT32 
 	this->textFormat = textFormat;
 
 	loadingDone = true;
+
+	DirectX::XMFLOAT3 scale = parent->GetTransform()->GetScale();
+	RTPos = parent->GetTransform()->GetPosition4();
+	RTSize = DirectX::XMFLOAT4(-scale.x, -scale.y, scale.x, scale.y);
+	CalculateCBox();
 }
 void Render_UI::Init(UEngine::pipeline_state_t * pipeline, GameObject * _parent)
 {
@@ -224,6 +229,11 @@ void Render_UI::ReadBin(const char * filename, ID3D11Device * m_pDevice, ID3D11D
 	}
 	delete[] tempStr;
 	loadingDone = true;
+
+	DirectX::XMFLOAT3 scale = parent->GetTransform()->GetScale();
+	RTPos = parent->GetTransform()->GetPosition4();
+	RTSize = DirectX::XMFLOAT4(-scale.x, -scale.y, scale.x, scale.y);
+	CalculateCBox();
 }
 
 void Render_UI::ChangeText(ID3D11Device * m_pDevice, ID3D11DeviceContext * m_pImmediateContext, const WCHAR * textString, UINT32 textLength)
@@ -259,5 +269,12 @@ void Render_UI::ChangeText(ID3D11Device * m_pDevice, ID3D11DeviceContext * m_pIm
 
 void Render_UI::CalculateCBox()
 {
+	if (collisionBox)
+		delete collisionBox;
 
+	DirectX::XMFLOAT3 scale = parent->GetTransform()->GetScale();
+	RTPos = parent->GetTransform()->GetPosition4();
+	RTSize = DirectX::XMFLOAT4(-scale.x, -scale.y, scale.x, scale.y);
+	collisionBox = new AABB(DirectX::XMFLOAT2(RTPos.x + RTSize.x, RTPos.x + RTSize.z),
+		DirectX::XMFLOAT2(RTPos.y + RTSize.y, RTPos.y + RTSize.w), DirectX::XMFLOAT2(-0.1f, 0.1f));
 }

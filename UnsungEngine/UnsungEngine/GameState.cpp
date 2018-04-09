@@ -40,7 +40,7 @@ void GameState::Init()
 	// load main camera 0
 	GameObject * mainCamera = new GameObject();
 	DirectX::XMMATRIX cameraPos = DirectX::XMMatrixIdentity();
-	cameraPos.r[3] = DirectX::XMVectorSet(0, 0, -10, 1);
+	cameraPos.r[3] = DirectX::XMVectorSet(0, 0, 0, 1);
 	mainCamera->GetTransform()->SetMatrix(cameraPos);
 	AddCamera(mainCamera);
 	Component * cameraScript = new CameraScript();
@@ -122,6 +122,11 @@ void GameState::Init()
 	Component * numParticleScript = new NumParticleScript();
 	numParticleScript->Init(UEngine::ComponentType_SCRIPT, true, numParticles);
 	numParticles->AddComponent(numParticleScript);
+	CollisionComponent * collisionComp3 = new CollisionComponent();
+	collisionComp3->Init(UEngine::ComponentType_COLLISION, true, numParticles);
+	numParticles->GetRenderComponent()->CalculateCBox();
+	collisionComp3->SetCollisionBox(numParticles->GetRenderComponent()->GetCollisionBox());
+	numParticles->AddComponent(collisionComp3);
 	//numParticles->SetActive(false);
 	objManager->AddGameObject(numParticles);
 

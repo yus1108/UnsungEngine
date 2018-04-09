@@ -194,6 +194,52 @@ void DebugRenderer::Add_Frustum(Frustum frustum, DirectX::XMFLOAT4 color) {
 	DirectX::XMStoreFloat3(&cpu_side_buffer[vert_count].pos, vertices[7]);
 	cpu_side_buffer[vert_count++].color = color;
 }
+void DebugRenderer::Add_UI_AABB(AABB aabb, DirectX::XMFLOAT4 color)
+{
+	DirectX::XMVECTOR pos[24];
+	UEngine::DebugVertex vertices[24];
+	DirectX::XMFLOAT2 xaxis = aabb.GetXAxis();
+	DirectX::XMFLOAT2 yaxis = aabb.GetYAxis();
+	DirectX::XMFLOAT2 zaxis = aabb.GetZAxis();
+	// bottom
+	pos[0] = DirectX::XMVectorSet(xaxis.x, yaxis.x, zaxis.x, 1);
+	pos[1] = DirectX::XMVectorSet(xaxis.y, yaxis.x, zaxis.x, 0);
+	pos[2] = DirectX::XMVectorSet(xaxis.x, yaxis.x, zaxis.y, 0);
+	pos[3] = DirectX::XMVectorSet(xaxis.y, yaxis.x, zaxis.y, 0);
+	pos[4] = DirectX::XMVectorSet(xaxis.x, yaxis.x, zaxis.x, 0);
+	pos[5] = DirectX::XMVectorSet(xaxis.x, yaxis.x, zaxis.y, 0);
+	pos[6] = DirectX::XMVectorSet(xaxis.y, yaxis.x, zaxis.x, 0);
+	pos[7] = DirectX::XMVectorSet(xaxis.y, yaxis.x, zaxis.y, 0);
+
+	// middle
+	pos[8] = DirectX::XMVectorSet(xaxis.x, yaxis.x, zaxis.x, 1);
+	pos[9] = DirectX::XMVectorSet(xaxis.x, yaxis.y, zaxis.x, 1);
+	pos[10] = DirectX::XMVectorSet(xaxis.y, yaxis.x, zaxis.x, 1);
+	pos[11] = DirectX::XMVectorSet(xaxis.y, yaxis.y, zaxis.x, 1);
+	pos[12] = DirectX::XMVectorSet(xaxis.y, yaxis.x, zaxis.y, 1);
+	pos[13] = DirectX::XMVectorSet(xaxis.y, yaxis.y, zaxis.y, 1);
+	pos[14] = DirectX::XMVectorSet(xaxis.x, yaxis.x, zaxis.y, 1);
+	pos[15] = DirectX::XMVectorSet(xaxis.x, yaxis.y, zaxis.y, 1);
+
+	// top
+	pos[16] = DirectX::XMVectorSet(xaxis.x, yaxis.y, zaxis.x, 1);
+	pos[17] = DirectX::XMVectorSet(xaxis.y, yaxis.y, zaxis.x, 1);
+	pos[18] = DirectX::XMVectorSet(xaxis.x, yaxis.y, zaxis.y, 1);
+	pos[19] = DirectX::XMVectorSet(xaxis.y, yaxis.y, zaxis.y, 1);
+	pos[20] = DirectX::XMVectorSet(xaxis.x, yaxis.y, zaxis.x, 1);
+	pos[21] = DirectX::XMVectorSet(xaxis.x, yaxis.y, zaxis.y, 1);
+	pos[22] = DirectX::XMVectorSet(xaxis.y, yaxis.y, zaxis.x, 1);
+	pos[23] = DirectX::XMVectorSet(xaxis.y, yaxis.y, zaxis.y, 1);
+
+	for (unsigned int i = 0; i < 24; i++) {
+		DirectX::XMMATRIX perspective = DirectX::XMMatrixTranspose(gameState.renderer->m_pCameras[0]->GetSceneToShader().perspectivMat);
+		pos[i] = DirectX::XMVector3Transform(pos[i], gameState.renderer->m_pCameras[0]->GetOriginalView());
+		pos[i] = DirectX::XMVector3Transform(pos[i], DirectX::XMMatrixInverse(&DirectX::XMMatrixDeterminant(perspective), perspective));
+		vertices[i].pos = DirectX::XMFLOAT3(pos[i].m128_f32[0], pos[i].m128_f32[1], pos[i].m128_f32[2]);
+		cpu_side_buffer[vert_count] = vertices[i];
+		cpu_side_buffer[vert_count++].color = color;
+	}
+}
 
 void DebugRenderer::Flush(ID3D11DeviceContext * m_pDeviceContext)
 {

@@ -20,6 +20,7 @@ public:
 	void Add_AABB(AABB aabb, DirectX::XMFLOAT4 color);
 	void Add_OOBB(OOBB * oobb, DirectX::XMFLOAT4 color);
 	void Add_Frustum(Frustum frustum, DirectX::XMFLOAT4 color);
+	void Add_UI_AABB(AABB aabb, DirectX::XMFLOAT4 color);
 	//void Add_Axis(UnitNode * node);
 	void Flush(ID3D11DeviceContext * m_pDeviceContext);
 };
