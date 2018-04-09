@@ -11,15 +11,13 @@ CollisionManager::CollisionManager()
 
 CollisionManager::~CollisionManager()
 {
-	UVector<UEngine::CollisionTree*> queueUnit;
-	queueUnit.push_back(root);
-	while (queueUnit.size() > 0) {
-		UEngine::CollisionTree *currNode = queueUnit[0];
-		queueUnit.erase(0);
-		for (unsigned i = 0; i < currNode->children.size(); i++)
-			queueUnit.push_back(currNode->children[i]);
-		delete currNode;
-	}
+	OnDestroy(root);
+}
+
+void CollisionManager::OnDestroy(UEngine::CollisionTree * currNode) {
+	for (unsigned i = 0; i < currNode->children.size(); i++)
+		OnDestroy(currNode->children[i]);
+	delete currNode;
 }
 
 void CollisionManager::Reset() {

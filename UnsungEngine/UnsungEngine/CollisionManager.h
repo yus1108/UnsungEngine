@@ -13,6 +13,8 @@ public:
 	CollisionManager();
 	~CollisionManager();
 
+	void OnDestroy(UEngine::CollisionTree * currNode);
+
 	void Reset();
 
 	UEngine::CollisionTree * GetRoot() { return root; };
