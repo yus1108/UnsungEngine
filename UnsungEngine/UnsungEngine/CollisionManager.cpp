@@ -117,7 +117,7 @@ void CollisionManager::Init(AABB _boundary, int levels)
 }
 
 void CollisionManager::Update(CollisionComponent * component) {
-	AABB UIAABB;
+	//AABB UIAABB;
 	switch (component->GetParent()->GetRenderComponent()->GetType())
 	{
 	case UEngine::DrawType_WORLD:
@@ -125,11 +125,11 @@ void CollisionManager::Update(CollisionComponent * component) {
 		break;
 	case UEngine::DrawType_UI:
 		uiComponentOnMouse = UMath::CollisionTest(input.GetMousePos(), (AABB*)component->GetCollisionBox()) ? component : uiComponentOnMouse;
-#ifdef _DEBUG
-		// temporarily only work in origin camera pos
-		UIAABB = *(AABB*)component->GetCollisionBox();
-		debugRenderer.Add_UI_AABB(UIAABB, DirectX::XMFLOAT4(0, 0, 1, 1));
-#endif // _DEBUG
+//#ifdef _DEBUG
+//		// temporarily only work in origin camera pos
+//		UIAABB = *(AABB*)component->GetCollisionBox();
+//		debugRenderer.Add_UI_AABB(UIAABB, DirectX::XMFLOAT4(0, 0, 1, 1));
+//#endif // _DEBUG
 		if (uiComponentOnMouse)
 			std::cout << uiComponentOnMouse << std::endl;
 		break;
